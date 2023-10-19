@@ -1,6 +1,5 @@
 import {
   defineConfig,
-  presetAttributify,
   presetIcons,
   presetUno,
   presetWebFonts,
@@ -10,7 +9,6 @@ export default defineConfig({
   shortcuts: [],
   presets: [
     presetUno(),
-    presetAttributify(),
     presetIcons({
       scale: 1.2,
       warn: true,
