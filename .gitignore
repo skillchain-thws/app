@@ -9,3 +9,11 @@ node_modules
 *.log
 artifacts
 cache
+
+backend/coverage
+backend/coverage.json
+backend/typechain
+backend/typechain-types
+backend/cache
+backend/artifacts
+
