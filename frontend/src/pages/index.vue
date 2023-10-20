@@ -1,8 +1,51 @@
 <script setup lang="ts">
+import { ethers } from 'ethers';
+import { Greeter__factory } from '../typechain/factories';
+
+const deployedAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3'
+const accountAddress = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
+
+const { provider, requestAccount } = useEthers()
+
+const greeting = ref('')
+const balance = ref('')
+onMounted(async () => {
+  getGreeting()
+  balance.value = ethers.formatEther(await provider.value.getBalance(accountAddress))
+})
+
+async function getGreeting() {
+  const factory = Greeter__factory.connect(deployedAddress, provider.value)
+  const data = await factory.greet()
+  greeting.value = data
+}
+
+async function setGreeting() {
+  await requestAccount()
+  const signer = await provider.value.getSigner()
+  const factory = Greeter__factory.connect(deployedAddress, signer)
+  const transaction = await factory.setGreeting(greeting.value)
+  await transaction.wait()
+  getGreeting()
+}
 </script>
 
 <template>
-  <div>
-    asdfs
+  <div class="flex justify-center pt-10">
+    <div class="space-y-5">
+      <p>Balance: {{ balance }}</p>
+
+      <form class="flex gap-x-2" @submit.prevent="setGreeting">
+        <input v-model="greeting" type="text" class="px-1 text-black">
+
+        <button class="bg-white px-6 py-2 text-black" @click="setGreeting">
+          Set
+        </button>
+      </form>
+
+      <button class="bg-white px-6 py-2 text-black" @click="getGreeting">
+        Get
+      </button>
+    </div>
   </div>
 </template>

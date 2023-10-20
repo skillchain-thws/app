@@ -6,6 +6,7 @@ export default antfu(
     rules: {
       'no-console': 'off',
       'style/max-statements-per-line': 'off',
+      'eslinteslint-comments/no-unlimited-disable': 'off',
     },
   },
   unocss.configs.flat,

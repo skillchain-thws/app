@@ -7,13 +7,11 @@ dist-ssr
 node_modules
 .idea/
 *.log
-artifacts
-cache
 
 backend/coverage
 backend/coverage.json
-backend/typechain
-backend/typechain-types
 backend/cache
 backend/artifacts
+
+frontend/src/typechain
 
