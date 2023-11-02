@@ -3,16 +3,16 @@
 ## Requirements
 
 1. **Node.js and npm Installation**
-   - Install Node.js and npm. You can download and install Node.js from [here](https://nodejs.org/).
+   - Install Node.js and npm from [here](https://nodejs.org/).
 
 2. **pnpm Installation**
-   - Once Node.js is installed, install `pnpm` globally by running:
+   - Once Node.js is installed, globally install `pnpm` by running:
      ```
      npm install -g pnpm
      ```
 
 3. **Metamask Extension Setup**
-   - Install the Metamask browser extension [here](https://metamask.io/download.html).
+   - Install the Metamask browser extension from [here](https://metamask.io/download.html).
 
 ## How to Run
 
@@ -22,44 +22,45 @@
      ```
 
 2. **Run Backend Services**
-  - Change directory to `/backend`
 
-  - For the first time run (This only need to rerun when contract is edited)
-    ```
-    pnpm build
-    ```
+   - Navigate to the `/backend` directory.
 
-  - Run these commands in 2 different terminals
-    ```bash
-    pnpm node
+   - For the initial setup (required only if contracts are edited):
+     ```
+     pnpm build
+     ```
 
-    # 10 Accounts will be listed. Choose one and take its address and private key. These will be used later on.
-    ```
-    ```
-    pnpm deploy:local
-    ```
+   - Run the following commands in separate terminals:
+     ```bash
+     pnpm node
+     # 10 Accounts will be listed. Choose one and take its address and private key.
+     # These will be used later on.
+     ```
+     ```
+     pnpm deploy:local
+     ```
 
 3. **Run Frontend**
-  - Update `frontend/.env` at field `VITE_ACCOUNT_ADDRESS` for address from account you selected above
-  - Change directory to `/frontend` and run
 
-    ```
-    pnpm dev
-    ```
+   - Update the `frontend/.env` file in the `VITE_ACCOUNT_ADDRESS` field with the address from the previously selected account.
+
+   - Navigate to the `/frontend` directory and run:
+     ```
+     pnpm dev
+     ```
 
 4. **Setup MetaMask**
 
-  - Add custom network with following infos
-    1. Url: http://127.0.0.1:8554
-    2. ChainId: 1337
-    3. Currency: ETH
+   - Add a custom network with the following details:
+     - URL: http://127.0.0.1:8554
+     - ChainId: 1337
+     - Currency: ETH
 
-  - Add account with private key from account you selected above
+   - Add the account using the private key from the previously selected account.
 
-3. **Access the Application**
+5. **Access the Application**
 
-  - Open your browser and enter the following URL:
-    [http://localhost:5173/](http://localhost:5173/)
-
+   - Open your browser and enter the following URL:
+     [http://localhost:5173/](http://localhost:5173/)
 
 > Ensure all terminals remain active to keep both frontend and backend services running.
