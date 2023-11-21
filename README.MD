@@ -33,16 +33,12 @@
    - Run the following commands in separate terminals:
      ```bash
      pnpm node
-     # 10 Accounts will be listed. Choose one and take its address and private key.
-     # These will be used later on.
      ```
      ```
      pnpm deploy:local
      ```
 
 3. **Run Frontend**
-
-   - Update the `frontend/.env` file in the `VITE_ACCOUNT_ADDRESS` field with the address from the previously selected account.
 
    - Navigate to the `/frontend` directory and run:
      ```
@@ -56,7 +52,7 @@
      - ChainId: 1337
      - Currency: ETH
 
-   - Add the account using the private key from the previously selected account.
+   - Add the account using this private key `0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80`.
 
 5. **Access the Application**
 

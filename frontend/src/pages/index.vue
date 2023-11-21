@@ -39,7 +39,7 @@ async function setGreeting() {
       <form class="flex gap-x-2" @submit.prevent="setGreeting">
         <input v-model="greeting" type="text" class="px-1 text-black">
 
-        <button class="bg-white px-6 py-2 text-black" @click="setGreeting">
+        <button class="bg-white px-6 py-2 text-black">
           Set
         </button>
       </form>
