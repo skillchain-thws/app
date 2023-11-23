@@ -212,7 +212,7 @@ contract FreelancerMarketplace {
     address buyer,
     uint256 jobId,
     string memory buyerMessage
-  ) public payable notInProgress(jobId) {
+  ) internal notInProgress(jobId) {
     address seller = jobs[jobId].owner;
 
     Escrow storage newEscrow = escrows[escrowCount + 1];
