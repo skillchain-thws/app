@@ -4,9 +4,9 @@ import { ethers } from 'hardhat'
 import { exit } from 'node:process'
 
 async function main() {
-  const greeter = await ethers.deployContract('Greeter', ['Initial value'])
-  await greeter.waitForDeployment()
-  console.log('Greeter deployed to:', greeter.target)
+  const contract = await ethers.deployContract('FreelancerMarketplace')
+  await contract.waitForDeployment()
+  console.log('FreelancerMarketplace deployed to:', contract.target)
 }
 
 main().catch((error) => {
