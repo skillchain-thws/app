@@ -6,7 +6,6 @@ const deployedAddress = import.meta.env.VITE_DEPLOYED_ADDRESS
 const accountAddress = import.meta.env.VITE_ACCOUNT_ADDRESS
 
 const { provider, requestAccount } = useEthers()
-
 const greeting = ref('')
 const balance = ref('')
 
@@ -39,14 +38,14 @@ async function setGreeting() {
       <form class="flex gap-x-2" @submit.prevent="setGreeting">
         <input v-model="greeting" type="text" class="px-1 text-black">
 
-        <button class="bg-white px-6 py-2 text-black">
+        <Button>
           Set
-        </button>
+        </Button>
       </form>
 
-      <button class="bg-white px-6 py-2 text-black" @click="getGreeting">
+      <Button @click="getGreeting">
         Get
-      </button>
+      </Button>
     </div>
   </div>
 </template>

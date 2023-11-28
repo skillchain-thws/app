@@ -1,22 +1,35 @@
-import vue from '@vitejs/plugin-vue'
-import UnoCSS from 'unocss/vite'
+import path from 'node:path'
+import Vue from '@vitejs/plugin-vue'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
+import { VueRouterAutoImports } from 'unplugin-vue-router'
+import VueRouter from 'unplugin-vue-router/vite'
 import { defineConfig } from 'vite'
-import Pages from 'vite-plugin-pages'
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@/': `${path.resolve(__dirname, 'src')}/`,
+    },
+  },
   plugins: [
-    vue({ script: { propsDestructure: true, defineModel: true } }),
-    Pages(),
+    Vue({ script: { propsDestructure: true, defineModel: true } }),
+    VueRouter(),
     AutoImport({
-      imports: ['vue', 'vue-router'],
+      imports: [
+        'vue',
+        '@vueuse/core',
+        VueRouterAutoImports,
+      ],
       dts: true,
-      dirs: ['./src/composables'],
+      dirs: [
+        './src/composables',
+      ],
       vueTemplate: true,
     }),
-    Components({ dts: true }),
-    UnoCSS(),
-  ],
 
+    Components({
+      dts: true,
+    }),
+  ],
 })

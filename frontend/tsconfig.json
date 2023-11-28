@@ -2,22 +2,24 @@
   "compilerOptions": {
     "target": "ESNext",
     "jsx": "preserve",
-    "lib": ["ESNext", "DOM"],
+    "lib": ["DOM", "ESNext"],
     "moduleDetection": "force",
     "baseUrl": ".",
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "paths": {
+      "@/*": ["src/*"]
+    },
     "resolveJsonModule": true,
     "types": [
-      "vite/client",
-      "vite-plugin-pages/client"
+      "vite/client"
     ],
     "allowJs": true,
     "strict": true,
     "strictNullChecks": true,
-    "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noEmit": true,
+    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "verbatimModuleSyntax": true,
     "skipLibCheck": true
