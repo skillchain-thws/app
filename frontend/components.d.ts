@@ -7,7 +7,16 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    Avatar: typeof import('./src/components/ui/avatar/Avatar.vue')['default']
+    AvatarFallback: typeof import('./src/components/ui/avatar/AvatarFallback.vue')['default']
+    AvatarImage: typeof import('./src/components/ui/avatar/AvatarImage.vue')['default']
     Button: typeof import('./src/components/ui/button/Button.vue')['default']
+    Card: typeof import('./src/components/ui/card/Card.vue')['default']
+    CardContent: typeof import('./src/components/ui/card/CardContent.vue')['default']
+    CardDescription: typeof import('./src/components/ui/card/CardDescription.vue')['default']
+    CardFooter: typeof import('./src/components/ui/card/CardFooter.vue')['default']
+    CardHeader: typeof import('./src/components/ui/card/CardHeader.vue')['default']
+    CardTitle: typeof import('./src/components/ui/card/CardTitle.vue')['default']
     Dialog: typeof import('./src/components/ui/dialog/Dialog.vue')['default']
     DialogClose: typeof import('./src/components/ui/dialog/DialogClose.vue')['default']
     DialogContent: typeof import('./src/components/ui/dialog/DialogContent.vue')['default']
@@ -17,10 +26,15 @@ declare module 'vue' {
     DialogTitle: typeof import('./src/components/ui/dialog/DialogTitle.vue')['default']
     DialogTrigger: typeof import('./src/components/ui/dialog/DialogTrigger.vue')['default']
     Input: typeof import('./src/components/ui/input/Input.vue')['default']
+    Label: typeof import('./src/components/ui/label/Label.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    ScrollArea: typeof import('./src/components/ui/scroll-area/ScrollArea.vue')['default']
+    ScrollBar: typeof import('./src/components/ui/scroll-area/ScrollBar.vue')['default']
+    Separator: typeof import('./src/components/ui/separator/Separator.vue')['default']
     TheCounter: typeof import('./src/components/TheCounter.vue')['default']
     TheFooter: typeof import('./src/components/TheFooter.vue')['default']
+    TheHeader: typeof import('./src/components/TheHeader.vue')['default']
     TheInput: typeof import('./src/components/TheInput.vue')['default']
   }
 }

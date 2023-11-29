@@ -3,6 +3,6 @@
 
 <template>
   <div class="py-10">
-    This is index page
+    This is chat page
   </div>
 </template>

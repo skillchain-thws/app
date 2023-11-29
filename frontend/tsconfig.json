@@ -6,7 +6,7 @@
     "moduleDetection": "force",
     "baseUrl": ".",
     "module": "ESNext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "Node",
     "paths": {
       "@/*": ["src/*"]
     },
