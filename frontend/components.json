@@ -2,8 +2,8 @@
   "style": "default",
   "typescript": true,
   "tailwind": {
-    "config": "tailwind.config.js",
-    "css": "src/assets/index.css",
+    "config": "tailwind.config.ts",
+    "css": "main.css",
     "baseColor": "slate",
     "cssVariables": true
   },
