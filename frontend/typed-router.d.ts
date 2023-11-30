@@ -43,7 +43,6 @@ declare module 'vue-router/auto/routes' {
     '/chat': RouteRecordInfo<'/chat', '/chat', Record<never, never>, Record<never, never>>,
     '/create_job': RouteRecordInfo<'/create_job', '/create_job', Record<never, never>, Record<never, never>>,
     '/create_profile': RouteRecordInfo<'/create_profile', '/create_profile', Record<never, never>, Record<never, never>>,
-    '/find': RouteRecordInfo<'/find', '/find', Record<never, never>, Record<never, never>>,
     '/hiring': RouteRecordInfo<'/hiring', '/hiring', Record<never, never>, Record<never, never>>,
   }
 }

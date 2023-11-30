@@ -11,7 +11,7 @@ import { Egg } from 'lucide-vue-next'
       </RouterLink>
 
       <ul class="flex items-center gap-8 justify-between text-lg h-[100px]">
-        <RouterLink to="/find" class="grow flex-center h-full border-b border-transparent hover:border-white transition-[border]" active-class="border-white">
+        <RouterLink to="/" class="grow flex-center h-full border-b border-transparent hover:border-white transition-[border]" active-class="border-white">
           find job
         </RouterLink>
         <RouterLink to="/hiring" class="grow flex-center h-full border-b border-transparent hover:border-white transition-[border]" active-class="border-white">
