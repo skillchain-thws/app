@@ -3,14 +3,14 @@ import { Egg } from 'lucide-vue-next'
 </script>
 
 <template>
-  <nav class=" grid grid-cols-4 items-center border-b">
-    <div class="grid grid-cols-4 items-center col-span-2">
-      <RouterLink to="/" class="flex items-center gap-2 col-span-2">
+  <nav class="flex justify-between items-center border-b">
+    <div class="flex items-center gap-40">
+      <RouterLink to="/" class="flex items-center gap-2">
         <Egg :size="26" class=" fill-white" />
         <span class="text-2xl tracking-wide">freelancer</span>
       </RouterLink>
 
-      <ul class="flex items-center gap-5 col-span-2 justify-between text-lg h-[100px]">
+      <ul class="flex items-center gap-8 justify-between text-lg h-[100px]">
         <RouterLink to="/find" class="grow flex-center h-full border-b border-transparent hover:border-white transition-[border]" active-class="border-white">
           find job
         </RouterLink>
@@ -20,13 +20,16 @@ import { Egg } from 'lucide-vue-next'
         <RouterLink to="/chat" class="grow flex-center h-full border-b border-transparent hover:border-white transition-[border]" active-class="border-white">
           chat
         </RouterLink>
-        <RouterLink to="/faq" class="grow flex-center h-full border-b border-transparent hover:border-white transition-[border]" active-class="border-white">
-          faq
+        <RouterLink to="/create_job" class="grow flex-center h-full border-b border-transparent hover:border-white transition-[border]" active-class="border-white">
+          create job
+        </RouterLink>
+        <RouterLink to="/create_profile" class="grow flex-center h-full border-b border-transparent hover:border-white transition-[border]" active-class="border-white">
+          create profile
         </RouterLink>
       </ul>
     </div>
 
-    <div class="col-span-2 flex justify-end items-center gap-x-5">
+    <div class="flex items-center gap-x-5">
       <Avatar class="w-11 h-11">
         <AvatarImage src="avatar.png" alt="avatar" />
         <AvatarFallback>Avatar</AvatarFallback>

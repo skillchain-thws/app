@@ -3,6 +3,6 @@
 
 <template>
   <div class="py-10">
-    This is faq page
+    This is create job page
   </div>
 </template>

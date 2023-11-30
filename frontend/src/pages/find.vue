@@ -1,9 +1,26 @@
 <script setup lang="ts">
-import { Briefcase, Rows, Search } from 'lucide-vue-next'
+import { jobs } from '@/includes/mocks'
+import { Bookmark, Search } from 'lucide-vue-next'
 
 const q = ref('')
-const loc = ref('')
-const type = ref('')
+const sortOpt = ref<typeof sortOpts[number]['value']>('lth')
+const sortOpts = [
+  { label: 'price: low to high', value: 'lth' },
+  { label: 'price: hight to low', value: 'htl' },
+] as const
+
+const data = computed(() => {
+  const f = q.value
+    ? jobs.filter(j =>
+      j.title.toLowerCase().includes(q.value.toLowerCase())
+      || j.description.toLowerCase().includes(q.value.toLowerCase()))
+    : jobs
+  return f.toSorted((a, b) => {
+    if (sortOpt.value === 'lth')
+      return a.budget - b.budget
+    return b.budget - a.budget
+  })
+})
 </script>
 
 <template>
@@ -16,51 +33,7 @@ const type = ref('')
               <Search :size="20" />
             </div>
           </Label>
-          <Input id="q" v-model="q" />
-        </div>
-
-        <Separator orientation="vertical" class="ml-4 mr-3" />
-
-        <div class="flex gap-2 items-center grow">
-          <Label for="type">
-            <div class="w-10 h-10 border rounded-full flex-center shrink-0">
-              <Briefcase :size="20" />
-            </div>
-          </Label>
-          <Input id="type" v-model="type" />
-        </div>
-
-        <Separator orientation="vertical" class="ml-4 mr-3" />
-
-        <div class="flex gap-2 items-center grow">
-          <Label for="loc">
-            <div class="w-10 h-10 border rounded-full flex-center shrink-0">
-              <Rows :size="20" />
-            </div>
-          </Label>
-          <Input id="loc" v-model="loc" />
-        </div>
-
-        <Separator orientation="vertical" class="ml-4 mr-3" />
-
-        <div class="flex gap-2 items-center grow">
-          <div class="w-10 h-10 border rounded-full flex-center shrink-0">
-            <Rows :size="20" />
-          </div>
-
-          <Select>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a fruit" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Fruits</SelectLabel>
-                <SelectItem value="apple">
-                  Apple
-                </SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <Input id="q" v-model="q" placeholder="search for job title or keyword" />
         </div>
       </div>
     </div>
@@ -69,32 +42,66 @@ const type = ref('')
       <div class="flex justify-between items-center">
         <div>
           <h1 class="text-4xl">
-            jobs
+            job
           </h1>
         </div>
-        <div>
-          sort
+        <div class="flex items-center whitespace-nowrap gap-2">
+          <span class="text-muted-foreground">
+            sort by:
+          </span>
+
+          <div class="min-w-[200px]">
+            <Select v-model="sortOpt">
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem v-for="opt in sortOpts" :key="opt.value" :value="opt.value">
+                    {{ opt.label }}
+                  </SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
       <ScrollArea class="h-[500px]">
         <div class="grid grid-cols-3 gap-8">
-          <Card v-for="i in 20" :key="i">
-            <CardHeader>
-              <CardTitle>notifications</CardTitle>
-              <CardDescription>you have 3 unread messages.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div>
-                something
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button class="w-full">
-                mark all as read
-              </Button>
-            </CardFooter>
-          </Card>
+          <RouterLink v-for="({ title, description, badges, budget }, i) in data" :key="i" class="group" to="/">
+            <Card class="group-hover:border-primary transition-colors">
+              <CardHeader>
+                <CardTitle>
+                  <div class="flex justify-between">
+                    <span class="lowercase">
+                      {{ title }}
+                    </span>
+
+                    <Bookmark :size="22" class="hover:fill-white" />
+                  </div>
+                </CardTitle>
+                <CardDescription class="pt-2 space-x-2">
+                  <Badge v-for="(badge, bi) in badges" :key="bi" variant="secondary">
+                    {{ badge }}
+                  </Badge>
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div class="lowercase">
+                  {{ description }}
+                </div>
+              </CardContent>
+              <CardFooter>
+                <div class="flex items-center">
+                  <span class="font-bold mr-0.5">
+                    eth {{ budget }}
+                  </span>
+                  <Etherum />
+                </div>
+              </CardFooter>
+            </Card>
+          </RouterLink>
         </div>
       </ScrollArea>
     </div>
