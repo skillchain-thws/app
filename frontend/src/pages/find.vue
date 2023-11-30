@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Briefcase, Check, Rows, Search } from 'lucide-vue-next'
+import { Briefcase, Rows, Search } from 'lucide-vue-next'
 
 const q = ref('')
 const loc = ref('')
@@ -8,40 +8,60 @@ const type = ref('')
 
 <template>
   <div>
-    <div class="py-10 -mx-8 border-b">
-      <div class="flex items-center gap-8 h-[80px] px-8">
-        <div class="flex gap-2 items-center">
+    <div class="py-10 border-b">
+      <div class="flex items-center h-[80px]">
+        <div class="flex gap-2 items-center grow">
           <Label for="q">
-            <div class="w-10 h-10 border rounded-full flex-center">
+            <div class="w-10 h-10 border rounded-full flex-center shrink-0">
               <Search :size="20" />
             </div>
           </Label>
           <Input id="q" v-model="q" />
         </div>
 
-        <Separator orientation="vertical" />
+        <Separator orientation="vertical" class="ml-4 mr-3" />
 
-        <div class="flex gap-2 items-center">
+        <div class="flex gap-2 items-center grow">
           <Label for="type">
-            <div class="w-10 h-10 border rounded-full flex-center">
+            <div class="w-10 h-10 border rounded-full flex-center shrink-0">
               <Briefcase :size="20" />
             </div>
           </Label>
           <Input id="type" v-model="type" />
         </div>
 
-        <Separator orientation="vertical" />
+        <Separator orientation="vertical" class="ml-4 mr-3" />
 
-        <div class="flex gap-2 items-center">
+        <div class="flex gap-2 items-center grow">
           <Label for="loc">
-            <div class="w-10 h-10 border rounded-full flex-center">
+            <div class="w-10 h-10 border rounded-full flex-center shrink-0">
               <Rows :size="20" />
             </div>
           </Label>
           <Input id="loc" v-model="loc" />
         </div>
 
-        <Separator orientation="vertical" />
+        <Separator orientation="vertical" class="ml-4 mr-3" />
+
+        <div class="flex gap-2 items-center grow">
+          <div class="w-10 h-10 border rounded-full flex-center shrink-0">
+            <Rows :size="20" />
+          </div>
+
+          <Select>
+            <SelectTrigger>
+              <SelectValue placeholder="Select a fruit" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Fruits</SelectLabel>
+                <SelectItem value="apple">
+                  Apple
+                </SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
     </div>
 
@@ -61,17 +81,17 @@ const type = ref('')
         <div class="grid grid-cols-3 gap-8">
           <Card v-for="i in 20" :key="i">
             <CardHeader>
-              <CardTitle>Notifications</CardTitle>
-              <CardDescription>You have 3 unread messages.</CardDescription>
+              <CardTitle>notifications</CardTitle>
+              <CardDescription>you have 3 unread messages.</CardDescription>
             </CardHeader>
             <CardContent>
               <div>
-                Something
+                something
               </div>
             </CardContent>
             <CardFooter>
               <Button class="w-full">
-                <Check class="mr-2 h-4 w-4" /> Mark all as read
+                mark all as read
               </Button>
             </CardFooter>
           </Card>
