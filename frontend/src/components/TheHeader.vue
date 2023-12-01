@@ -29,13 +29,13 @@ async function handleConnectMM() {
 
 <template>
   <nav class="flex justify-between items-center border-b">
-    <div class="flex items-center gap-40">
+    <div class="flex items-center gap-[20%]">
       <RouterLink to="/" class="flex items-center gap-2">
         <Egg :size="26" class=" fill-white" />
         <span class="text-2xl tracking-wide">freelancer</span>
       </RouterLink>
 
-      <ul class="flex items-center gap-8 justify-between text-lg h-[100px]">
+      <ul class="flex items-center gap-8 justify-between text-lg h-[100px] whitespace-nowrap">
         <RouterLink to="/" class="grow flex-center h-full border-b border-transparent hover:border-white transition-[border]" active-class="border-white">
           find job
         </RouterLink>

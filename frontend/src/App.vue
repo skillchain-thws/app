@@ -2,7 +2,7 @@
   <div class="container my-8 border rounded-lg">
     <TheHeader />
 
-    <main>
+    <main class="relative min-h-[200px]">
       <RouterView />
     </main>
 

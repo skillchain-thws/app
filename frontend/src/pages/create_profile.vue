@@ -47,7 +47,9 @@ function onSubmit() {
         </div>
       </div>
 
-      <Button>Create</Button>
+      <Button type="submit">
+        Create
+      </Button>
     </div>
 
     <ProfileCard v-bind="profile" />
