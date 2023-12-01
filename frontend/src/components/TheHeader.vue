@@ -1,5 +1,22 @@
 <script setup lang="ts">
+import { useToast } from '@/components/ui/toast/use-toast'
+import { MetaMaskConnector, useWalletStore } from '@vue-dapp/core'
 import { Egg } from 'lucide-vue-next'
+
+const { toast } = useToast()
+
+const store = useWalletStore()
+async function handleConnectMM() {
+  try {
+    await store.connectWith(new MetaMaskConnector())
+  }
+  catch (e) {
+    toast({
+      description: store.error,
+      variant: 'destructive',
+    })
+  }
+}
 </script>
 
 <template>
@@ -29,11 +46,22 @@ import { Egg } from 'lucide-vue-next'
       </ul>
     </div>
 
-    <div class="flex items-center gap-x-5">
-      <Avatar class="w-11 h-11">
-        <AvatarImage src="avatar.png" alt="avatar" />
-        <AvatarFallback>Avatar</AvatarFallback>
-      </Avatar>
+    <div>
+      <template v-if="store.isConnected">
+        <Avatar>
+          <AvatarImage src="avatar.png" alt="avatar" />
+          <AvatarFallback>Avatar</AvatarFallback>
+        </Avatar>
+      </template>
+
+      <template v-else>
+        <Button @click="handleConnectMM">
+          <div class="flex items-center gap-1">
+            <Metamask class="text-lg" />
+            connect
+          </div>
+        </Button>
+      </template>
     </div>
   </nav>
 </template>

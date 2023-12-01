@@ -5,5 +5,7 @@
     <main>
       <RouterView />
     </main>
+
+    <Toaster />
   </div>
 </template>
