@@ -1,14 +1,22 @@
 <script setup lang="ts">
 import { useToast } from '@/components/ui/toast/use-toast'
-import { MetaMaskConnector, useWalletStore } from '@vue-dapp/core'
+import { MetaMaskConnector, shortenAddress, useWalletStore } from '@vue-dapp/core'
 import { Egg } from 'lucide-vue-next'
 
-const { toast } = useToast()
+// @ts-expect-error no types
+import jazzicon from '@metamask/jazzicon'
 
+const { toast } = useToast()
 const store = useWalletStore()
+const avatar = shallowRef<HTMLDivElement>()
+
 async function handleConnectMM() {
   try {
     await store.connectWith(new MetaMaskConnector())
+    const addr = store.address.slice(2, 10)
+    const seed = Number.parseInt(addr, 16)
+    const icon = jazzicon(35, seed)
+    avatar.value && avatar.value.replaceWith(icon)
   }
   catch (e) {
     toast({
@@ -48,10 +56,10 @@ async function handleConnectMM() {
 
     <div>
       <template v-if="store.isConnected">
-        <Avatar>
-          <AvatarImage src="avatar.png" alt="avatar" />
-          <AvatarFallback>Avatar</AvatarFallback>
-        </Avatar>
+        <div class="flex items-center gap-2">
+          <span class="text-muted-foreground">{{ shortenAddress(store.address) }}</span>
+          <div ref="avatar" />
+        </div>
       </template>
 
       <template v-else>
