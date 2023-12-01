@@ -10,6 +10,8 @@ const { toast } = useToast()
 const store = useWalletStore()
 const avatar = shallowRef<HTMLDivElement>()
 
+onMounted(() => handleConnectMM())
+
 async function handleConnectMM() {
   try {
     await store.connectWith(new MetaMaskConnector())
