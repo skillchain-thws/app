@@ -1,31 +1,14 @@
 <script setup lang="ts">
-import { useToast } from '@/components/ui/toast/use-toast'
-import { MetaMaskConnector, shortenAddress, useWalletStore } from '@vue-dapp/core'
 import { Egg } from 'lucide-vue-next'
 
-// @ts-expect-error no types
-import jazzicon from '@metamask/jazzicon'
-
-const { toast } = useToast()
-const store = useWalletStore()
+const store = useMMStore()
 const avatar = shallowRef<HTMLDivElement>()
 
-onMounted(() => handleConnectMM())
+onMounted(() => handleConnect())
 
-async function handleConnectMM() {
-  try {
-    await store.connectWith(new MetaMaskConnector())
-    const addr = store.address.slice(2, 10)
-    const seed = Number.parseInt(addr, 16)
-    const icon = jazzicon(35, seed)
-    avatar.value && avatar.value.replaceWith(icon)
-  }
-  catch (e) {
-    toast({
-      description: store.error,
-      variant: 'destructive',
-    })
-  }
+async function handleConnect() {
+  const { icon } = await store.connect()
+  avatar.value?.replaceWith(icon)
 }
 </script>
 
@@ -59,14 +42,14 @@ async function handleConnectMM() {
     <div>
       <template v-if="store.isConnected">
         <div class="flex items-center gap-2">
-          <span class="text-muted-foreground">{{ shortenAddress(store.address) }}</span>
+          <span class="text-muted-foreground">{{ store.shortAddress }}</span>
           <div ref="avatar" />
         </div>
       </template>
 
       <template v-else>
-        <Button @click="handleConnectMM">
-          <div class="flex items-center gap-1">
+        <Button @click="handleConnect">
+          <div class="flex items-center gap-1.5">
             <Metamask class="text-lg" />
             connect
           </div>

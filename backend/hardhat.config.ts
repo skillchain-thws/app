@@ -1,3 +1,4 @@
+import '@nomicfoundation/hardhat-ethers'
 import '@nomicfoundation/hardhat-toolbox'
 import type { HardhatUserConfig } from 'hardhat/config'
 

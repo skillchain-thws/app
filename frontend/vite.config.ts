@@ -25,12 +25,11 @@ export default defineConfig({
       dts: true,
       dirs: [
         './src/composables',
+        './src/stores',
       ],
       vueTemplate: true,
     }),
 
-    Components({
-      dts: true,
-    }),
+    Components({ dts: true }),
   ],
 })

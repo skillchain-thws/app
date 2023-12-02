@@ -1,5 +1,9 @@
 <script setup lang="ts">
+import { FreelancerMarketplace__factory } from '@/typechain/factories/FreelancerMarketplace__factory'
 import type { Job } from '@/types'
+
+const store = useMMStore()
+const DEPLOYED_ADDRESS = import.meta.env.VITE_DEPLOYED_ADDRESS
 
 const job = ref<Job>({
   title: '',
@@ -13,8 +17,10 @@ watch(badgesStr, () => {
   job.value.badges = badgesStr.value.trim().split(' ')
 })
 
-function onSubmit() {
-  console.log(job.value)
+async function onSubmit() {
+  const signer = await store.getSigner()
+  const factory = FreelancerMarketplace__factory.connect(DEPLOYED_ADDRESS, signer)
+  factory.addJob(job.value.title, job.value.description, job.value.budget)
 }
 </script>
 
