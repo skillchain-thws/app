@@ -24,11 +24,6 @@ contract UserManager {
         freelancerMarketplace = FreelancerMarketplace(_freelancerMarketplaceAddress);
     }
 
-    function hasAUser() external view returns (bool) {
-    require(users[msg.sender].owner != address(0), "You need a User for this action");
-    return true;
-}
-
     function getAllJobIds(address userAddress) external view returns (uint256[] memory) {
         return users[userAddress].jobIds;
     }
@@ -103,7 +98,7 @@ contract UserManager {
         require(users[msg.sender].owner != address(0), "Only a User can write a Review");
         require(userAddress != msg.sender, "You can't Review yourself");
 
-        uint256 userIndex = users[userAddress].reviewsBuyerCount + 1;
+        uint256 userIndex = users[userAddress].reviewsBuyerCount;
         Review storage newReview = users[userAddress].reviewsBuyer[userIndex];
         newReview.comment = comment;
         newReview.rating = rating;
@@ -113,6 +108,14 @@ contract UserManager {
 
         emit UserReviewAdded(userAddress, comment, rating);
     }
+
+function getAllUserAddresses() external view returns (address[] memory) {
+    address[] memory allUserAddresses = new address[](userCount);
+    for (uint256 i = 0; i < userCount; i++) {
+        allUserAddresses[i] = addresses[i];
+    }
+    return allUserAddresses;
+}
 
     function getReviewsByUser(address userAddress) internal view returns (Review[] memory, Review[] memory) {
         User storage user = users[userAddress];

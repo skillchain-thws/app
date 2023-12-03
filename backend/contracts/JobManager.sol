@@ -41,6 +41,7 @@ contract JobManager {
         uint256 price
     );
 
+
     event ToggledJob(bool inProgress);
 
     event JobDeleted(address userAddress, uint256 jobId);
@@ -48,6 +49,20 @@ contract JobManager {
     constructor(address _freelancerMarketplaceAddress) {
         freelancerMarketplace = FreelancerMarketplace(_freelancerMarketplaceAddress);
     }
+
+    function isUserInArray() external view returns (bool) {
+        address[] memory allUsers = userManager.getAllUserAddresses();
+        address sender = msg.sender;
+
+        for (uint256 i = 0; i < allUsers.length; i++) {
+            if (allUsers[i] == sender) {
+                return true; // sender is in the array
+            }
+        }
+
+        return false; // sender is not in the array
+    }
+
 
     function setEscrowManager(address _address) external {
         escrowManager = EscrowManager(_address);
@@ -61,16 +76,15 @@ contract JobManager {
         return jobs[jobId].owner;
     }
 
-    function sendBuyRequest(uint256 jobId, string memory comment) public
+    function sendBuyRequest(uint256 jobId, string memory comment) public  isAUser()
         isNotJobOwner(jobId)
         notInProgress(jobId)
         jobExists(jobId)
     {
         require(freelancerMarketplace.nonEmptyString(comment), "Comment must not be empty");
-        require(userManager.hasAUser(), "User must exist");
 
         Job storage currentJob = jobs[jobId];
-        BuyRequest storage request = currentJob.buyRequests[currentJob.buyRequestCount + 1];
+        BuyRequest storage request = currentJob.buyRequests[currentJob.buyRequestCount];
         request.jobId = jobId;
         request.buyer = msg.sender;
         request.comment = comment;
@@ -85,8 +99,8 @@ contract JobManager {
         notInProgress(jobId)
         isJobOwner(jobId)
         jobExists(jobId)
+         isAUser()
     {
-        require(userManager.hasAUser(), "User must exist");
 
         Job storage currentJob = jobs[jobId];
         BuyRequest memory currentBuyRequest = currentJob.buyRequests[buyRequestId];
@@ -95,17 +109,16 @@ contract JobManager {
         escrowManager.createEscrow(currentBuyRequest.buyer, jobId, currentBuyRequest.comment);
     }
 
-    function addJob(string memory title, string memory description, uint256 price) public {
+    function addJob(string memory title, string memory description, uint256 price) public  isAUser(){
         require(freelancerMarketplace.nonEmptyString(title), "Title must not be empty");
         require(freelancerMarketplace.nonEmptyString(description), "Description must not be empty");
-        require(userManager.hasAUser(), "User must exist");
 
-        Job storage newJob = jobs[jobCount + 1];
+        Job storage newJob = jobs[jobCount];
         newJob.owner = msg.sender;
         newJob.title = title;
         newJob.description = description;
         newJob.price = price;
-        newJob.jobId = jobCount + 1;
+        newJob.jobId = jobCount;
         newJob.inProgress = false;
 
         userManager.addJobId(jobCount, msg.sender);
@@ -115,8 +128,8 @@ contract JobManager {
         emit JobAdded(msg.sender, title, description, price);
     }
 
-    function toggleJob(uint256 jobId) external isJobOwner(jobId) {
-        require(userManager.hasAUser(), "User must exist");
+    function toggleJob(uint256 jobId) external isJobOwner(jobId)  isAUser() {
+
         jobs[jobId].inProgress = !jobs[jobId].inProgress;
 
         emit ToggledJob(jobs[jobId].inProgress);
@@ -131,6 +144,20 @@ contract JobManager {
         delete jobs[jobId];
 
         emit JobDeleted(msg.sender, jobId);
+    }
+
+    modifier isAUser() {
+        address[] memory allUsers = userManager.getAllUserAddresses();
+        address sender = msg.sender;
+        bool pass = false;
+        for (uint256 i = 0; i < allUsers.length; i++) {
+            if (allUsers[i] == sender) {
+                pass = true;
+            }
+        }
+
+        require(pass, "You need a User for this Action");
+        _;
     }
 
     modifier isJobOwner(uint256 jobId) {
