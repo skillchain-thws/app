@@ -4,146 +4,176 @@ pragma solidity ^0.8.4;
 import "./FreelancerMarketplace.sol";
 
 contract UserManager {
-    FreelancerMarketplace freelancerMarketplace;
-    mapping(address => User) public users;
-    mapping(uint256 => address) addresses;
-    uint256 public userCount;
+  FreelancerMarketplace freelancerMarketplace;
 
-    struct User {
-        address owner;
-        string userName;
-        mapping(uint256 => Review) reviewsBuyer;
-        uint256 reviewsBuyerCount;
-        mapping(uint256 => Review) reviewsSeller;
-        uint256 reviewsSellerCount;
-        bool isJudge;
-        uint256[] jobIds;
+  mapping(address => User) public users;
+  mapping(uint256 => address) addresses;
+  uint256 public userCount;
+
+  struct User {
+    address owner;
+    string userName;
+    mapping(uint256 => Review) reviewsBuyer;
+    uint256 reviewsBuyerCount;
+    mapping(uint256 => Review) reviewsSeller;
+    uint256 reviewsSellerCount;
+    bool isJudge;
+    uint256[] jobIds;
+  }
+
+  constructor(address _freelancerMarketplaceAddress) {
+    freelancerMarketplace = FreelancerMarketplace(
+      _freelancerMarketplaceAddress
+    );
+  }
+
+  function getAllJobIds(
+    address userAddress
+  ) external view returns (uint256[] memory) {
+    return users[userAddress].jobIds;
+  }
+
+  function addJobId(uint256 jobId, address _address) external {
+    users[_address].jobIds.push(jobId);
+  }
+
+  function removeJobId(uint256 jobId, address _address) external {
+    User storage currentUser = users[_address];
+    uint256 indexToRemove;
+
+    for (uint256 i = 0; i < currentUser.jobIds.length; i++) {
+      if (currentUser.jobIds[i] == jobId) {
+        indexToRemove = i;
+        break;
+      }
     }
 
-    constructor(address _freelancerMarketplaceAddress) {
-        freelancerMarketplace = FreelancerMarketplace(_freelancerMarketplaceAddress);
-    }
+    require(indexToRemove < currentUser.jobIds.length, "Job ID not found");
 
-    function getAllJobIds(address userAddress) external view returns (uint256[] memory) {
-        return users[userAddress].jobIds;
-    }
+    currentUser.jobIds[indexToRemove] = currentUser.jobIds[
+      currentUser.jobIds.length - 1
+    ];
+    currentUser.jobIds.pop();
+  }
 
-    function addJobId(uint256 jobId, address _address) external {
-        users[_address].jobIds.push(jobId);
-    }
+  function getUser(
+    address _address
+  )
+    external
+    view
+    returns (
+      address owner,
+      string memory userName,
+      bool isJudge,
+      uint256[] memory jobIds
+    )
+  {
+    User storage user = users[_address];
+    return (user.owner, user.userName, user.isJudge, user.jobIds);
+  }
 
-    function removeJobId(uint256 jobId, address _address) external {
-        User storage currentUser = users[_address];
-        uint256 indexToRemove;
-        for (uint256 i = 0; i < currentUser.jobIds.length; i++) {
-            if (currentUser.jobIds[i] == jobId) {
-                indexToRemove = i;
-                break;
-            }
-        }
+  event UserRegistered(address userAddress, string name);
 
-        require(indexToRemove < currentUser.jobIds.length, "Job ID not found");
+  function registerUser(string memory _name) external nameNotTaken(_name) {
+    require(
+      freelancerMarketplace.nonEmptyString(_name),
+      "String must not be empty"
+    );
+    require(users[msg.sender].owner == address(0), "User already registered");
 
-        currentUser.jobIds[indexToRemove] = currentUser.jobIds[currentUser.jobIds.length - 1];
-        currentUser.jobIds.pop();
-    }
+    User storage newUser = users[msg.sender];
+    newUser.owner = msg.sender;
+    newUser.userName = _name;
+    newUser.isJudge = false;
+    newUser.reviewsBuyerCount = 0;
+    newUser.reviewsSellerCount = 0;
 
-    function getUser(address _address) external view returns (
-        address owner,
-        string memory userName,
-        bool isJudge,
-        uint256[] memory jobIds
-    ) {
-        User storage user = users[_address];
-        return (user.owner, user.userName, user.isJudge, user.jobIds);
-    }
+    addresses[userCount] = msg.sender;
+    userCount++;
 
-    event UserRegistered(address userAddress, string name);
+    emit UserRegistered(msg.sender, _name);
+  }
 
-    function registerUser(string memory _name) external  nameNotTaken(_name) {
-        require(freelancerMarketplace.nonEmptyString(_name), "String must not be empty");
-        require(users[msg.sender].owner == address(0), "User already registered");
+  event JudgeSet(address userAddress);
 
-        User storage newUser = users[msg.sender];
-        newUser.owner = msg.sender;
-        newUser.userName = _name;
-        newUser.isJudge = false;
-        newUser.reviewsBuyerCount = 0;
-        newUser.reviewsSellerCount = 0;
+  function setJudge(address userAddress) external {
+    require(freelancerMarketplace.onlyAdmin(), "You need to be Admin");
+    users[userAddress].isJudge = true;
 
-        addresses[userCount] = msg.sender;
-        userCount++;
+    emit JudgeSet(userAddress);
+  }
 
-        emit UserRegistered(msg.sender, _name);
-    }
+  event UserReviewAdded(address userAddress, string comment, uint8 rating);
 
-    event JudgeSet(address userAddress);
+  function addUserReview(
+    address userAddress,
+    string memory comment,
+    uint8 rating
+  ) external {
+    require(
+      freelancerMarketplace.nonEmptyString(comment),
+      "Comment must not be empty"
+    );
+    require(users[userAddress].owner != address(0), "User does not exist");
+    require(
+      users[msg.sender].owner != address(0),
+      "Only a User can write a Review"
+    );
+    require(userAddress != msg.sender, "You can't Review yourself");
 
-    function setJudge(address userAddress) external {
-        require(freelancerMarketplace.onlyAdmin(), "You need to be Admin");
-        users[userAddress].isJudge = true;
+    uint256 userIndex = users[userAddress].reviewsBuyerCount;
+    Review storage newReview = users[userAddress].reviewsBuyer[userIndex];
+    newReview.comment = comment;
+    newReview.rating = rating;
+    newReview.commenter = msg.sender;
 
-        emit JudgeSet(userAddress);
-    }
+    users[userAddress].reviewsBuyerCount++;
 
-    event UserReviewAdded(address userAddress, string comment, uint8 rating);
+    emit UserReviewAdded(userAddress, comment, rating);
+  }
 
-    function addUserReview(
-        address userAddress,
-        string memory comment,
-        uint8 rating
-    ) external {
-        require(freelancerMarketplace.nonEmptyString(comment), "Comment must not be empty");
-        require(users[userAddress].owner != address(0), "User does not exist");
-        require(users[msg.sender].owner != address(0), "Only a User can write a Review");
-        require(userAddress != msg.sender, "You can't Review yourself");
-
-        uint256 userIndex = users[userAddress].reviewsBuyerCount;
-        Review storage newReview = users[userAddress].reviewsBuyer[userIndex];
-        newReview.comment = comment;
-        newReview.rating = rating;
-        newReview.commenter = msg.sender;
-
-        users[userAddress].reviewsBuyerCount++;
-
-        emit UserReviewAdded(userAddress, comment, rating);
-    }
-
-function getAllUserAddresses() external view returns (address[] memory) {
+  function getAllUserAddresses() external view returns (address[] memory) {
     address[] memory allUserAddresses = new address[](userCount);
+
     for (uint256 i = 0; i < userCount; i++) {
-        allUserAddresses[i] = addresses[i];
+      allUserAddresses[i] = addresses[i];
     }
+
     return allUserAddresses;
-}
+  }
 
-    function getReviewsByUser(address userAddress) internal view returns (Review[] memory, Review[] memory) {
-        User storage user = users[userAddress];
+  function getReviewsByUser(
+    address userAddress
+  ) internal view returns (Review[] memory, Review[] memory) {
+    User storage user = users[userAddress];
 
-        Review[] memory buyerReviews = new Review[](user.reviewsBuyerCount);
-        Review[] memory sellerReviews = new Review[](user.reviewsSellerCount);
+    Review[] memory buyerReviews = new Review[](user.reviewsBuyerCount);
+    Review[] memory sellerReviews = new Review[](user.reviewsSellerCount);
 
-        for (uint256 i = 0; i < user.reviewsBuyerCount; i++) {
-            buyerReviews[i] = user.reviewsBuyer[i];
-        }
-
-        for (uint256 j = 0; j < user.reviewsSellerCount; j++) {
-            sellerReviews[j] = user.reviewsSeller[j];
-        }
-
-        return (buyerReviews, sellerReviews);
+    for (uint256 i = 0; i < user.reviewsBuyerCount; i++) {
+      buyerReviews[i] = user.reviewsBuyer[i];
     }
 
-    // Modifiers
-    modifier nameNotTaken(string memory str) {
-        bool taken = false;
-        for (uint256 i = 0; i < userCount; i++) {
-            taken = (keccak256(abi.encodePacked(users[addresses[i]].userName)) == keccak256(abi.encodePacked(str)));
-            if (taken) {
-                break;
-            }
-        }
-        require(!taken, "Name is already taken");
-        _;
+    for (uint256 j = 0; j < user.reviewsSellerCount; j++) {
+      sellerReviews[j] = user.reviewsSeller[j];
     }
+
+    return (buyerReviews, sellerReviews);
+  }
+
+  modifier nameNotTaken(string memory str) {
+    bool taken = false;
+
+    for (uint256 i = 0; i < userCount; i++) {
+      taken = (keccak256(abi.encodePacked(users[addresses[i]].userName)) ==
+        keccak256(abi.encodePacked(str)));
+
+      if (taken) {
+        break;
+      }
+    }
+
+    require(!taken, "Name is already taken");
+    _;
+  }
 }
