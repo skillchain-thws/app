@@ -5,7 +5,7 @@ import "./JobManager.sol";
 import "./FreelancerMarketplace.sol";
 
 contract EscrowManager {
-  mapping(uint256 => Escrow) escrows;
+  mapping(uint256 => Escrow) public escrows;
   uint256 escrowCount;
   FreelancerMarketplace freelancerMarketplace;
   JobManager jobManager;
@@ -30,7 +30,15 @@ contract EscrowManager {
     mapping(address => bool) votes;
   }
 
-  event EscrowStarted(address buyer, address seller, uint256 jobId);
+  struct SimplifiedEscrow {
+    uint256 jobId;
+    address buyer;
+    address seller;
+    uint256 money;
+    bool started;
+    bool buyerAccepted;
+    bool sellerAccepted;
+  }
 
   constructor(address _freelancerMarketplaceAddress) {
     freelancerMarketplace = FreelancerMarketplace(
@@ -38,13 +46,114 @@ contract EscrowManager {
     );
   }
 
+  //*********************************************************************
+  //*********************************************************************
+  //                        Setter Functions
+  //*********************************************************************
+  //*********************************************************************
+
   function setJobManager(address _address) external {
+    require(
+      freelancerMarketplace.onlyAdmin(),
+      "Only the Admin can add Managers"
+    );
     jobManager = JobManager(_address);
   }
 
   function setUserManager(address _address) external {
+    require(
+      freelancerMarketplace.onlyAdmin(),
+      "Only the Admin can add Managers"
+    );
     userManager = UserManager(_address);
   }
+
+  //*********************************************************************
+  //*********************************************************************
+  //                        Getter Functions
+  //*********************************************************************
+  //*********************************************************************
+
+  function getEscrowIdFromJob(
+    uint256 jobId
+  ) external view returns (uint256 escrowId) {
+    for (uint256 i = 0; i < escrowCount; i++) {
+      if (escrows[i].jobId == jobId) {
+        return i;
+      }
+    }
+    revert("Escrow not found for the given job ID");
+  }
+
+  function getEscrow(
+    uint256 escrowId
+  )
+    public
+    view
+    escrowExists(escrowId)
+    returns (
+      uint256 jobId,
+      address buyer,
+      address seller,
+      uint256 money,
+      bool started,
+      bool buyerAccepted,
+      bool sellerAccepted
+    )
+  {
+    Escrow storage tempEscrow = escrows[escrowId];
+    return (
+      tempEscrow.jobId,
+      tempEscrow.buyer,
+      tempEscrow.seller,
+      tempEscrow.money,
+      tempEscrow.started,
+      tempEscrow.buyerAccepted,
+      tempEscrow.sellerAccepted
+    );
+  }
+
+  function getChats(
+    uint256 escrowId
+  )
+    public
+    view
+    escrowExists(escrowId)
+    isEscrowParty(escrowId)
+    returns (
+      string[] memory generalChat,
+      string[] memory buyerChat,
+      string[] memory sellerChat
+    )
+  {
+    Escrow storage tempEscrow = escrows[escrowId];
+
+    generalChat = new string[](tempEscrow.generalChatCount);
+    buyerChat = new string[](tempEscrow.buyerChatCount);
+    sellerChat = new string[](tempEscrow.sellerChatCount);
+
+    for (uint256 i = 0; i < tempEscrow.generalChatCount; i++) {
+      generalChat[i] = tempEscrow.generalChat[i];
+    }
+
+    for (uint256 i = 0; i < tempEscrow.buyerChatCount; i++) {
+      buyerChat[i] = tempEscrow.buyerChat[i];
+    }
+
+    for (uint256 i = 0; i < tempEscrow.sellerChatCount; i++) {
+      sellerChat[i] = tempEscrow.sellerChat[i];
+    }
+
+    return (generalChat, buyerChat, sellerChat);
+  }
+
+  //*********************************************************************
+  //*********************************************************************
+  //                        Escrow Functions
+  //*********************************************************************
+  //*********************************************************************
+
+  event EscrowStarted(address buyer, address seller, uint256 jobId);
 
   function createEscrow(
     address buyer,
@@ -77,33 +186,11 @@ contract EscrowManager {
     emit EscrowStarted(msg.sender, seller, jobId);
   }
 
-  function getEscrow(
-    uint256 escrowId
-  )
-    public
-    view
-    escrowExists(escrowId)
-    returns (
-      uint256 jobId,
-      address buyer,
-      address seller,
-      uint256 money,
-      bool started,
-      bool buyerAccepted,
-      bool sellerAccepted
-    )
-  {
-    Escrow storage tempEscrow = escrows[escrowId];
-    return (
-      tempEscrow.jobId,
-      tempEscrow.buyer,
-      tempEscrow.seller,
-      tempEscrow.money,
-      tempEscrow.started,
-      tempEscrow.buyerAccepted,
-      tempEscrow.sellerAccepted
-    );
-  }
+  //*********************************************************************
+  //*********************************************************************
+  //                        Acceptance Functions
+  //*********************************************************************
+  //*********************************************************************
 
   function acceptBuyer(
     bool _accept,
@@ -185,8 +272,20 @@ contract EscrowManager {
     }
   }
 
+  //*********************************************************************
+  //*********************************************************************
+  //                        Comittee Functions
+  //*********************************************************************
+  //*********************************************************************
+
   //TODO
   function startComitteeVote() internal {}
+
+  //*********************************************************************
+  //*********************************************************************
+  //                        Chat Functions
+  //*********************************************************************
+  //*********************************************************************
 
   function sendMessageToBuyerChat(
     uint256 escrowId,
@@ -222,39 +321,11 @@ contract EscrowManager {
     currentEscrow.generalChatCount++;
   }
 
-  function getChats(
-    uint256 escrowId
-  )
-    public
-    view
-    escrowExists(escrowId)
-    isEscrowParty(escrowId)
-    returns (
-      string[] memory generalChat,
-      string[] memory buyerChat,
-      string[] memory sellerChat
-    )
-  {
-    Escrow storage tempEscrow = escrows[escrowId];
-
-    generalChat = new string[](tempEscrow.generalChatCount);
-    buyerChat = new string[](tempEscrow.buyerChatCount);
-    sellerChat = new string[](tempEscrow.sellerChatCount);
-
-    for (uint256 i = 0; i < tempEscrow.generalChatCount; i++) {
-      generalChat[i] = tempEscrow.generalChat[i];
-    }
-
-    for (uint256 i = 0; i < tempEscrow.buyerChatCount; i++) {
-      buyerChat[i] = tempEscrow.buyerChat[i];
-    }
-
-    for (uint256 i = 0; i < tempEscrow.sellerChatCount; i++) {
-      sellerChat[i] = tempEscrow.sellerChat[i];
-    }
-
-    return (generalChat, buyerChat, sellerChat);
-  }
+  //*********************************************************************
+  //*********************************************************************
+  //                        Modifiers
+  //*********************************************************************
+  //*********************************************************************
 
   modifier escrowExists(uint256 escrowId) {
     require(escrowId <= escrowCount, "Escrow does not exist");

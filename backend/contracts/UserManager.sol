@@ -7,7 +7,7 @@ contract UserManager {
   FreelancerMarketplace freelancerMarketplace;
 
   mapping(address => User) public users;
-  mapping(uint256 => address) addresses;
+  mapping(uint256 => address) public addresses;
   uint256 public userCount;
 
   struct User {
@@ -27,11 +27,96 @@ contract UserManager {
     );
   }
 
+  //*********************************************************************
+  //*********************************************************************
+  //                        Getter Functions
+  //*********************************************************************
+  //*********************************************************************
+
+  function getUser(
+    address _address
+  )
+    external
+    view
+    returns (
+      address owner,
+      string memory userName,
+      bool isJudge,
+      uint256[] memory jobIds
+    )
+  {
+    User storage user = users[_address];
+    return (user.owner, user.userName, user.isJudge, user.jobIds);
+  }
+
+  function getAllUserAddresses() external view returns (address[] memory) {
+    address[] memory allUserAddresses = new address[](userCount);
+
+    for (uint256 i = 0; i < userCount; i++) {
+      allUserAddresses[i] = addresses[i];
+    }
+
+    return allUserAddresses;
+  }
+
   function getAllJobIds(
     address userAddress
   ) external view returns (uint256[] memory) {
     return users[userAddress].jobIds;
   }
+
+  function getReviewsByUser(
+    address userAddress
+  ) internal view returns (Review[] memory, Review[] memory) {
+    User storage user = users[userAddress];
+
+    Review[] memory buyerReviews = new Review[](user.reviewsBuyerCount);
+    Review[] memory sellerReviews = new Review[](user.reviewsSellerCount);
+
+    for (uint256 i = 0; i < user.reviewsBuyerCount; i++) {
+      buyerReviews[i] = user.reviewsBuyer[i];
+    }
+
+    for (uint256 j = 0; j < user.reviewsSellerCount; j++) {
+      sellerReviews[j] = user.reviewsSeller[j];
+    }
+
+    return (buyerReviews, sellerReviews);
+  }
+
+  //*********************************************************************
+  //*********************************************************************
+  //                        User Functions
+  //*********************************************************************
+  //*********************************************************************
+
+  event UserRegistered(address userAddress, string name);
+
+  function registerUser(string memory _name) external nameNotTaken(_name) {
+    require(
+      freelancerMarketplace.nonEmptyString(_name),
+      "String must not be empty"
+    );
+    require(users[msg.sender].owner == address(0), "User already registered");
+
+    User storage newUser = users[msg.sender];
+    newUser.owner = msg.sender;
+    newUser.userName = _name;
+    newUser.isJudge = false;
+    newUser.reviewsBuyerCount = 0;
+    newUser.reviewsSellerCount = 0;
+
+    addresses[userCount] = msg.sender;
+    userCount++;
+
+    emit UserRegistered(msg.sender, _name);
+  }
+
+  //*********************************************************************
+  //*********************************************************************
+  //                        Job Functions
+  //*********************************************************************
+  //*********************************************************************
 
   function addJobId(uint256 jobId, address _address) external {
     users[_address].jobIds.push(jobId);
@@ -56,43 +141,11 @@ contract UserManager {
     currentUser.jobIds.pop();
   }
 
-  function getUser(
-    address _address
-  )
-    external
-    view
-    returns (
-      address owner,
-      string memory userName,
-      bool isJudge,
-      uint256[] memory jobIds
-    )
-  {
-    User storage user = users[_address];
-    return (user.owner, user.userName, user.isJudge, user.jobIds);
-  }
-
-  event UserRegistered(address userAddress, string name);
-
-  function registerUser(string memory _name) external nameNotTaken(_name) {
-    require(
-      freelancerMarketplace.nonEmptyString(_name),
-      "String must not be empty"
-    );
-    require(users[msg.sender].owner == address(0), "User already registered");
-
-    User storage newUser = users[msg.sender];
-    newUser.owner = msg.sender;
-    newUser.userName = _name;
-    newUser.isJudge = false;
-    newUser.reviewsBuyerCount = 0;
-    newUser.reviewsSellerCount = 0;
-
-    addresses[userCount] = msg.sender;
-    userCount++;
-
-    emit UserRegistered(msg.sender, _name);
-  }
+  //*********************************************************************
+  //*********************************************************************
+  //                        Judge Functions
+  //*********************************************************************
+  //*********************************************************************
 
   event JudgeSet(address userAddress);
 
@@ -102,6 +155,12 @@ contract UserManager {
 
     emit JudgeSet(userAddress);
   }
+
+  //*********************************************************************
+  //*********************************************************************
+  //                        Review Functions
+  //*********************************************************************
+  //*********************************************************************
 
   event UserReviewAdded(address userAddress, string comment, uint8 rating);
 
@@ -132,34 +191,11 @@ contract UserManager {
     emit UserReviewAdded(userAddress, comment, rating);
   }
 
-  function getAllUserAddresses() external view returns (address[] memory) {
-    address[] memory allUserAddresses = new address[](userCount);
-
-    for (uint256 i = 0; i < userCount; i++) {
-      allUserAddresses[i] = addresses[i];
-    }
-
-    return allUserAddresses;
-  }
-
-  function getReviewsByUser(
-    address userAddress
-  ) internal view returns (Review[] memory, Review[] memory) {
-    User storage user = users[userAddress];
-
-    Review[] memory buyerReviews = new Review[](user.reviewsBuyerCount);
-    Review[] memory sellerReviews = new Review[](user.reviewsSellerCount);
-
-    for (uint256 i = 0; i < user.reviewsBuyerCount; i++) {
-      buyerReviews[i] = user.reviewsBuyer[i];
-    }
-
-    for (uint256 j = 0; j < user.reviewsSellerCount; j++) {
-      sellerReviews[j] = user.reviewsSeller[j];
-    }
-
-    return (buyerReviews, sellerReviews);
-  }
+  //*********************************************************************
+  //*********************************************************************
+  //                              Modifier
+  //*********************************************************************
+  //*********************************************************************
 
   modifier nameNotTaken(string memory str) {
     bool taken = false;

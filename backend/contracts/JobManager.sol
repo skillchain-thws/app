@@ -6,7 +6,7 @@ import "./EscrowManager.sol";
 import "./FreelancerMarketplace.sol";
 
 contract JobManager {
-  mapping(uint256 => Job) jobs;
+  mapping(uint256 => Job) public jobs;
   uint256 public jobCount;
 
   FreelancerMarketplace freelancerMarketplace;
@@ -34,6 +34,14 @@ contract JobManager {
     bool inProgress;
   }
 
+  struct SimplifiedJob {
+    address owner;
+    uint256 jobId;
+    string title;
+    string description;
+    uint256 price;
+    bool inProgress;
+  }
   event JobAdded(
     address owner,
     string title,
@@ -51,74 +59,121 @@ contract JobManager {
     );
   }
 
+  //*********************************************************************
+  //*********************************************************************
+  //                        Utility Functions
+  //*********************************************************************
+  //*********************************************************************
+
   function isUserInArray() external view returns (bool) {
     address[] memory allUsers = userManager.getAllUserAddresses();
     address sender = msg.sender;
 
     for (uint256 i = 0; i < allUsers.length; i++) {
       if (allUsers[i] == sender) {
-        return true; // sender is in the array
+        return true;
       }
     }
 
-    return false; // sender is not in the array
+    return false;
   }
 
+  //*********************************************************************
+  //*********************************************************************
+  //                        Setter Functions
+  //*********************************************************************
+  //*********************************************************************
+
   function setEscrowManager(address _address) external {
+    require(
+      freelancerMarketplace.onlyAdmin(),
+      "Only the Admin can add Managers"
+    );
     escrowManager = EscrowManager(_address);
   }
 
   function setUserManager(address _address) external {
+    require(
+      freelancerMarketplace.onlyAdmin(),
+      "Only the Admin can add Managers"
+    );
     userManager = UserManager(_address);
   }
+
+  //*********************************************************************
+  //*********************************************************************
+  //                        Getter Functions
+  //*********************************************************************
+  //*********************************************************************
 
   function getJobOwner(uint256 jobId) external view returns (address _address) {
     return jobs[jobId].owner;
   }
 
-  function sendBuyRequest(
-    uint256 jobId,
-    string memory comment
-  ) public isAUser isNotJobOwner(jobId) notInProgress(jobId) jobExists(jobId) {
-    require(
-      freelancerMarketplace.nonEmptyString(comment),
-      "Comment must not be empty"
-    );
+  function getAllJobs() external view returns (SimplifiedJob[] memory) {
+    SimplifiedJob[] memory allJobs = new SimplifiedJob[](jobCount);
 
-    Job storage currentJob = jobs[jobId];
-    BuyRequest storage request = currentJob.buyRequests[
-      currentJob.buyRequestCount
-    ];
-    request.jobId = jobId;
-    request.buyer = msg.sender;
-    request.comment = comment;
-    request.buyRequestId = currentJob.buyRequestCount;
-    request.accepted = false;
+    for (uint256 i = 0; i < jobCount; i++) {
+      allJobs[i] = SimplifiedJob({
+        owner: jobs[i].owner,
+        jobId: jobs[i].jobId,
+        title: jobs[i].title,
+        description: jobs[i].description,
+        price: jobs[i].price,
+        inProgress: jobs[i].inProgress
+      });
+    }
 
-    currentJob.buyRequestCount++;
+    return allJobs;
   }
 
-  function acceptBuyRequest(
-    uint256 jobId,
-    uint256 buyRequestId
+  function getAllJobsOfUser(
+    address _owner
+  ) external view returns (SimplifiedJob[] memory) {
+    uint256[] memory userJobIds = userManager.getAllJobIds(_owner);
+    SimplifiedJob[] memory allUserJobs = new SimplifiedJob[](userJobIds.length);
+
+    for (uint256 i = 0; i < userJobIds.length; i++) {
+      Job storage job = jobs[userJobIds[i]];
+      allUserJobs[i] = SimplifiedJob({
+        owner: job.owner,
+        jobId: job.jobId,
+        title: job.title,
+        description: job.description,
+        price: job.price,
+        inProgress: job.inProgress
+      });
+    }
+
+    return allUserJobs;
+  }
+
+  function getJobBuyRequests(
+    uint256 jobId
   )
-    public
-    payable
-    notInProgress(jobId)
-    isJobOwner(jobId)
+    external
+    view
     jobExists(jobId)
     isAUser
+    isJobOwner(jobId)
+    returns (BuyRequest[] memory)
   {
-    Job storage currentJob = jobs[jobId];
-    BuyRequest memory currentBuyRequest = currentJob.buyRequests[buyRequestId];
-    currentBuyRequest.accepted = true;
+    Job storage job = jobs[jobId];
+    uint256 counter = job.buyRequestCount;
+    BuyRequest[] memory allJobBuyRequests = new BuyRequest[](counter);
 
-    escrowManager.createEscrow(
-      currentBuyRequest.buyer,
-      jobId,
-      currentBuyRequest.comment
-    );
+    for (uint256 i = 0; i < counter; i++) {
+      allJobBuyRequests[i] = job.buyRequests[i];
+    }
+
+    return allJobBuyRequests;
   }
+
+  //*********************************************************************
+  //*********************************************************************
+  //                        Job Functions
+  //*********************************************************************
+  //*********************************************************************
 
   function addJob(
     string memory title,
@@ -157,12 +212,61 @@ contract JobManager {
 
   function deleteJob(
     uint256 jobId
-  ) public isJobOwner(jobId) notInProgress(jobId) jobExists(jobId) {
+  ) public jobExists(jobId) isJobOwner(jobId) notInProgress(jobId) {
     userManager.removeJobId(jobId, msg.sender);
     delete jobs[jobId];
 
     emit JobDeleted(msg.sender, jobId);
   }
+
+  //*********************************************************************
+  //*********************************************************************
+  //                        BuyRequest Functions
+  //*********************************************************************
+  //*********************************************************************
+
+  function sendBuyRequest(
+    uint256 jobId,
+    string memory comment
+  ) public isAUser jobExists(jobId) isNotJobOwner(jobId) notInProgress(jobId) {
+    require(
+      freelancerMarketplace.nonEmptyString(comment),
+      "Comment must not be empty"
+    );
+
+    Job storage currentJob = jobs[jobId];
+    BuyRequest storage request = currentJob.buyRequests[
+      currentJob.buyRequestCount
+    ];
+    request.jobId = jobId;
+    request.buyer = msg.sender;
+    request.comment = comment;
+    request.buyRequestId = currentJob.buyRequestCount;
+    request.accepted = false;
+
+    currentJob.buyRequestCount++;
+  }
+
+  function acceptBuyRequest(
+    uint256 jobId,
+    uint256 buyRequestId
+  ) public isAUser jobExists(jobId) isJobOwner(jobId) notInProgress(jobId) {
+    Job storage currentJob = jobs[jobId];
+    BuyRequest memory currentBuyRequest = currentJob.buyRequests[buyRequestId];
+    currentBuyRequest.accepted = true;
+
+    escrowManager.createEscrow(
+      currentBuyRequest.buyer,
+      jobId,
+      currentBuyRequest.comment
+    );
+  }
+
+  //*********************************************************************
+  //*********************************************************************
+  //                        Modifier
+  //*********************************************************************
+  //*********************************************************************
 
   modifier isAUser() {
     address[] memory allUsers = userManager.getAllUserAddresses();
