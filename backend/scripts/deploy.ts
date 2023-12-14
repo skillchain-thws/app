@@ -28,11 +28,11 @@ async function main() {
     await escrow.setJobManager(job.target),
   ])
 
-  // Only in dev
-  if (true) {
-    await user.registerUser('Admin')
-    for (const j of jobs)
-      await job.addJob(j.title, j.description, j.price, j.tags)
+  const isDev = true
+  if (isDev) {
+    await user.registerUser('test_acc')
+    for (const { title, description, price, tags } of jobs)
+      await job.addJob(title, description, price, tags)
   }
 }
 

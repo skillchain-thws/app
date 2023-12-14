@@ -39,8 +39,6 @@ function fetchJobs() {
 onMounted(() => {
   fetchJobs()
 })
-
-console.log(store.address)
 </script>
 
 <template>
