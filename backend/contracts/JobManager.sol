@@ -26,12 +26,13 @@ contract JobManager {
     uint256 jobId;
     string title;
     string description;
-    uint256 price;
+    uint price;
     mapping(uint256 => BuyRequest) buyRequests;
     uint256 buyRequestCount;
     mapping(uint256 => Review) reviewsJob;
     uint256 reviewCount;
     bool inProgress;
+    string[] tags;
   }
 
   struct SimplifiedJob {
@@ -39,15 +40,12 @@ contract JobManager {
     uint256 jobId;
     string title;
     string description;
-    uint256 price;
+    uint price;
     bool inProgress;
+    string[] tags;
   }
-  event JobAdded(
-    address owner,
-    string title,
-    string description,
-    uint256 price
-  );
+
+  event JobAdded(address owner, string title, string description, uint price);
 
   event ToggledJob(bool inProgress);
 
@@ -120,7 +118,8 @@ contract JobManager {
         title: jobs[i].title,
         description: jobs[i].description,
         price: jobs[i].price,
-        inProgress: jobs[i].inProgress
+        inProgress: jobs[i].inProgress,
+        tags: jobs[i].tags
       });
     }
 
@@ -141,7 +140,8 @@ contract JobManager {
         title: job.title,
         description: job.description,
         price: job.price,
-        inProgress: job.inProgress
+        inProgress: job.inProgress,
+        tags: job.tags
       });
     }
 
@@ -178,7 +178,8 @@ contract JobManager {
   function addJob(
     string memory title,
     string memory description,
-    uint256 price
+    uint price,
+    string[] memory tags
   ) public isAUser {
     require(
       freelancerMarketplace.nonEmptyString(title),
@@ -196,6 +197,7 @@ contract JobManager {
     newJob.price = price;
     newJob.jobId = jobCount;
     newJob.inProgress = false;
+    newJob.tags = tags;
 
     userManager.addJobId(jobCount, msg.sender);
 

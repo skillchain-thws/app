@@ -15,7 +15,7 @@ contract EscrowManager {
     uint256 jobId;
     address buyer;
     address seller;
-    uint256 money;
+    uint money;
     bool started;
     bool buyerAccepted;
     bool sellerAccepted;
@@ -34,7 +34,7 @@ contract EscrowManager {
     uint256 jobId;
     address buyer;
     address seller;
-    uint256 money;
+    uint money;
     bool started;
     bool buyerAccepted;
     bool sellerAccepted;
@@ -95,7 +95,7 @@ contract EscrowManager {
       uint256 jobId,
       address buyer,
       address seller,
-      uint256 money,
+      uint money,
       bool started,
       bool buyerAccepted,
       bool sellerAccepted
@@ -201,7 +201,7 @@ contract EscrowManager {
     if (_accept) {
       require(msg.value >= currentEscrow.money, "Insufficient funds");
 
-      currentEscrow.money += msg.value; // Add the sent funds to the escrow
+      currentEscrow.money += msg.value;
     }
 
     currentEscrow.buyerAccepted = _accept;
