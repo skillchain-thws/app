@@ -1,9 +1,13 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_DEPLOYED_ADDRESS: string
   readonly VITE_ACCOUNT_ADDRESS: string
   readonly VITE_ACCOUNT_KEY: string
+
+  readonly VITE_MARKET_ADDRESS: string
+  readonly VITE_JOB_ADDRESS: string
+  readonly VITE_USER_ADDRESS: string
+  readonly VITE_ESCROW_ADDRESS: string
 }
 
 interface ImportMeta {
