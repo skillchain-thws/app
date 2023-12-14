@@ -3,7 +3,9 @@
     <TheHeader />
 
     <main class="relative min-h-[200px]">
-      <RouterView />
+      <Suspense>
+        <RouterView />
+      </Suspense>
     </main>
 
     <Toaster />
