@@ -1,26 +1,23 @@
 <script setup lang="ts">
-import { FreelancerMarketplace__factory } from '@/typechain/factories/FreelancerMarketplace__factory'
 import type { Job } from '@/types'
-
-const store = useMMStore()
-const DEPLOYED_ADDRESS = import.meta.env.VITE_DEPLOYED_ADDRESS
 
 const job = ref<Job>({
   title: '',
   description: '',
-  badges: [],
-  budget: 0,
+  tags: [],
+  price: 0,
 })
 
 const badgesStr = ref('')
 watch(badgesStr, () => {
-  job.value.badges = badgesStr.value.trim().split(' ')
+  job.value.tags = badgesStr.value.trim().split(' ')
 })
 
+const store = useMMStore()
+const factory = await store.getJobFactory()
+
 async function onSubmit() {
-  const signer = await store.getSigner()
-  const factory = FreelancerMarketplace__factory.connect(DEPLOYED_ADDRESS, signer)
-  factory.addJob(job.value.title, job.value.description, job.value.budget)
+  factory.addJob(job.value.title, job.value.description, job.value.price, job.value.tags)
 }
 </script>
 
@@ -41,7 +38,7 @@ async function onSubmit() {
         <div class="w-[120px]">
           <div class="space-y-2">
             <Label for="budget">budget</Label>
-            <Input id="budget" v-model.number="job.budget" min="0" step="0.01" type="number" />
+            <Input id="budget" v-model.number="job.price" min="0" step="1" type="number" />
           </div>
         </div>
 

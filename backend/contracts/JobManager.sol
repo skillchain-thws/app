@@ -45,7 +45,13 @@ contract JobManager {
     string[] tags;
   }
 
-  event JobAdded(address owner, string title, string description, uint price);
+  event JobAdded(
+    address owner,
+    string title,
+    string description,
+    uint price,
+    string[] tags
+  );
 
   event ToggledJob(bool inProgress);
 
@@ -203,7 +209,7 @@ contract JobManager {
 
     jobCount++;
 
-    emit JobAdded(msg.sender, title, description, price);
+    emit JobAdded(msg.sender, title, description, price, tags);
   }
 
   function toggleJob(uint256 jobId) external isJobOwner(jobId) isAUser {

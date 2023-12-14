@@ -1,8 +1,8 @@
 export interface Job {
   title: string
-  badges: string[]
+  tags: string[]
   description: string
-  budget: number
+  price: number
 }
 
 export interface Profile {

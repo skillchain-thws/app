@@ -1,29 +1,51 @@
 <script setup lang="ts">
-import { jobs } from '@/includes/mocks'
+import type { Job } from '@/types'
 import { Search } from 'lucide-vue-next'
 
 const q = ref('')
+const qDebounced = refDebounced(q, 500)
 const sortOpt = ref<typeof sortOpts[number]['value']>('lth')
 const sortOpts = [
   { label: 'price: low to high', value: 'lth' },
   { label: 'price: hight to low', value: 'htl' },
 ] as const
 
+const store = useMMStore()
+
+const jobFactory = await store.getJobFactory()
+const jobs = shallowRef<Job[]>([])
 const data = computed(() => {
-  const f = q.value
-    ? jobs.filter(j => JSON.stringify(j).toLowerCase().includes(q.value.toLowerCase()))
-    : jobs
-  return f.toSorted((a, b) => {
+  const f = qDebounced.value
+    ? jobs.value.filter(j => JSON.stringify(j).toLowerCase().includes(q.value.toLowerCase()))
+    : jobs.value
+  return f.sort((a, b) => {
     if (sortOpt.value === 'lth')
-      return a.budget - b.budget
-    return b.budget - a.budget
+      return a.price - b.price
+    return b.price - a.price
   })
 })
+
+function fetchJobs() {
+  jobFactory.getAllJobs().then((res) => {
+    jobs.value = res.map(j => ({
+      title: j[2],
+      description: j[3],
+      price: Number(j[4]),
+      tags: j[6],
+    }))
+  })
+}
+
+onMounted(() => {
+  fetchJobs()
+})
+
+console.log(store.address)
 </script>
 
 <template>
   <div>
-    <div class="py-10 border-b">
+    <div class="py-10">
       <div class="flex gap-2 items-center ">
         <Label for="q">
           <div class="w-10 h-10 border rounded-full flex-center shrink-0">
@@ -65,9 +87,15 @@ const data = computed(() => {
 
       <ScrollArea class="h-[500px]">
         <div class="grid grid-cols-3 gap-8">
-          <RouterLink v-for="(job, i) in data" :key="i" class="group" to="/">
-            <JobCard v-bind="job" />
-          </RouterLink>
+          <template v-if="jobs.length">
+            <RouterLink v-for="(job, i) in data" :key="i" class="group" to="/">
+              <JobCard v-bind="job" />
+            </RouterLink>
+          </template>
+
+          <template v-else>
+            <JobCardSkeleton v-for="i in 5" :key="i" />
+          </template>
         </div>
       </ScrollArea>
     </div>

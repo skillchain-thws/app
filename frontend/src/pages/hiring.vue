@@ -23,7 +23,7 @@ const data = computed(() => {
 
 <template>
   <div>
-    <div class="py-10 border-b">
+    <div class="py-10">
       <div class="flex gap-2 items-center ">
         <Label for="q">
           <div class="w-10 h-10 border rounded-full flex-center shrink-0">

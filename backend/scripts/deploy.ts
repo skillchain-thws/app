@@ -31,8 +31,8 @@ async function main() {
   // Only in dev
   if (true) {
     await user.registerUser('Admin')
-    const _jobs = jobs.map(j => job.addJob(j.title, j.description, j.price))
-    await Promise.all(_jobs)
+    for (const j of jobs)
+      await job.addJob(j.title, j.description, j.price, j.tags)
   }
 }
 

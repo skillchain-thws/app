@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { Job } from '@/types'
-import { Bookmark } from 'lucide-vue-next'
 
 defineProps<Job>()
 </script>
@@ -13,14 +12,12 @@ defineProps<Job>()
           <span class="break-words">
             {{ title }}
           </span>
-
-          <Bookmark :size="22" class="hover:fill-white" />
         </div>
       </CardTitle>
       <CardDescription class="pt-2 space-x-2">
-        <template v-for="(b, bi) in badges">
-          <Badge v-if="b" :key="bi" variant="secondary">
-            {{ b }}
+        <template v-for="(t, ti) in tags">
+          <Badge v-if="t" :key="ti" variant="secondary">
+            {{ t }}
           </Badge>
         </template>
       </CardDescription>
@@ -33,7 +30,7 @@ defineProps<Job>()
     <CardFooter>
       <div class="flex items-center">
         <span class="font-bold mr-0.5">
-          eth {{ budget }}
+          eth {{ price }}
         </span>
         <Etherum />
       </div>
