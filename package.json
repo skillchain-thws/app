@@ -5,7 +5,7 @@
   "packageManager": "pnpm@8.12.1",
   "scripts": {
     "dev": "pnpm --filter=./frontend dev",
-    "deploy:gh": "pnpm --filter=./frontend build && git subtree push --prefix frontend/dist origin gh-pages",
+    "deploy:gh": "pnpm --filter=./frontend build && git subtree split --prefix frontend/dist -b gh-pages && git push -f origin gh-pages:gh-pages && git branch -D gh-pages",
     "postinstall": "npx simple-git-hooks"
   },
   "devDependencies": {
