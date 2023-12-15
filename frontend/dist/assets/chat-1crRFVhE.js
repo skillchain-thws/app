@@ -1,1 +1,0 @@
-import{d as n,g as r,h as _,j as l,o as p,c as i}from"./index-hpl1SOig.js";const m={class:"py-10"},u=n({__name:"chat",async setup(d){let o,t;const s=r(),a=([o,t]=_(()=>s.getJobFactory()),o=await o,t(),o);return l(async()=>{(await a.getAllJobs()).forEach(e=>{console.log(e[6])})}),(c,e)=>(p(),i("div",m))}});export{u as default};
