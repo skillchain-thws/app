@@ -42,11 +42,20 @@ contract UserManager {
       address owner,
       string memory userName,
       bool isJudge,
-      uint256[] memory jobIds
+      uint256[] memory jobIds,
+      uint256 reviewsBuyerCount,
+      uint256 reviewSellerCount
     )
   {
     User storage user = users[_address];
-    return (user.owner, user.userName, user.isJudge, user.jobIds);
+    return (
+      user.owner,
+      user.userName,
+      user.isJudge,
+      user.jobIds,
+      user.reviewsBuyerCount,
+      user.reviewsSellerCount
+    );
   }
 
   function getAllUserAddresses() external view returns (address[] memory) {

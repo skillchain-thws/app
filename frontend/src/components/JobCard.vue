@@ -8,7 +8,7 @@ const store = useMMStore()
 </script>
 
 <template>
-  <Card class="group hover:border-primary transition-colors">
+  <Card class="group flex flex-col cursor-pointer hover:border-primary transition-colors">
     <CardHeader>
       <CardTitle>
         <div class="flex justify-between items-center">
@@ -28,6 +28,7 @@ const store = useMMStore()
           </TooltipProvider>
         </div>
       </CardTitle>
+
       <CardDescription class="pt-2 space-x-2">
         <template v-for="(t, ti) in tags">
           <Badge v-if="t" :key="ti" variant="secondary">
@@ -36,12 +37,14 @@ const store = useMMStore()
         </template>
       </CardDescription>
     </CardHeader>
+
     <CardContent>
       <div class="break-words">
         {{ description }}
       </div>
     </CardContent>
-    <CardFooter>
+
+    <CardFooter class="mt-auto">
       <div class="flex items-center">
         <span class="font-bold mr-0.5">
           eth {{ price }}

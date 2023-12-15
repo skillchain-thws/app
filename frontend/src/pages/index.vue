@@ -44,6 +44,13 @@ function fetchJobs() {
 onMounted(() => {
   fetchJobs()
 })
+
+const isSheetOpen = ref(false)
+const currentJob = shallowRef<Job>()
+function handleOpenSheet(j: Job) {
+  currentJob.value = j
+  isSheetOpen.value = true
+}
 </script>
 
 <template>
@@ -94,9 +101,7 @@ onMounted(() => {
       <ScrollArea class="h-[800px]">
         <div class="grid grid-cols-3 gap-8">
           <template v-if="jobs.length">
-            <RouterLink v-for="(job, i) in data" :key="i" to="/">
-              <JobCard v-bind="job" />
-            </RouterLink>
+            <JobCard v-for="(job, i) in data" :key="i" v-bind="job" @click="handleOpenSheet(job)" />
           </template>
 
           <template v-else>
@@ -105,5 +110,7 @@ onMounted(() => {
         </div>
       </ScrollArea>
     </div>
+
+    <JobSheet v-if="currentJob" v-model:open="isSheetOpen" :job="currentJob" />
   </div>
 </template>
