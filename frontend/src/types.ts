@@ -1,15 +1,9 @@
 export interface Job {
+  owner: string
+  id: number
   title: string
-  tags: string[]
   description: string
   price: number
-}
-
-export interface Profile {
-  title: string
-  badges: string[]
-  description: string
-  budget: number
-  star: number
-  ratingCount: number
+  inProcess: boolean
+  tags: string[]
 }

@@ -1,17 +1,31 @@
 <script setup lang="ts">
 import type { Job } from '@/types'
+import { Info } from 'lucide-vue-next'
 
 defineProps<Job>()
+
+const store = useMMStore()
 </script>
 
 <template>
-  <Card class="group-hover:border-primary transition-colors">
+  <Card class="group hover:border-primary transition-colors">
     <CardHeader>
       <CardTitle>
-        <div class="flex justify-between">
+        <div class="flex justify-between items-center">
           <span class="break-words">
             {{ title }}
           </span>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <Info :size="22" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>by: {{ store.address.toLowerCase() === owner.toLowerCase() ? 'me' : owner }}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </CardTitle>
       <CardDescription class="pt-2 space-x-2">

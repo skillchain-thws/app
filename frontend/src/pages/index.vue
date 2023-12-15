@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import type { Job } from '@/types'
-import { Search } from 'lucide-vue-next'
+import { Heart, Search } from 'lucide-vue-next'
 
 const q = ref('')
 const qDebounced = refDebounced(q, 500)
+const showMyOnly = ref(false)
 const sortOpt = ref<typeof sortOpts[number]['value']>('lth')
 const sortOpts = [
   { label: 'price: low to high', value: 'lth' },
@@ -14,10 +15,11 @@ const store = useMMStore()
 
 const jobFactory = await store.getJobFactory()
 const jobs = shallowRef<Job[]>([])
+const myJobs = computed(() => showMyOnly.value ? jobs.value.filter(j => j.owner.toLowerCase() === store.address.toLowerCase()) : jobs.value)
 const data = computed(() => {
   const f = qDebounced.value
-    ? jobs.value.filter(j => JSON.stringify(j).toLowerCase().includes(q.value.toLowerCase()))
-    : jobs.value
+    ? myJobs.value.filter(j => JSON.stringify(j).toLowerCase().includes(q.value.toLowerCase()))
+    : myJobs.value
   return f.sort((a, b) => {
     if (sortOpt.value === 'lth')
       return a.price - b.price
@@ -28,9 +30,12 @@ const data = computed(() => {
 function fetchJobs() {
   jobFactory.getAllJobs().then((res) => {
     jobs.value = res.map(j => ({
+      owner: j[0],
+      id: Number(j[1]),
       title: j[2],
       description: j[3],
       price: Number(j[4]),
+      inProcess: j[5],
       tags: j[6],
     }))
   })
@@ -56,10 +61,13 @@ onMounted(() => {
 
     <div class="py-8 space-y-8">
       <div class="flex justify-between items-center">
-        <div>
+        <div class="flex items-center gap-3">
           <h1 class="text-4xl">
             jobs
           </h1>
+          <Toggle v-model:pressed="showMyOnly" aria-label="toggle my job only">
+            <Heart :size="20" />
+          </Toggle>
         </div>
         <div class="flex items-center whitespace-nowrap gap-2">
           <span class="text-muted-foreground">
@@ -83,10 +91,10 @@ onMounted(() => {
         </div>
       </div>
 
-      <ScrollArea class="h-[500px]">
+      <ScrollArea class="h-[800px]">
         <div class="grid grid-cols-3 gap-8">
           <template v-if="jobs.length">
-            <RouterLink v-for="(job, i) in data" :key="i" class="group" to="/">
+            <RouterLink v-for="(job, i) in data" :key="i" to="/">
               <JobCard v-bind="job" />
             </RouterLink>
           </template>

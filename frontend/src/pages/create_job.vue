@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { Job } from '@/types'
 
-const job = ref<Job>({ title: '', description: '', tags: [], price: 0 })
+const emptyJob = () => structuredClone({ title: '', description: '', tags: [], price: 0, id: 0, inProcess: true, owner: '0x0000000000000000000000000000000000000000' })
+const job = ref<Job>(emptyJob())
 
 const tagsStr = ref('')
 watch(tagsStr, () => {
@@ -38,7 +39,7 @@ async function handleCreateJob() {
     if (!await handleCheckUser())
       return
     await jobFactory.addJob(job.value.title, job.value.description, job.value.price, job.value.tags)
-    job.value = { title: '', description: '', tags: [], price: 0 }
+    job.value = emptyJob()
   }
   catch {
     router.push('/error')
@@ -59,7 +60,7 @@ async function handleCreateUsername() {
 
 <template>
   <form class="grid grid-cols-2 gap-10 py-10 items-center" @submit.prevent="handleCreateJob">
-    <div class="space-y-2">
+    <div class="space-y-3">
       <div class="space-y-2">
         <Label for="title">title</Label>
         <Input id="title" v-model="job.title" type="text" />

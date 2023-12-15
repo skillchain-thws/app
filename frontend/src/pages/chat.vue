@@ -28,9 +28,9 @@ function handleSend() {
         <ScrollArea class="h-[600px] pr-5">
           <ul class="space-y-3">
             <li v-for="address in list" :key="address" class="cursor-pointer" @click="reciever = address">
-              <div class="border rounded-md p-2 hover:border-white" :class="{ 'border-white': reciever === address }">
+              <div class="border rounded-md px-2 py-4 hover:border-white" :class="{ 'border-white': reciever === address }">
                 <div class="flex items-center">
-                  <Avatar class="w-[20%]" :size="35" :address="address" />
+                  <Avatar class="w-[20%]" :size="45" :address="address" />
                   <div>
                     <p class="font-medium">
                       {{ shortenAddress(address) }}

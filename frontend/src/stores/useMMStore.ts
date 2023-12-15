@@ -1,27 +1,30 @@
-import { useToast } from '@/components/ui/toast'
+import { ToastAction, useToast } from '@/components/ui/toast'
+import { EscrowManager__factory, FreelancerMarketplace__factory, JobManager__factory, UserManager__factory } from '@/typechain/factories'
 import { MetaMaskConnector, shortenAddress, useWalletStore } from '@vue-dapp/core'
 import type { JsonRpcSigner } from 'ethers'
 import { BrowserProvider } from 'ethers'
 import { acceptHMRUpdate, defineStore } from 'pinia'
 
-import { EscrowManager__factory, FreelancerMarketplace__factory, JobManager__factory, UserManager__factory } from '@/typechain/factories'
-
 export const useMMStore = defineStore('metamask', () => {
-  // ref
   const store = useWalletStore()
+  store.onChanged(() => window.location.reload())
   const signer = shallowRef<JsonRpcSigner>()
+  const { toast } = useToast()
 
-  // computed
   const provider = computed(() => window.ethereum ? new BrowserProvider(window.ethereum) : undefined)
   const isConnected = computed(() => store.isConnected)
   const address = computed(() => store.address)
   const shortAddress = computed(() => shortenAddress(store.address))
 
-  const { toast } = useToast()
-
   async function connect() {
     const connector = new MetaMaskConnector()
-    await store.connectWith(connector)
+    try {
+      await store.connectWith(connector)
+    }
+    catch (e) {
+      if (store.error === 'Provider not found')
+        window.open('https://metamask.io/download/', '_blank')
+    }
   }
 
   async function getSigner() {
@@ -29,7 +32,15 @@ export const useMMStore = defineStore('metamask', () => {
       return signer.value
 
     if (!provider.value) {
-      toast({ description: 'You must login with Metamask', variant: 'destructive' })
+      toast({
+        description: 'you must connect with metamask to continue',
+        action: h(ToastAction, { altText: 'connect', onClick() {
+          connect()
+        } }, {
+          default: () => 'connect',
+        }),
+
+      })
       throw new Error('You must login with Metamask')
     }
 
