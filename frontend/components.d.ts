@@ -7,7 +7,7 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
-    Avatar: typeof import('./src/components/ui/avatar/Avatar.vue')['default']
+    Avatar: typeof import('./src/components/Avatar.vue')['default']
     AvatarFallback: typeof import('./src/components/ui/avatar/AvatarFallback.vue')['default']
     AvatarImage: typeof import('./src/components/ui/avatar/AvatarImage.vue')['default']
     Badge: typeof import('./src/components/ui/badge/Badge.vue')['default']
@@ -18,6 +18,7 @@ declare module 'vue' {
     CardFooter: typeof import('./src/components/ui/card/CardFooter.vue')['default']
     CardHeader: typeof import('./src/components/ui/card/CardHeader.vue')['default']
     CardTitle: typeof import('./src/components/ui/card/CardTitle.vue')['default']
+    ChatBox: typeof import('./src/components/ChatBox.vue')['default']
     Checkbox: typeof import('./src/components/ui/checkbox/Checkbox.vue')['default']
     Command: typeof import('./src/components/ui/command/Command.vue')['default']
     CommandDialog: typeof import('./src/components/ui/command/CommandDialog.vue')['default']

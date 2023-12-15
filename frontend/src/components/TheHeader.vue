@@ -2,14 +2,8 @@
 import { Egg } from 'lucide-vue-next'
 
 const store = useMMStore()
-const avatar = shallowRef<HTMLDivElement>()
 
-onMounted(() => handleConnect())
-
-async function handleConnect() {
-  const { icon } = await store.connect()
-  avatar.value?.replaceWith(icon)
-}
+onMounted(() => store.connect())
 </script>
 
 <template>
@@ -35,12 +29,12 @@ async function handleConnect() {
       <template v-if="store.isConnected">
         <div class="flex items-center gap-2">
           <span class="text-muted-foreground">{{ store.shortAddress }}</span>
-          <div ref="avatar" />
+          <Avatar :size="35" :address="store.address" />
         </div>
       </template>
 
       <template v-else>
-        <Button @click="handleConnect">
+        <Button @click="store.connect()">
           <div class="flex items-center gap-1.5">
             <Metamask class="text-lg" />
             connect

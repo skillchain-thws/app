@@ -6,9 +6,6 @@ import { acceptHMRUpdate, defineStore } from 'pinia'
 
 import { EscrowManager__factory, FreelancerMarketplace__factory, JobManager__factory, UserManager__factory } from '@/typechain/factories'
 
-// @ts-expect-error no types
-import jazzicon from '@metamask/jazzicon'
-
 export const useMMStore = defineStore('metamask', () => {
   // ref
   const store = useWalletStore()
@@ -25,10 +22,6 @@ export const useMMStore = defineStore('metamask', () => {
   async function connect() {
     const connector = new MetaMaskConnector()
     await store.connectWith(connector)
-    const addr = store.address.slice(2, 10)
-    const seed = Number.parseInt(addr, 16)
-    const icon = jazzicon(35, seed)
-    return { icon }
   }
 
   async function getSigner() {

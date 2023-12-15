@@ -1,42 +1,64 @@
 <script setup lang="ts">
 import type { Job } from '@/types'
 
-const job = ref<Job>({
-  title: '',
-  description: '',
-  tags: [],
-  price: 0,
-})
+const job = ref<Job>({ title: '', description: '', tags: [], price: 0 })
 
 const tagsStr = ref('')
 watch(tagsStr, () => {
   job.value.tags = tagsStr.value.trim().split(' ')
 })
 
+const router = useRouter()
 const store = useMMStore()
 const jobFactory = await store.getJobFactory()
+const isDialogOpen = ref(false)
+const userFactory = await store.getUserFactory()
 
 onMounted(async () => {
-  try {
-    // const userFactory = await store.getUserFactory()
-    // await userFactory.registerUser('real_acc')
-    // const user = await userFactory.getUser('0x70997970C51812dc3A010C7d01b50e0d17dc79C8')
-    // console.log(user)
-  }
-  catch (e) {
-
-  }
+  handleCheckUser()
 })
 
-async function onSubmit() {
-  jobFactory.addJob(job.value.title, job.value.description, job.value.price, job.value.tags)
+async function handleCheckUser() {
+  try {
+    const user = await userFactory.getUser(store.address)
+    if (!user[1]) {
+      isDialogOpen.value = true
+      return false
+    }
+  }
+  catch {
+    router.push('/error')
+  }
+
+  return true
 }
 
-const isDialogOpen = ref(false)
+async function handleCreateJob() {
+  try {
+    if (!await handleCheckUser())
+      return
+    await jobFactory.addJob(job.value.title, job.value.description, job.value.price, job.value.tags)
+    job.value = { title: '', description: '', tags: [], price: 0 }
+  }
+  catch {
+    router.push('/error')
+  }
+}
+
+const username = ref('')
+async function handleCreateUsername() {
+  try {
+    await userFactory.registerUser(username.value)
+    isDialogOpen.value = false
+  }
+  catch {
+    router.push('/error')
+  }
+}
 </script>
 
 <template>
-  <form class="grid grid-cols-2 gap-10 py-10 items-center" @submit.prevent="onSubmit">
+  <form class="grid grid-cols-2 gap-10 py-10 items-center" @submit.prevent="handleCreateJob">
     <div class="space-y-2">
       <div class="space-y-2">
         <Label for="title">title</Label>
@@ -69,22 +91,30 @@ const isDialogOpen = ref(false)
 
     <div class="flex items-center justify-center">
       <div class="w-[80%]">
-        <JobCard v-bind="job" class="w-full hover:border-white transition-colors" />
+        <JobCard v-bind="job" class="w-full border-white transition-colors" />
       </div>
     </div>
   </form>
 
-  <Dialog :open="isDialogOpen">
+  <Dialog v-model:open="isDialogOpen">
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Edit profile</DialogTitle>
+        <DialogTitle>no username</DialogTitle>
         <DialogDescription>
-          Make changes to your profile here. Click save when you're done.
+          you first need to create a username
         </DialogDescription>
       </DialogHeader>
 
+      <form id="create_username" @submit.prevent="handleCreateUsername">
+        <Input v-model="username" placeholder="username" />
+      </form>
+
       <DialogFooter>
-        Save changes
+        <DialogClose>
+          <Button form="create_username">
+            create
+          </Button>
+        </DialogClose>
       </DialogFooter>
     </DialogContent>
   </Dialog>
