@@ -1,0 +1,1 @@
+import{J as t,o as s,j as c,E as e}from"./index-tRq5Nopp.js";const o={},n={class:"flex items-center justify-center absolute inset-0"},_=e("div",{class:"text-center"},[e("div",{class:"text-4xl"}," 404 "),e("div",null," not found ")],-1),a=[_];function r(i,d){return s(),c("div",n,a)}const f=t(o,[["render",r]]);export{f as default};
