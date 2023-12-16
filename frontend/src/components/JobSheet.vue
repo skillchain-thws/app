@@ -21,34 +21,58 @@ const userFactory = await store.getUserFactory()
 const jobFactory = await store.getJobFactory()
 const user = shallowRef<User>()
 const userJobs = shallowRef<Job[]>([])
-onMounted(() => {
-  userFactory.getUser(props.job.owner).then((res) => {
-    user.value = {
-      owner: res[0],
-      userName: res[1],
-      isJudge: res[2],
-      jobIds: res[3].map(Number),
-      reviewsBuyerCount: Number(res[4]),
-      reviewSellerCount: Number(res[5]),
-    }
-  })
 
-  jobFactory.getAllJobsOfUser(props.job.owner).then((res) => {
-    userJobs.value = res.map(x => ({
-      owner: x[0],
-      id: Number(x[1]),
-      title: x[2],
-      description: x[3],
-      price: Number(x[4]),
-      inProcess: x[5],
-      tags: x[6],
-    })).filter(x => x.id !== props.job.id)
-  })
-})
+watch(
+  () => props.job.owner
+  , () => {
+    user.value = undefined
+    userJobs.value = []
 
+    userFactory.getUser(props.job.owner).then((res) => {
+      user.value = {
+        owner: res[0],
+        userName: res[1],
+        isJudge: res[2],
+        jobIds: res[3].map(Number),
+        reviewsBuyerCount: Number(res[4]),
+        reviewSellerCount: Number(res[5]),
+      }
+    })
+
+    jobFactory.getAllJobsOfUser(props.job.owner).then((res) => {
+      userJobs.value = res.map(x => ({
+        owner: x[0],
+        id: Number(x[1]),
+        title: x[2],
+        description: x[3],
+        price: Number(x[4]),
+        inProcess: x[5],
+        tags: x[6],
+      })).filter(x => x.id !== props.job.id)
+    })
+  },
+  { immediate: true },
+)
+
+const router = useRouter()
 const message = ref('')
-function handleSendRequest() {
-  jobFactory.sendBuyRequest(props.job.id, message.value)
+async function handleSendRequest() {
+  try {
+    await jobFactory.sendBuyRequest(props.job.id, message.value)
+    message.value = ''
+  }
+  catch {
+    router.push('/error')
+  }
+}
+
+async function hanldeDeleteJob() {
+  try {
+    await jobFactory.deleteJob(props.job.id)
+  }
+  catch {
+    router.push('/error')
+  }
 }
 </script>
 
@@ -70,19 +94,26 @@ function handleSendRequest() {
         </Badge>
       </div>
 
-      <div class="flex items-center">
-        <span class="font-bold mr-1">
-          eth {{ job.price }}
-        </span>
-        <Etherum />
-      </div>
+      <JobPrice>
+        {{ job.price }}
+      </JobPrice>
 
-      <form class="mt-3 space-y-3" @submit.prevent="handleSendRequest">
-        <Textarea v-model="message" placeholder="leave a message" />
-        <Button :disabled="job.owner.toLowerCase() === store.address.toLowerCase()" class="w-full" type="submit">
-          send
+      <template v-if="job.owner.toLowerCase() !== store.address.toLowerCase()">
+        <form class="mt-3 space-y-3" @submit.prevent="handleSendRequest">
+          <Textarea v-model="message" placeholder="leave a message" />
+          <Button
+            class="w-full" type="submit"
+          >
+            send
+          </Button>
+        </form>
+      </template>
+
+      <template v-else>
+        <Button class="w-full mt-3" variant="destructive" @click="hanldeDeleteJob">
+          delete
         </Button>
-      </form>
+      </template>
 
       <div v-if="user">
         <Separator orientation="horizontal" class="my-5" />
@@ -149,12 +180,9 @@ function handleSendRequest() {
                       </ul>
                     </div>
 
-                    <div class="flex items-center">
-                      <span class="font-bold mr-1">
-                        eth {{ j.price }}
-                      </span>
-                      <Etherum />
-                    </div>
+                    <JobPrice>
+                      {{ j.price }}
+                    </JobPrice>
                   </div>
                 </li>
               </ul>

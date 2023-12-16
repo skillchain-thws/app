@@ -8,7 +8,7 @@ const props = defineProps<{
 }>()
 
 const el = ref<HTMLDivElement>()
-onMounted(() => {
+watchEffect(() => {
   jazz()
 })
 

@@ -260,7 +260,7 @@ contract JobManager {
     uint256 buyRequestId
   ) public isAUser jobExists(jobId) isJobOwner(jobId) notInProgress(jobId) {
     Job storage currentJob = jobs[jobId];
-    BuyRequest memory currentBuyRequest = currentJob.buyRequests[buyRequestId];
+    BuyRequest storage currentBuyRequest = currentJob.buyRequests[buyRequestId];
     currentBuyRequest.accepted = true;
 
     escrowManager.createEscrow(

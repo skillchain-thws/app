@@ -27,22 +27,20 @@ const data = computed(() => {
   })
 })
 
-function fetchJobs() {
-  jobFactory.getAllJobs().then((res) => {
-    jobs.value = res.map(j => ({
-      owner: j[0],
-      id: Number(j[1]),
-      title: j[2],
-      description: j[3],
-      price: Number(j[4]),
-      inProcess: j[5],
-      tags: j[6],
-    }))
-  })
-}
-
 onMounted(() => {
-  fetchJobs()
+  jobFactory.getAllJobs().then((res) => {
+    jobs.value = res
+      .filter(x => x[0] !== '0x0000000000000000000000000000000000000000')
+      .map(j => ({
+        owner: j[0],
+        id: Number(j[1]),
+        title: j[2],
+        description: j[3],
+        price: Number(j[4]),
+        inProcess: j[5],
+        tags: j[6],
+      }))
+  })
 })
 
 const isSheetOpen = ref(false)
@@ -111,6 +109,10 @@ function handleOpenSheet(j: Job) {
       </ScrollArea>
     </div>
 
-    <JobSheet v-if="currentJob" :key="currentJob.id" v-model:open="isSheetOpen" :job="currentJob" />
+    <template v-if="currentJob">
+      <KeepAlive>
+        <JobSheet v-model:open="isSheetOpen" :job="currentJob" />
+      </KeepAlive>
+    </template>
   </div>
 </template>

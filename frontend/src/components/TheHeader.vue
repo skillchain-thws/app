@@ -3,7 +3,7 @@ import { Egg } from 'lucide-vue-next'
 
 const store = useMMStore()
 
-onMounted(() => store.connect())
+watchEffect(() => store.connect())
 </script>
 
 <template>

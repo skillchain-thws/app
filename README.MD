@@ -1,6 +1,51 @@
 
 # Dapp
-## Requirements
+freelancer is your go-to decentralized platform for seamless freelance connections. Connect securely, find diverse freelance services, and transact effortlessly with smart contracts. Join our freelancer community for a world of freelance opportunities. Smart. Secure. Simple. Join freelancer today.
+
+## Report
+These are functions in solidity, which are confirmed to use and tested in Frontend
+
+1. JobManager
+- [x] acceptBuyRequest
+- [x] addJob
+- [x] deleteJob
+- [x] sendBuyRequest
+- [ ] toggleJob
+- [x] getAllJobs
+- [x] getAllJobsOfUser
+- [x] getJobBuyRequests
+- [ ] getJobOwner
+
+2. UserManager
+- [ ] addJobId
+- [ ] addUserReview
+- [x] registerUser
+- [ ] setJudge
+- [ ] removeJobId
+- [ ] addresses
+- [ ] getAllJobsIds
+- [ ] getAllUserAddresses
+- [x] getUser
+- [ ] userCount
+
+3. EscrowManager
+- [ ] acceptBuyer
+- [ ] acceptDone
+- [ ] acceptSeller
+- [ ] cancelEscrow
+- [ ] createEscrow
+- [ ] sendMessageToBuyerChat
+- [ ] sendMessageToSellerChat
+- [ ] startWort
+- [ ] getChats
+- [ ] getEscrow
+- [ ] getEscrowIdFromJob
+
+
+
+
+## Development
+### Requirements
 1.  **Node.js and npm Installation**
 Install Node.js and npm from [here](https://nodejs.org/).
 2.  **pnpm Installation**
@@ -10,7 +55,7 @@ npm install -g pnpm
 ```
 3.  **Metamask Extension Setup**
 Install the Metamask browser extension from [here](https://metamask.io/download.html).
-## How to Run
+### How to Run
 1.  **Install Dependencies**
 ```
 pnpm install

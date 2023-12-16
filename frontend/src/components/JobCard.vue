@@ -31,12 +31,9 @@ defineProps<Job>()
     </CardContent>
 
     <CardFooter class="mt-auto">
-      <div class="flex items-center">
-        <span class="font-bold mr-0.5">
-          eth {{ price }}
-        </span>
-        <Etherum />
-      </div>
+      <JobPrice>
+        {{ price }}
+      </JobPrice>
     </CardFooter>
   </Card>
 </template>

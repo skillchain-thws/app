@@ -13,45 +13,28 @@ const router = useRouter()
 const store = useMMStore()
 const jobFactory = await store.getJobFactory()
 const isDialogOpen = ref(false)
-const userFactory = await store.getUserFactory()
+const { user } = useUser()
 
 onMounted(async () => {
-  handleCheckUser()
+  checkUser()
 })
 
-async function handleCheckUser() {
-  try {
-    const user = await userFactory.getUser(store.address)
-    if (!user[1]) {
-      isDialogOpen.value = true
-      return false
-    }
-  }
-  catch {
-    router.push('/error')
-  }
+function checkUser() {
+  if (user.value && user.value.userName)
+    return true
 
-  return true
+  isDialogOpen.value = true
+  return false
 }
 
 async function handleCreateJob() {
   try {
-    if (!await handleCheckUser())
+    if (!checkUser())
       return
+
     await jobFactory.addJob(job.value.title, job.value.description, job.value.price, job.value.tags)
     job.value = emptyJob()
     tagsStr.value = ''
-  }
-  catch {
-    router.push('/error')
-  }
-}
-
-const username = ref('')
-async function handleCreateUsername() {
-  try {
-    await userFactory.registerUser(username.value)
-    isDialogOpen.value = false
   }
   catch {
     router.push('/error')
@@ -98,26 +81,5 @@ async function handleCreateUsername() {
     </div>
   </form>
 
-  <Dialog v-model:open="isDialogOpen">
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>no username</DialogTitle>
-        <DialogDescription>
-          you first need to create a username
-        </DialogDescription>
-      </DialogHeader>
-
-      <form id="create_username" @submit.prevent="handleCreateUsername">
-        <Input v-model="username" placeholder="username" />
-      </form>
-
-      <DialogFooter>
-        <DialogClose>
-          <Button form="create_username">
-            create
-          </Button>
-        </DialogClose>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
+  <DialogCreateUsername v-model:open="isDialogOpen" />
 </template>
