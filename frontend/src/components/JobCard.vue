@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import type { Job } from '@/types'
-import { Info } from 'lucide-vue-next'
 
 defineProps<Job>()
-
-const store = useMMStore()
 </script>
 
 <template>
@@ -15,17 +12,6 @@ const store = useMMStore()
           <span class="break-words">
             {{ title }}
           </span>
-
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <Info :size="22" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>by: {{ store.address.toLowerCase() === owner.toLowerCase() ? 'me' : owner }}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
         </div>
       </CardTitle>
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Job } from '@/types'
 
-const emptyJob = () => structuredClone({ title: '', description: '', tags: [], price: 0, id: 0, inProcess: true, owner: '0x0000000000000000000000000000000000000000' })
+const emptyJob = () => ({ title: '', description: '', tags: [], price: 0, id: 0, inProcess: false, owner: '0x0000000000000000000000000000000000000000' })
 const job = ref<Job>(emptyJob())
 
 const tagsStr = ref('')
@@ -40,6 +40,7 @@ async function handleCreateJob() {
       return
     await jobFactory.addJob(job.value.title, job.value.description, job.value.price, job.value.tags)
     job.value = emptyJob()
+    tagsStr.value = ''
   }
   catch {
     router.push('/error')

@@ -111,6 +111,6 @@ function handleOpenSheet(j: Job) {
       </ScrollArea>
     </div>
 
-    <JobSheet v-if="currentJob" v-model:open="isSheetOpen" :job="currentJob" />
+    <JobSheet v-if="currentJob" :key="currentJob.id" v-model:open="isSheetOpen" :job="currentJob" />
   </div>
 </template>

@@ -23,12 +23,18 @@ onMounted(() => store.connect())
       <RouterLink to="/chat" class="grow flex-center h-full border-b border-transparent hover:border-white transition-[border] min-w-[80px]" active-class="border-white">
         chat
       </RouterLink>
+
+      <RouterLink to="/requests" class="grow flex-center h-full border-b border-transparent hover:border-white transition-[border] min-w-[80px]" active-class="border-white">
+        requests
+      </RouterLink>
     </ul>
 
     <div class="ml-auto">
       <template v-if="store.isConnected">
         <div class="flex items-center gap-3">
-          <span class="text-lg text-muted-foreground">{{ store.shortAddress }}</span>
+          <p class="text-lg text-muted-foreground">
+            {{ store.shortAddress }}
+          </p>
           <Avatar :size="40" :address="store.address" />
         </div>
       </template>
