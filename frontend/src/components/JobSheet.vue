@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Job } from '@/types'
 
-interface User {
+interface Seller {
   owner: string
   userName: string
   isJudge: boolean
@@ -19,17 +19,19 @@ const open = defineModel({ default: false })
 const store = useMMStore()
 const userFactory = await store.getUserFactory()
 const jobFactory = await store.getJobFactory()
-const user = shallowRef<User>()
-const userJobs = shallowRef<Job[]>([])
+const seller = shallowRef<Seller>()
+const otherJobs = shallowRef<Job[]>([])
+const { user } = useUser()
+const { Comp, open: openDialog } = useUsernameDialog()
 
 watch(
   () => props.job.owner
   , () => {
-    user.value = undefined
-    userJobs.value = []
+    seller.value = undefined
+    otherJobs.value = []
 
     userFactory.getUser(props.job.owner).then((res) => {
-      user.value = {
+      seller.value = {
         owner: res[0],
         userName: res[1],
         isJudge: res[2],
@@ -40,7 +42,7 @@ watch(
     })
 
     jobFactory.getAllJobsOfUser(props.job.owner).then((res) => {
-      userJobs.value = res.map(x => ({
+      otherJobs.value = res.map(x => ({
         owner: x[0],
         id: Number(x[1]),
         title: x[2],
@@ -54,25 +56,25 @@ watch(
   { immediate: true },
 )
 
-const router = useRouter()
 const message = ref('')
+const error = ref('')
 async function handleSendRequest() {
-  try {
-    await jobFactory.sendBuyRequest(props.job.id, message.value)
-    message.value = ''
+  if (!user.value || !user.value.userName) {
+    openDialog()
+    return
   }
-  catch {
-    router.push('/error')
+
+  if (!message.value) {
+    error.value = 'message is required'
+    return
   }
+
+  await jobFactory.sendBuyRequest(props.job.id, message.value)
+  message.value = ''
 }
 
 async function hanldeDeleteJob() {
-  try {
-    await jobFactory.deleteJob(props.job.id)
-  }
-  catch {
-    router.push('/error')
-  }
+  await jobFactory.deleteJob(props.job.id)
 }
 </script>
 
@@ -88,6 +90,8 @@ async function hanldeDeleteJob() {
         </SheetDescription>
       </SheetHeader>
 
+      <component :is="Comp" />
+
       <div class="pt-5 pb-2 flex gap-2 flex-wrap">
         <Badge v-for="(t, ti) in job.tags" :key="ti" variant="secondary">
           {{ t }}
@@ -100,7 +104,13 @@ async function hanldeDeleteJob() {
 
       <template v-if="job.owner.toLowerCase() !== store.address.toLowerCase()">
         <form class="mt-3 space-y-3" @submit.prevent="handleSendRequest">
-          <Textarea v-model="message" placeholder="leave a message" />
+          <div class="space-y-1">
+            <Textarea v-model="message" placeholder="leave a message" />
+            <p v-if="error" class="text-destructive">
+              {{ error }}
+            </p>
+          </div>
+
           <Button
             class="w-full" type="submit"
           >
@@ -115,10 +125,8 @@ async function hanldeDeleteJob() {
         </Button>
       </template>
 
-      <div v-if="user">
-        <Separator orientation="horizontal" class="my-5" />
-
-        <div class="space-y-2">
+      <div v-if="seller">
+        <div class="space-y-2 mt-10">
           <h3 class="text-xl">
             info
           </h3>
@@ -127,47 +135,45 @@ async function hanldeDeleteJob() {
             <div>username</div>
             <div class="col-span-2">
               <Badge variant="outline">
-                {{ user.userName }}
+                {{ seller.userName }}
               </Badge>
             </div>
             <div>address</div>
             <div class="col-span-2">
               <Badge variant="outline">
-                {{ user.owner }}
+                {{ seller.owner }}
               </Badge>
             </div>
             <div>is reviewer</div>
             <div class="col-span-2">
               <Badge variant="outline">
-                {{ user.isJudge ? 'yes' : 'no' }}
+                {{ seller.isJudge ? 'yes' : 'no' }}
               </Badge>
             </div>
             <div>buyer reviewed</div>
             <div class="col-span-2">
               <Badge variant="outline">
-                {{ user.reviewsBuyerCount }}
+                {{ seller.reviewsBuyerCount }}
               </Badge>
             </div>
             <div>seller reviewed</div>
             <div class="col-span-2">
               <Badge variant="outline">
-                {{ user.reviewSellerCount }}
+                {{ seller.reviewSellerCount }}
               </Badge>
             </div>
           </div>
         </div>
 
-        <template v-if="userJobs.length">
-          <Separator orientation="horizontal" class="mt-10 mb-5" />
-
-          <div class="space-y-5">
+        <template v-if="otherJobs.length">
+          <div class="space-y-5 mt-10">
             <h3 class="text-xl">
-              more from @{{ user.userName }}
+              more from @{{ seller.userName }}
             </h3>
 
             <ScrollArea class="h-[400px]">
               <ul class="flex flex-col gap-3">
-                <li v-for="(j, i) in userJobs" :key="i" class="px-3 py-2 rounded-md border">
+                <li v-for="(j, i) in otherJobs" :key="i" class="px-3 py-2 rounded-md border">
                   <div class="space-y-2">
                     <div class="space-y-2">
                       <p>{{ j.title }}</p>

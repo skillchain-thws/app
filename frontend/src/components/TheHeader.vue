@@ -8,7 +8,7 @@ watchEffect(() => store.connect())
 
 <template>
   <nav class="flex items-center border-b">
-    <RouterLink to="/" class="flex items-center gap-2 w-1/3">
+    <RouterLink to="/" class="flex items-center gap-2 w-1/4">
       <Egg :size="26" class=" fill-white" />
       <span class="text-2xl tracking-wide">freelancer</span>
     </RouterLink>
@@ -26,6 +26,10 @@ watchEffect(() => store.connect())
 
       <RouterLink to="/requests" class="grow flex-center h-full border-b border-transparent hover:border-white transition-[border] min-w-[80px]" active-class="border-white">
         requests
+      </RouterLink>
+
+      <RouterLink to="/review" class="grow flex-center h-full border-b border-transparent hover:border-white transition-[border] min-w-[80px]" active-class="border-white">
+        review
       </RouterLink>
     </ul>
 

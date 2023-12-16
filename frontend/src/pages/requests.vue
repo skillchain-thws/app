@@ -14,7 +14,6 @@ interface CustomJob extends Job {
 }
 
 const store = useMMStore()
-const router = useRouter()
 
 const jobFactory = await store.getJobFactory()
 const pendingJobs = shallowRef<CustomJob[]>([])
@@ -68,18 +67,13 @@ async function handleAcceptRequest(requestId: number) {
   if (jobId.value !== 0 && !jobId.value)
     return
 
-  try {
-    await jobFactory.acceptBuyRequest(jobId.value, requestId)
-  }
-  catch {
-    router.push('/error')
-  }
+  await jobFactory.acceptBuyRequest(jobId.value, requestId)
 }
 </script>
 
 <template>
-  <div>
-    <div class="py-10">
+  <div class="py-10 space-y-10">
+    <div>
       <h2 class="text-2xl font-medium flex items-center gap-1">
         pending <span class="text-muted-foreground text-base">
           ({{ pendingJobs.length }})
@@ -87,13 +81,13 @@ async function handleAcceptRequest(requestId: number) {
       </h2>
 
       <template v-if="pendingJobs.length">
-        <ScrollArea class="mt-10 h-[500px]">
+        <ScrollArea class="mt-5 h-[500px]">
           <ul class="space-y-5">
             <li v-for="j in pendingJobs" :key="j.id">
               <div class="px-5 py-3 border rounded-md grid grid-cols-11 gap-10">
                 <div class="space-y-2 col-span-5">
                   <div class="font-medium">
-                    {{ j.title }}
+                    {{ j.title }} #{{ j.id }}
                   </div>
                   <div class="text-muted-foreground">
                     {{ j.description }}
@@ -162,7 +156,7 @@ async function handleAcceptRequest(requestId: number) {
       </template>
     </div>
 
-    <div class="py-10">
+    <div>
       <h2 class="text-2xl font-medium flex items-center gap-1">
         accepted <span class="text-muted-foreground text-base">
           ({{ acceptedJobs.length }})
@@ -170,13 +164,13 @@ async function handleAcceptRequest(requestId: number) {
       </h2>
 
       <template v-if="acceptedJobs.length">
-        <ScrollArea class="mt-10 h-[500px]">
+        <ScrollArea class="mt-5 h-[500px]">
           <ul class="space-y-5">
             <li v-for="j in acceptedJobs" :key="j.id">
               <div class="px-5 py-3 border rounded-md grid grid-cols-11 gap-10">
                 <div class="space-y-2 col-span-5">
                   <div class="font-medium">
-                    {{ j.title }}
+                    {{ j.title }} #{{ j.id }}
                   </div>
                   <div class="text-muted-foreground">
                     {{ j.description }}

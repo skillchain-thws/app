@@ -45,6 +45,7 @@ declare module 'vue-router/auto/routes' {
     '/create_job': RouteRecordInfo<'/create_job', '/create_job', Record<never, never>, Record<never, never>>,
     '/error': RouteRecordInfo<'/error', '/error', Record<never, never>, Record<never, never>>,
     '/requests': RouteRecordInfo<'/requests', '/requests', Record<never, never>, Record<never, never>>,
+    '/review': RouteRecordInfo<'/review', '/review', Record<never, never>, Record<never, never>>,
   }
 }
 
