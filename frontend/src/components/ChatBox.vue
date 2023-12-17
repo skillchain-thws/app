@@ -7,7 +7,7 @@ const { dir = 'left' } = defineProps<{
 <template>
   <div class="flex" :class="{ 'justify-end': dir === 'right' }">
     <div class="w-2/3" :class="{ 'flex justify-end': dir === 'right' }">
-      <div class="rounded-lg bg-secondary w-fit">
+      <div class="rounded-md bg-secondary w-fit">
         <div class="px-3 py-1">
           <slot />
         </div>

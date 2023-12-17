@@ -2,6 +2,13 @@
 import type { Job } from '@/types'
 import { Heart, Search } from 'lucide-vue-next'
 
+const store = useMMStore()
+const router = useRouter()
+onMounted(() => {
+  if (!store.isRegisterd)
+    router.push('/register')
+})
+
 const q = ref('')
 const qDebounced = refDebounced(q, 500)
 const showMyOnly = ref(false)
@@ -10,8 +17,6 @@ const sortOpts = [
   { label: 'price: low to high', value: 'lth' },
   { label: 'price: hight to low', value: 'htl' },
 ] as const
-
-const store = useMMStore()
 
 const jobFactory = await store.getJobFactory()
 const jobs = shallowRef<Job[]>([])

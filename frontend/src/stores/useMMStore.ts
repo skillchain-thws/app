@@ -3,8 +3,16 @@ import { EscrowManager__factory, FreelancerMarketplace__factory, JobManager__fac
 import { MetaMaskConnector, shortenAddress, useWalletStore } from '@vue-dapp/core'
 import type { JsonRpcSigner } from 'ethers'
 import { BrowserProvider } from 'ethers'
-import { acceptHMRUpdate, defineStore } from 'pinia'
+import { defineStore } from 'pinia'
 
+interface User {
+  owner: string
+  userName: string
+  isJudge: boolean
+  jobIds: number[]
+  reviewsBuyerCount: number
+  reviewSellerCount: number
+}
 export const useMMStore = defineStore('metamask', () => {
   const store = useWalletStore()
   store.onChanged(() => window.location.reload())
@@ -15,6 +23,29 @@ export const useMMStore = defineStore('metamask', () => {
   const isConnected = computed(() => store.isConnected)
   const address = computed(() => store.address)
   const shortAddress = computed(() => shortenAddress(store.address))
+  const user = shallowRef<User>({
+    owner: '0x0000000000000000000000000000000000000000',
+    userName: '',
+    isJudge: false,
+    jobIds: [],
+    reviewsBuyerCount: 0,
+    reviewSellerCount: 0,
+  })
+  const isRegisterd = computed(() => !!user.value.userName)
+
+  async function fetchUser() {
+    const factory = await getUserFactory()
+    factory.getUser(store.address).then((u) => {
+      user.value = {
+        owner: u[0],
+        userName: u[1],
+        isJudge: u[2],
+        jobIds: u[3].map(Number),
+        reviewsBuyerCount: Number(u[4]),
+        reviewSellerCount: Number(u[5]),
+      }
+    })
+  }
 
   async function connect() {
     const connector = new MetaMaskConnector()
@@ -48,6 +79,15 @@ export const useMMStore = defineStore('metamask', () => {
     return signer.value
   }
 
+  async function getBalance() {
+    try {
+      return Number(await provider.value?.getBalance(address.value))
+    }
+    catch {
+      return 0
+    }
+  }
+
   async function getMarketFactory() {
     const address = import.meta.env.VITE_MARKET_ADDRESS
     return FreelancerMarketplace__factory.connect(address, await getSigner())
@@ -69,18 +109,18 @@ export const useMMStore = defineStore('metamask', () => {
   }
 
   return {
-    getSigner,
     connect,
+    getSigner,
+    getBalance,
     getMarketFactory,
     getJobFactory,
     getUserFactory,
     getEscrowFactory,
+    fetchUser,
 
     isConnected,
     address,
     shortAddress,
+    isRegisterd,
   }
 })
-
-if (import.meta.hot)
-  import.meta.hot.accept(acceptHMRUpdate(useMMStore, import.meta.hot))

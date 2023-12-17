@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import type { Job } from '@/types'
 
+const store = useMMStore()
+const router = useRouter()
+onMounted(() => {
+  if (!store.isRegisterd)
+    router.push('/register')
+})
+
 const emptyJob = () => ({ title: '', description: '', tags: [], price: 0, id: 0, inProcess: false, owner: '0x0000000000000000000000000000000000000000' })
 const job = ref<Job>(emptyJob())
 const error = ref({ title: '', description: '' })
@@ -10,17 +17,9 @@ watch(tagsStr, () => {
   job.value.tags = tagsStr.value.trim().split(' ')
 })
 
-const store = useMMStore()
 const jobFactory = await store.getJobFactory()
-const { Comp, open } = useUsernameDialog()
-const { user } = useUser()
 
 async function handleCreateJob() {
-  if (!user.value || !user.value.userName) {
-    open()
-    return
-  }
-
   error.value = { title: '', description: '' }
 
   if (job.value.title && job.value.description) {
@@ -81,6 +80,4 @@ async function handleCreateJob() {
       </div>
     </div>
   </form>
-
-  <component :is="Comp" />
 </template>

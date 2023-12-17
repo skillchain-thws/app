@@ -2,8 +2,14 @@
 import { Egg } from 'lucide-vue-next'
 
 const store = useMMStore()
-
-watchEffect(() => store.connect())
+const balance = ref('0')
+onMounted(() => {
+  store.connect().then(() => {
+    store.getBalance().then((b) => {
+      balance.value = (b / 1e18).toFixed(4)
+    })
+  })
+})
 </script>
 
 <template>
@@ -35,11 +41,14 @@ watchEffect(() => store.connect())
 
     <div class="ml-auto">
       <template v-if="store.isConnected">
-        <div class="flex items-center gap-3">
-          <p class="text-lg text-muted-foreground">
-            {{ store.shortAddress }}
-          </p>
-          <Avatar :size="40" :address="store.address" />
+        <div class="flex items-center gap-3 text-sm">
+          <div>
+            <p class="text-lg text-muted-foreground">
+              {{ store.shortAddress }}
+            </p>
+            <JobPrice>{{ balance }}</JobPrice>
+          </div>
+          <Avatar :size="45" :address="store.address" />
         </div>
       </template>
 

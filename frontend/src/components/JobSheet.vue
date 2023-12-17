@@ -21,8 +21,6 @@ const userFactory = await store.getUserFactory()
 const jobFactory = await store.getJobFactory()
 const seller = shallowRef<Seller>()
 const otherJobs = shallowRef<Job[]>([])
-const { user } = useUser()
-const { Comp, open: openDialog } = useUsernameDialog()
 
 watch(
   () => props.job.owner
@@ -59,11 +57,6 @@ watch(
 const message = ref('')
 const error = ref('')
 async function handleSendRequest() {
-  if (!user.value || !user.value.userName) {
-    openDialog()
-    return
-  }
-
   if (!message.value) {
     error.value = 'message is required'
     return
@@ -89,8 +82,6 @@ async function hanldeDeleteJob() {
           {{ job.description }}
         </SheetDescription>
       </SheetHeader>
-
-      <component :is="Comp" />
 
       <div class="pt-5 pb-2 flex gap-2 flex-wrap">
         <Badge v-for="(t, ti) in job.tags" :key="ti" variant="secondary">
