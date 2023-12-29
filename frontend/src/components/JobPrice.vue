@@ -3,6 +3,6 @@
     <span class="font-bold mr-1">
       eth <slot />
     </span>
-    <Etherum />
+    <Etherum class="fill-primary -mt-0.5" />
   </div>
 </template>

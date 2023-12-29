@@ -23,12 +23,12 @@ function handleSend() {
 
 <template>
   <div class="py-10">
-    <div class="min-h-[200px] grid grid-cols-3">
+    <div class="grid grid-cols-3">
       <div class="col-span-1">
-        <ScrollArea class="h-[600px] pr-5">
+        <ScrollArea class="h-[800px] pr-5">
           <ul class="space-y-3">
             <li v-for="address in list" :key="address" class="cursor-pointer" @click="reciever = address">
-              <div class="border rounded-md px-2 py-4 hover:border-white" :class="{ 'border-white': reciever === address }">
+              <div class="border rounded-md px-2 py-4 hover:border-primary transition-colors" :class="{ 'border-primary': reciever === address }">
                 <div class="flex items-center">
                   <Avatar class="w-[20%]" :size="45" :address="address" />
                   <div>

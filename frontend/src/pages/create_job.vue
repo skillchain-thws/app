@@ -71,7 +71,7 @@ async function handleCreateJob() {
 
     <div class="flex items-center justify-center">
       <div class="w-[80%]">
-        <JobCard v-bind="job" class="w-full border-white transition-colors" />
+        <JobCard v-bind="job" class="w-full border-primary" />
       </div>
     </div>
   </form>
