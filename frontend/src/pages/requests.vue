@@ -14,11 +14,6 @@ interface CustomJob extends Job {
 }
 
 const store = useMMStore()
-const router = useRouter()
-onMounted(() => {
-  if (!store.isRegisterd)
-    router.push('/register')
-})
 
 const jobFactory = await store.getJobFactory()
 const pendingJobs = shallowRef<CustomJob[]>([])

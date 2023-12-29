@@ -2,11 +2,6 @@
 import type { Job } from '@/types'
 
 const store = useMMStore()
-const router = useRouter()
-onMounted(() => {
-  if (!store.isRegisterd)
-    router.push('/register')
-})
 
 const emptyJob = () => ({ title: '', description: '', tags: [], price: 0, id: 0, inProcess: false, owner: '0x0000000000000000000000000000000000000000' })
 const job = ref<Job>(emptyJob())

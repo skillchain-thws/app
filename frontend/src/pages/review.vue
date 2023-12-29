@@ -1,11 +1,4 @@
 <script setup lang="ts">
-const store = useMMStore()
-const router = useRouter()
-onMounted(() => {
-  if (!store.isRegisterd)
-    router.push('/register')
-})
-
 // const escrowFactory = await store.getEscrowFactory()
 // const e = await escrowFactory.getEscrowIdFromJob(0)
 // console.log(e)

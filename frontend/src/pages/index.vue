@@ -3,11 +3,6 @@ import type { Job } from '@/types'
 import { Heart, Search } from 'lucide-vue-next'
 
 const store = useMMStore()
-const router = useRouter()
-onMounted(() => {
-  if (!store.isRegisterd)
-    router.push('/register')
-})
 
 const q = ref('')
 const qDebounced = refDebounced(q, 500)

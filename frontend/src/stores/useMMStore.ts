@@ -35,16 +35,15 @@ export const useMMStore = defineStore('metamask', () => {
 
   async function fetchUser() {
     const factory = await getUserFactory()
-    factory.getUser(store.address).then((u) => {
-      user.value = {
-        owner: u[0],
-        userName: u[1],
-        isJudge: u[2],
-        jobIds: u[3].map(Number),
-        reviewsBuyerCount: Number(u[4]),
-        reviewSellerCount: Number(u[5]),
-      }
-    })
+    const u = await factory.getUser(store.address)
+    user.value = {
+      owner: u[0],
+      userName: u[1],
+      isJudge: u[2],
+      jobIds: u[3].map(Number),
+      reviewsBuyerCount: Number(u[4]),
+      reviewSellerCount: Number(u[5]),
+    }
   }
 
   async function connect() {
@@ -122,5 +121,6 @@ export const useMMStore = defineStore('metamask', () => {
     address,
     shortAddress,
     isRegisterd,
+    user,
   }
 })

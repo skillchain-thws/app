@@ -1,6 +1,6 @@
 
 # Dapp
-freelancer is your go-to decentralized platform for seamless freelance connections. Connect securely, find diverse freelance services, and transact effortlessly with smart contracts. Join our freelancer community for a world of freelance opportunities. Smart. Secure. Simple. Join freelancer today.
+skillchain is your go-to decentralized platform for seamless freelance connections. Connect securely, find diverse freelance services, and transact effortlessly with smart contracts. Join our skillchain community for a world of freelance opportunities. Smart. Secure. Simple. Join skillchain today.
 
 ## Report
 These are functions in solidity, which are confirmed to use and tested in Frontend

@@ -9,10 +9,8 @@ const username = ref('')
 
 onMounted(() => {
   input.value?.$el.focus()
-  watch(() => store.isRegisterd, () => {
-    if (store.isRegisterd)
-      router.push('/')
-  })
+  if (store.isRegisterd)
+    router.push('/')
 })
 
 async function handleCreateUsername() {
@@ -30,7 +28,7 @@ async function handleCreateUsername() {
     <div class="w-1/3 border rounded-md">
       <form class="p-5" @submit.prevent="handleCreateUsername">
         <h1 class="font-medium text-xl">
-          welcome to freelancer
+          welcome to skillchain
         </h1>
         <p class="text-muted-foreground text-sm mt-0.5">
           you first need to create a username

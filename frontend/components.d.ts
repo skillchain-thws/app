@@ -72,6 +72,7 @@ declare module 'vue' {
     Skeleton: typeof import('./src/components/ui/skeleton/Skeleton.vue')['default']
     Textarea: typeof import('./src/components/ui/textarea/Textarea.vue')['default']
     TheHeader: typeof import('./src/components/TheHeader.vue')['default']
+    TheMain: typeof import('./src/components/TheMain.vue')['default']
     Toast: typeof import('./src/components/ui/toast/Toast.vue')['default']
     ToastAction: typeof import('./src/components/ui/toast/ToastAction.vue')['default']
     ToastClose: typeof import('./src/components/ui/toast/ToastClose.vue')['default']

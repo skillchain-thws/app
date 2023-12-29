@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Egg } from 'lucide-vue-next'
+import { Link } from 'lucide-vue-next'
 
 const store = useMMStore()
 const balance = ref('0')
@@ -15,8 +15,8 @@ onMounted(() => {
 <template>
   <nav class="flex items-center border-b">
     <RouterLink to="/" class="flex items-center gap-2 w-1/4">
-      <Egg :size="26" class=" fill-white" />
-      <span class="text-2xl tracking-wide">freelancer</span>
+      <Link :size="26" class="text-white" />
+      <span class="text-2xl tracking-wide">skillchain</span>
     </RouterLink>
 
     <ul class="flex items-center gap-8 justify-between text-lg h-[100px] whitespace-nowrap">
@@ -41,14 +41,14 @@ onMounted(() => {
 
     <div class="ml-auto">
       <template v-if="store.isConnected">
-        <div class="flex items-center gap-3 text-sm">
+        <div class="flex items-center gap-2.5 text-sm">
           <div>
-            <p class="text-lg text-muted-foreground">
+            <p class="text-base text-muted-foreground">
               {{ store.shortAddress }}
             </p>
             <JobPrice>{{ balance }}</JobPrice>
           </div>
-          <Avatar :size="45" :address="store.address" />
+          <Avatar :size="42" :address="store.address" />
         </div>
       </template>
 

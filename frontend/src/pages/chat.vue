@@ -2,13 +2,6 @@
 import { shortenAddress } from '@vue-dapp/core'
 import { Forward } from 'lucide-vue-next'
 
-const store = useMMStore()
-const router = useRouter()
-onMounted(() => {
-  if (!store.isRegisterd)
-    router.push('/register')
-})
-
 const list = [
   '0xbDA5747bFD65F08deb54cb465eB87D40e51B197E',
   '0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097',
