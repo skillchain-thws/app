@@ -165,6 +165,15 @@ contract UserManager {
     emit JudgeSet(userAddress);
   }
 
+  event JudgeUnset(address userAddress);
+
+  function unsetJudge(address userAddress) external {
+    require(freelancerMarketplace.onlyAdmin(), "You need to be Admin");
+    users[userAddress].isJudge = false;
+
+    emit JudgeUnset(userAddress);
+  }
+
   //*********************************************************************
   //*********************************************************************
   //                        Review Functions
