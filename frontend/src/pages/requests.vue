@@ -67,7 +67,10 @@ async function handleAcceptRequest(requestId: number) {
   if (jobId.value !== 0 && !jobId.value)
     return
 
-  await jobFactory.acceptBuyRequest(jobId.value, requestId)
+  const response = await jobFactory.acceptBuyRequest(jobId.value, requestId)
+  const receipt = await response.wait()
+  if (receipt?.status === 1)
+    window.location.reload()
 }
 </script>
 

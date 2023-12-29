@@ -1,25 +1,16 @@
 <script setup lang="ts">
-import type { Job } from '@/types'
-
-interface Seller {
-  owner: string
-  userName: string
-  isJudge: boolean
-  jobIds: number[]
-  reviewsBuyerCount: number
-  reviewSellerCount: number
-}
+import type { Job, User } from '@/types'
 
 const props = defineProps<{
   job: Job
 }>()
 
-const open = defineModel({ default: false })
+const open = defineModel<boolean>('open', { default: false })
 
 const store = useMMStore()
 const userFactory = await store.getUserFactory()
 const jobFactory = await store.getJobFactory()
-const seller = shallowRef<Seller>()
+const seller = shallowRef<User>()
 const otherJobs = shallowRef<Job[]>([])
 
 watch(
@@ -62,8 +53,12 @@ async function handleSendRequest() {
     return
   }
 
-  await jobFactory.sendBuyRequest(props.job.id, message.value)
-  message.value = ''
+  const response = await jobFactory.sendBuyRequest(props.job.id, message.value)
+  const receipt = await response.wait()
+  if (receipt?.status === 1) {
+    message.value = ''
+    open.value = false
+  }
 }
 
 async function hanldeDeleteJob() {

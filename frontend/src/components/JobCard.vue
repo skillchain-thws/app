@@ -9,13 +9,13 @@ defineProps<Job>()
     <CardHeader>
       <CardTitle>
         <div class="flex justify-between items-center">
-          <span class="break-words">
+          <span class="break-words tracking-wide">
             {{ title }}
           </span>
         </div>
       </CardTitle>
 
-      <CardDescription class="pt-2 space-x-2">
+      <CardDescription class="pt-2 flex gap-2 flex-wrap">
         <template v-for="(t, ti) in tags">
           <Badge v-if="t" :key="ti" variant="secondary">
             {{ t }}

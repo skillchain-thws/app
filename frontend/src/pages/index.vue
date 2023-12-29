@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { EMPTY_ADDRESS } from '@/constants'
 import type { Job } from '@/types'
-import { Heart, Search } from 'lucide-vue-next'
+import { Heart } from 'lucide-vue-next'
 
 const store = useMMStore()
 
@@ -30,7 +31,7 @@ const data = computed(() => {
 onMounted(() => {
   jobFactory.getAllJobs().then((res) => {
     jobs.value = res
-      .filter(x => x[0] !== '0x0000000000000000000000000000000000000000')
+      .filter(x => x[0] !== EMPTY_ADDRESS)
       .map(j => ({
         owner: j[0],
         id: Number(j[1]),
@@ -54,14 +55,7 @@ function handleOpenSheet(j: Job) {
 <template>
   <div>
     <div class="py-10">
-      <div class="flex gap-2 items-center ">
-        <Label for="q">
-          <div class="w-10 h-10 border rounded-full flex-center shrink-0">
-            <Search :size="20" />
-          </div>
-        </Label>
-        <Input id="q" v-model="q" placeholder="search for job title or keyword" />
-      </div>
+      <BaseSearch v-model="q" placeholder="search for job title or keyword" />
     </div>
 
     <div class="py-8 space-y-8">
@@ -97,7 +91,7 @@ function handleOpenSheet(j: Job) {
       </div>
 
       <ScrollArea class="h-[800px]">
-        <div class="grid grid-cols-3 gap-8">
+        <div class="grid grid-cols-3 gap-6">
           <template v-if="jobs.length">
             <JobCard v-for="(job, i) in data" :key="i" v-bind="job" @click="handleOpenSheet(job)" />
           </template>

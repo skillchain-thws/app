@@ -17,7 +17,7 @@ watch(route, () => {
 </script>
 
 <template>
-  <main class="relative min-h-[200px]">
+  <main class="relative min-h-[400px]">
     <RouterView />
   </main>
 </template>
