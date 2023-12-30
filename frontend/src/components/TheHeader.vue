@@ -3,15 +3,8 @@ import { Link, Moon, Sun } from 'lucide-vue-next'
 import type { RouteNamedMap } from 'vue-router/auto/routes'
 
 const isDark = useDark()
-const store = useMMStore()
-const balance = ref('0')
-onMounted(() => {
-  store.connect().then(() => {
-    store.getBalance().then((b) => {
-      balance.value = (b / 1e18).toFixed(4)
-    })
-  })
-})
+const isEthereum = !!window.ethereum
+const store = useStore()
 const navs: { to: keyof RouteNamedMap, label: string }[] = [
   { to: '/', label: 'jobs' },
   { to: '/create_job', label: 'create job' },
@@ -20,6 +13,12 @@ const navs: { to: keyof RouteNamedMap, label: string }[] = [
   { to: '/requests', label: 'requests' },
   { to: '/reviews', label: 'reviews' },
 ]
+
+// onMounted(async () => {
+//   await store.connect()
+//   const b = await store.getBalance()
+//   balance.value = (b / 1e18).toFixed(4)
+// })
 </script>
 
 <template>
@@ -48,7 +47,7 @@ const navs: { to: keyof RouteNamedMap, label: string }[] = [
             <p class="text-base text-muted-foreground">
               {{ store.shortAddress }}
             </p>
-            <JobPrice>{{ balance }}</JobPrice>
+            <JobPrice>{{ store.balance }}</JobPrice>
           </div>
 
           <Avatar :size="42" :address="store.address" />
@@ -56,7 +55,7 @@ const navs: { to: keyof RouteNamedMap, label: string }[] = [
       </template>
 
       <template v-else>
-        <Button @click="store.connect()">
+        <Button :disabled="!isEthereum" @click="store.connect()">
           <div class="flex items-center gap-1.5">
             <Metamask class="text-lg" />
             connect

@@ -1,5 +1,5 @@
-import { ToastAction, useToast } from '@/components/ui/toast'
 import { EscrowManager__factory, FreelancerMarketplace__factory, JobManager__factory, UserManager__factory } from '@/typechain/factories'
+import { shortenAddr } from '@/utils'
 import type { JsonRpcSigner } from 'ethers'
 import { BrowserProvider } from 'ethers'
 import { defineStore } from 'pinia'
@@ -12,17 +12,13 @@ interface User {
   reviewsBuyerCount: number
   reviewSellerCount: number
 }
-export const useMMStore = defineStore('metamask', () => {
+export const useStore = defineStore('metamask', () => {
   const signer = shallowRef<JsonRpcSigner>()
-  const { toast } = useToast()
-
   const provider = shallowRef(new BrowserProvider(window.ethereum))
   const address = ref('')
-  const isConnected = computed(() => address.value)
-  const shortAddress = computed(() => {
-    const length = address.value.length
-    return `${address.value.substring(2, 7)}...${address.value.substring(length - 5, length)}`
-  })
+  const isConnected = computed(() => !!address.value)
+  const shortAddress = computed(() => shortenAddr(address.value))
+  const balance = ref('0')
   const user = shallowRef<User>({
     owner: '0x0000000000000000000000000000000000000000',
     userName: '',
@@ -47,46 +43,18 @@ export const useMMStore = defineStore('metamask', () => {
   }
 
   async function connect() {
-    try {
-      const accounts = await window?.ethereum?.request({ method: 'eth_requestAccounts' }) as string[]
-      address.value = accounts[0]
-    }
-    catch (e) {
-      window.open('https://metamask.io/download/', '_blank')
-    }
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }) as string[]
+    address.value = accounts[0]
+    const _balance = Number(await provider.value.getBalance(address.value))
+    balance.value = (_balance / 1e18).toFixed(4)
   }
 
   async function getSigner() {
     if (signer.value)
       return signer.value
 
-    if (!provider.value) {
-      toast({
-        description: 'you must connect with metamask to continue',
-        action: h(ToastAction, {
-          altText: 'connect',
-          onClick() {
-            connect()
-          },
-        }, {
-          default: () => 'connect',
-        }),
-
-      })
-      throw new Error('You must login with Metamask')
-    }
-
     signer.value = await provider.value.getSigner()
     return signer.value
-  }
-
-  async function getBalance() {
-    try {
-      return Number(await provider.value.getBalance(address.value))
-    }
-    catch {
-      return 0
-    }
   }
 
   async function getMarketFactory() {
@@ -112,7 +80,6 @@ export const useMMStore = defineStore('metamask', () => {
   return {
     connect,
     getSigner,
-    getBalance,
     getMarketFactory,
     getJobFactory,
     getUserFactory,
@@ -124,5 +91,6 @@ export const useMMStore = defineStore('metamask', () => {
     shortAddress,
     isRegisterd,
     user,
+    balance,
   }
 })

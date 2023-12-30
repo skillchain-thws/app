@@ -2,7 +2,7 @@
 import { EMPTY_ADDRESS } from '@/constants'
 import type { Escrow } from '@/types'
 
-const store = useMMStore()
+const store = useStore()
 const userFactory = await store.getUserFactory()
 const escrowFactory = await store.getEscrowFactory()
 

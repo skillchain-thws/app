@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Input } from '@/components/ui/input'
 
-const store = useMMStore()
+const store = useStore()
 const router = useRouter()
 const userFactory = await store.getUserFactory()
 const input = ref<InstanceType<typeof Input>>()

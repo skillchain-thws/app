@@ -13,7 +13,7 @@ interface CustomJob extends Job {
   requests: Request[]
 }
 
-const store = useMMStore()
+const store = useStore()
 
 const jobFactory = await store.getJobFactory()
 const pendingJobs = shallowRef<CustomJob[]>([])

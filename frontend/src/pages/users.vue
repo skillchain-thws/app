@@ -4,7 +4,7 @@ import type { User } from '@/types'
 const q = ref('')
 const qDebounced = refDebounced(q, 500)
 
-const store = useMMStore()
+const store = useStore()
 const userFactory = await store.getUserFactory()
 const users = shallowRef<User[]>([])
 const showUsers = computed(() => {

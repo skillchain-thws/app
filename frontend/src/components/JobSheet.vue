@@ -7,7 +7,7 @@ const props = defineProps<{
 
 const open = defineModel<boolean>('open', { default: false })
 
-const store = useMMStore()
+const store = useStore()
 const userFactory = await store.getUserFactory()
 const jobFactory = await store.getJobFactory()
 const seller = shallowRef<User>()

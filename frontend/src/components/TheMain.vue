@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { useToast } from './ui/toast'
 
-const store = useMMStore()
+const store = useStore()
 const router = useRouter()
 const route = useRoute()
 const { toast } = useToast()
-await store.fetchUser()
+store.isConnected && await store.fetchUser()
 
 watch(route, () => {
   if (store.isRegisterd || route.path === '/register')

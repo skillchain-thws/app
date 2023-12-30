@@ -3,7 +3,7 @@ import { EMPTY_ADDRESS } from '@/constants'
 import type { Job } from '@/types'
 import { Heart } from 'lucide-vue-next'
 
-const store = useMMStore()
+const store = useStore()
 
 const q = ref('')
 const qDebounced = refDebounced(q, 500)

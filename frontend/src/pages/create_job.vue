@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Job } from '@/types'
 
-const store = useMMStore()
+const store = useStore()
 
 const emptyJob = () => ({ title: '', description: '', tags: [], price: 0, id: 0, inProcess: false, owner: '0x0000000000000000000000000000000000000000' })
 const job = ref<Job>(emptyJob())
