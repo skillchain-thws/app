@@ -1,6 +1,5 @@
 import { ToastAction, useToast } from '@/components/ui/toast'
 import { EscrowManager__factory, FreelancerMarketplace__factory, JobManager__factory, UserManager__factory } from '@/typechain/factories'
-import { MetaMaskConnector, shortenAddress, useWalletStore } from '@vue-dapp/core'
 import type { JsonRpcSigner } from 'ethers'
 import { BrowserProvider } from 'ethers'
 import { defineStore } from 'pinia'
@@ -14,15 +13,16 @@ interface User {
   reviewSellerCount: number
 }
 export const useMMStore = defineStore('metamask', () => {
-  const store = useWalletStore()
-  store.onChanged(() => window.location.reload())
   const signer = shallowRef<JsonRpcSigner>()
   const { toast } = useToast()
 
-  const provider = computed(() => window.ethereum ? new BrowserProvider(window.ethereum) : undefined)
-  const isConnected = computed(() => store.isConnected)
-  const address = computed(() => store.address)
-  const shortAddress = computed(() => shortenAddress(store.address))
+  const provider = shallowRef(new BrowserProvider(window.ethereum))
+  const address = ref('')
+  const isConnected = computed(() => address.value)
+  const shortAddress = computed(() => {
+    const length = address.value.length
+    return `${address.value.substring(2, 7)}...${address.value.substring(length - 5, length)}`
+  })
   const user = shallowRef<User>({
     owner: '0x0000000000000000000000000000000000000000',
     userName: '',
@@ -35,7 +35,7 @@ export const useMMStore = defineStore('metamask', () => {
 
   async function fetchUser() {
     const factory = await getUserFactory()
-    const u = await factory.getUser(store.address)
+    const u = await factory.getUser(address.value)
     user.value = {
       owner: u[0],
       userName: u[1],
@@ -47,13 +47,12 @@ export const useMMStore = defineStore('metamask', () => {
   }
 
   async function connect() {
-    const connector = new MetaMaskConnector()
     try {
-      await store.connectWith(connector)
+      const accounts = await window?.ethereum?.request({ method: 'eth_requestAccounts' }) as string[]
+      address.value = accounts[0]
     }
     catch (e) {
-      if (store.error === 'Provider not found')
-        window.open('https://metamask.io/download/', '_blank')
+      window.open('https://metamask.io/download/', '_blank')
     }
   }
 
@@ -64,9 +63,12 @@ export const useMMStore = defineStore('metamask', () => {
     if (!provider.value) {
       toast({
         description: 'you must connect with metamask to continue',
-        action: h(ToastAction, { altText: 'connect', onClick() {
-          connect()
-        } }, {
+        action: h(ToastAction, {
+          altText: 'connect',
+          onClick() {
+            connect()
+          },
+        }, {
           default: () => 'connect',
         }),
 
@@ -80,7 +82,7 @@ export const useMMStore = defineStore('metamask', () => {
 
   async function getBalance() {
     try {
-      return Number(await provider.value?.getBalance(address.value))
+      return Number(await provider.value.getBalance(address.value))
     }
     catch {
       return 0

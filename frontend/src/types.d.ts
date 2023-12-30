@@ -1,3 +1,5 @@
+import type { Eip1193Provider } from 'ethers'
+
 export interface Job {
   owner: string
   id: number
@@ -25,4 +27,10 @@ export interface User {
   jobIds: number[]
   reviewsBuyerCount: number
   reviewSellerCount: number
+}
+
+declare global {
+  interface Window {
+    ethereum: Eip1193Provider
+  }
 }

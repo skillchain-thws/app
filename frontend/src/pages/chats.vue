@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { shortenAddress } from '@vue-dapp/core'
 import { Forward } from 'lucide-vue-next'
 
 const list = [
@@ -33,7 +32,7 @@ function handleSend() {
                   <Avatar class="w-[20%]" :size="45" :address="address" />
                   <div>
                     <p class="font-medium">
-                      {{ shortenAddress(address) }}
+                      {{ address }}
                     </p>
                     <p>You: Lorem ipsum dolor sit amet.</p>
                   </div>
