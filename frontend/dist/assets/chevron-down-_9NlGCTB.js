@@ -1,5 +1,5 @@
-import{c as o}from"./index-oOlvovHs.js";/**
- * @license lucide-vue-next v0.297.0 - ISC
+import{c as o}from"./index-CnjvNhTO.js";/**
+ * @license lucide-vue-next v0.303.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
