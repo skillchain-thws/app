@@ -11,6 +11,7 @@ export interface Job {
 }
 
 export interface Escrow {
+  escrowId: number
   jobId: number
   buyer: string
   seller: string

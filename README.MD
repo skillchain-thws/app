@@ -20,7 +20,8 @@ These are functions in solidity, which are confirmed to use and tested in Fronte
 - [ ] addJobId
 - [ ] addUserReview
 - [x] registerUser
-- [ ] setJudge
+- [x] setJudge
+- [x] unsetJudge
 - [ ] removeJobId
 - [ ] addresses
 - [ ] getAllJobsIds
@@ -36,7 +37,7 @@ These are functions in solidity, which are confirmed to use and tested in Fronte
 - [ ] createEscrow
 - [ ] sendMessageToBuyerChat
 - [ ] sendMessageToSellerChat
-- [ ] startWort
+- [ ] startWork
 - [ ] getChats
 - [ ] getEscrow
 - [ ] getEscrowIdFromJob

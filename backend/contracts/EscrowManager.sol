@@ -92,6 +92,7 @@ contract EscrowManager {
     view
     escrowExists(escrowId)
     returns (
+      uint256 _escrowId,
       uint256 jobId,
       address buyer,
       address seller,
@@ -103,6 +104,7 @@ contract EscrowManager {
   {
     Escrow storage tempEscrow = escrows[escrowId];
     return (
+      escrowId,
       tempEscrow.jobId,
       tempEscrow.buyer,
       tempEscrow.seller,

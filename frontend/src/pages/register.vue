@@ -24,7 +24,7 @@ async function handleCreateUsername() {
 </script>
 
 <template>
-  <div class="py-10 flex justify-center items-center">
+  <div class="absolute inset-0 flex-center">
     <div class="w-1/3 border rounded-md">
       <form class="p-5" @submit.prevent="handleCreateUsername">
         <h1 class="font-medium text-xl">

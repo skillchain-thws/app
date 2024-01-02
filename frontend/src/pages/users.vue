@@ -17,8 +17,8 @@ const showUsers = computed(() => {
 })
 
 async function fetch() {
-  const addresses = await userFactory.getAllUserAddresses()
-  users.value = (await Promise.all(addresses.map(a => userFactory.getUser(a)))).map(x => ({
+  const _users = await userFactory.getAllUsers()
+  users.value = _users.map(x => ({
     owner: x[0],
     userName: x[1],
     isJudge: x[2],

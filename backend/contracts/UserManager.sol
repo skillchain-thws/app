@@ -21,6 +21,15 @@ contract UserManager {
     uint256[] jobIds;
   }
 
+  struct SimpleUser {
+    address owner;
+    string userName;
+    bool isJudge;
+    uint256[] jobIds;
+    uint256 reviewsBuyerCount;
+    uint256 reviewsSellerCount;
+  }
+
   constructor(address _freelancerMarketplaceAddress) {
     freelancerMarketplace = FreelancerMarketplace(
       _freelancerMarketplaceAddress
@@ -66,6 +75,27 @@ contract UserManager {
     }
 
     return allUserAddresses;
+  }
+
+  function getAllUsers() external view returns (SimpleUser[] memory) {
+    SimpleUser[] memory allUsers = new SimpleUser[](userCount);
+
+    for (uint256 i = 0; i < userCount; i++) {
+      address userAddress = addresses[i];
+      User storage user = users[userAddress];
+
+      SimpleUser memory _user;
+      _user.owner = user.owner;
+      _user.userName = user.userName;
+      _user.reviewsBuyerCount = user.reviewsBuyerCount;
+      _user.reviewsSellerCount = user.reviewsSellerCount;
+      _user.isJudge = user.isJudge;
+      _user.jobIds = user.jobIds;
+
+      allUsers[i] = _user;
+    }
+
+    return allUsers;
   }
 
   function getAllJobIds(

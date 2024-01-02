@@ -11,7 +11,7 @@ const isEthereum = !!window.ethereum
       <TheMain />
     </Suspense>
 
-    <div v-else-if="!isEthereum" class="h-[400px] flex justify-center items-center">
+    <div v-else-if="!isEthereum" class="h-[400px] flex-center">
       <div class="flex flex-col items-center justify-center">
         <Metamask class="text-9xl" />
         <p class="mt-5">
@@ -25,7 +25,7 @@ const isEthereum = !!window.ethereum
       </div>
     </div>
 
-    <div v-else-if="!store.isConnected" class="h-[400px] flex justify-center items-center">
+    <div v-else-if="!store.isConnected" class="h-[400px] flex-center">
       <div class="flex flex-col items-center justify-center space-y-5">
         <Metamask class="text-9xl" />
 

@@ -5,20 +5,23 @@ import type { RouteNamedMap } from 'vue-router/auto/routes'
 const isDark = useDark()
 const isEthereum = !!window.ethereum
 const store = useStore()
-const navs: { to: keyof RouteNamedMap, label: string }[] = [
-  { to: '/', label: 'jobs' },
-  { to: '/create_job', label: 'create job' },
-  { to: '/users', label: 'users' },
-  { to: '/chats', label: 'chats' },
-  { to: '/requests', label: 'requests' },
-  { to: '/reviews', label: 'reviews' },
-]
+const navs
+ = computed<{ to: keyof RouteNamedMap, label: string }[]>(
+   () => isEthereum && store.isConnected
+     ? [
+         { to: '/', label: 'jobs' },
+         { to: '/create_job', label: 'create job' },
+         { to: '/users', label: 'users' },
+         { to: '/chats', label: 'chats' },
+         { to: '/requests', label: 'requests' },
+         { to: '/reviews', label: 'reviews' },
+       ]
+     : [],
+ )
 
-// onMounted(async () => {
-//   await store.connect()
-//   const b = await store.getBalance()
-//   balance.value = (b / 1e18).toFixed(4)
-// })
+onMounted(() => {
+  store.connect()
+})
 </script>
 
 <template>

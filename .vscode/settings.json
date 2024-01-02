@@ -9,6 +9,10 @@
     "source.organizeImports": "explicit"
   },
 
+  "[solidity]": {
+    "editor.formatOnSave": true
+  },
+
   "eslint.rules.customizations": [
     { "rule": "style/*", "severity": "off" },
     { "rule": "*-indent", "severity": "off" },
@@ -23,14 +27,10 @@
 
   "eslint.validate": [
     "javascript",
-    "javascriptreact",
     "typescript",
-    "typescriptreact",
     "vue",
     "html",
     "markdown",
-    "json",
-    "jsonc",
-    "yaml"
+    "json"
   ]
 }

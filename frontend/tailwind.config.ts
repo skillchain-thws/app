@@ -1,5 +1,6 @@
 import type { Config } from 'tailwindcss'
 import animate from 'tailwindcss-animate'
+import plugin from 'tailwindcss/plugin'
 
 export default {
   darkMode: ['class'],
@@ -73,5 +74,17 @@ export default {
       },
     },
   },
-  plugins: [animate],
+  plugins: [
+    animate,
+    plugin(({ addUtilities }) => {
+      addUtilities({
+        '.flex-center': {
+          'display': 'center',
+          'justify-content': 'center',
+          'align-items': 'center',
+        },
+      })
+    }),
+
+  ],
 } satisfies Config
