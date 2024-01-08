@@ -1,5 +1,5 @@
 
-# Dapp
+# Skillchain
 skillchain is your go-to decentralized platform for seamless freelance connections. Connect securely, find diverse freelance services, and transact effortlessly with smart contracts. Join our skillchain community for a world of freelance opportunities. Smart. Secure. Simple. Join skillchain today.
 
 ## Report
