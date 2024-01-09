@@ -17,8 +17,7 @@ contract EscrowManager {
     address seller;
     uint money;
     bool started;
-    bool buyerAccepted;
-    bool sellerAccepted;
+    bool isDone;
     mapping(uint256 => string) generalChat;
     uint256 generalChatCount;
     mapping(uint256 => string) buyerChat;
@@ -28,6 +27,8 @@ contract EscrowManager {
     mapping(uint8 => address) comittee;
     uint8 comitteeCount;
     mapping(address => bool) votes;
+    mapping(uint256 => Request) requests;
+    uint256 buyRequestCount;
   }
 
   struct SimplifiedEscrow {
@@ -36,8 +37,21 @@ contract EscrowManager {
     address seller;
     uint money;
     bool started;
-    bool buyerAccepted;
-    bool sellerAccepted;
+    bool isDone;
+  }
+
+  enum RequestStatus {
+    Pending,
+    Accepted,
+    Declined
+  }
+
+  struct Request {
+    uint256 requestId;
+    address buyer;
+    address seller;
+    RequestStatus status;
+    bool isStartRequest;
   }
 
   constructor(address _freelancerMarketplaceAddress) {
@@ -98,8 +112,7 @@ contract EscrowManager {
       address seller,
       uint money,
       bool started,
-      bool buyerAccepted,
-      bool sellerAccepted
+      bool isDone
     )
   {
     Escrow storage tempEscrow = escrows[escrowId];
@@ -110,9 +123,128 @@ contract EscrowManager {
       tempEscrow.seller,
       tempEscrow.money,
       tempEscrow.started,
-      tempEscrow.buyerAccepted,
-      tempEscrow.sellerAccepted
+      tempEscrow.isDone
     );
+  }
+
+  function getPendingRequests(
+    uint256 escrowId
+  ) external view returns (Request[] memory) {
+    require(escrowId < escrowCount, "Invalid escrow ID");
+    Escrow storage escrow = escrows[escrowId];
+
+    Request[] memory pendingRequests;
+    uint256 pendingCount;
+
+    for (uint256 i = 0; i < escrow.buyRequestCount; i++) {
+      if (escrow.requests[i].status == RequestStatus.Pending) {
+        pendingRequests[pendingCount] = escrow.requests[i];
+        pendingCount++;
+      }
+    }
+
+    return pendingRequests;
+  }
+
+  function getAcceptedRequests(
+    uint256 escrowId
+  ) external view returns (Request[] memory) {
+    require(escrowId < escrowCount, "Invalid escrow ID");
+    Escrow storage escrow = escrows[escrowId];
+
+    Request[] memory acceptedRequests;
+    uint256 acceptedCount;
+
+    for (uint256 i = 0; i < escrow.buyRequestCount; i++) {
+      if (escrow.requests[i].status == RequestStatus.Accepted) {
+        acceptedRequests[acceptedCount] = escrow.requests[i];
+        acceptedCount++;
+      }
+    }
+
+    return acceptedRequests;
+  }
+
+  function getDeclinedRequests(
+    uint256 escrowId
+  ) external view returns (Request[] memory) {
+    require(escrowId < escrowCount, "Invalid escrow ID");
+    Escrow storage escrow = escrows[escrowId];
+
+    Request[] memory declinedRequests;
+    uint256 declinedCount;
+
+    for (uint256 i = 0; i < escrow.buyRequestCount; i++) {
+      if (escrow.requests[i].status == RequestStatus.Declined) {
+        declinedRequests[declinedCount] = escrow.requests[i];
+        declinedCount++;
+      }
+    }
+
+    return declinedRequests;
+  }
+
+  function getPendingRequestsForStartedEscrow(
+    uint256 escrowId
+  ) external view returns (Request[] memory) {
+    require(escrowId < escrowCount, "Invalid escrow ID");
+    Escrow storage escrow = escrows[escrowId];
+
+    require(escrow.started, "Escrow is not started");
+
+    Request[] memory pendingRequests;
+    uint256 pendingCount;
+
+    for (uint256 i = 0; i < escrow.buyRequestCount; i++) {
+      if (escrow.requests[i].status == RequestStatus.Pending) {
+        pendingRequests[pendingCount] = escrow.requests[i];
+        pendingCount++;
+      }
+    }
+
+    return pendingRequests;
+  }
+
+  function getAcceptedRequestsForStartedEscrow(
+    uint256 escrowId
+  ) external view returns (Request[] memory) {
+    require(escrowId < escrowCount, "Invalid escrow ID");
+    Escrow storage escrow = escrows[escrowId];
+
+    require(escrow.started, "Escrow is not started");
+
+    Request[] memory acceptedRequests;
+    uint256 acceptedCount;
+
+    for (uint256 i = 0; i < escrow.buyRequestCount; i++) {
+      if (escrow.requests[i].status == RequestStatus.Accepted) {
+        acceptedRequests[acceptedCount] = escrow.requests[i];
+        acceptedCount++;
+      }
+    }
+
+    return acceptedRequests;
+  }
+
+  function getDeclinedRequestsForStartedEscrow(
+    uint256 escrowId
+  ) external view returns (Request[] memory) {
+    require(escrowId < escrowCount, "Invalid escrow ID");
+    Escrow storage escrow = escrows[escrowId];
+
+    require(escrow.started, "Escrow is not started");
+
+    Request[] memory declinedRequests;
+    uint256 declinedCount;
+
+    for (uint256 i = 0; i < escrow.buyRequestCount; i++) {
+      if (escrow.requests[i].status == RequestStatus.Declined) {
+        declinedRequests[declinedCount] = escrow.requests[i];
+        declinedCount++;
+      }
+    }
+
+    return declinedRequests;
   }
 
   function getChats(
@@ -168,8 +300,6 @@ contract EscrowManager {
     newEscrow.jobId = jobId;
     newEscrow.buyer = buyer;
     newEscrow.seller = seller;
-    newEscrow.buyerAccepted = false;
-    newEscrow.sellerAccepted = false;
 
     uint256 buyerChatIndex = newEscrow.buyerChatCount;
     newEscrow.buyerChat[buyerChatIndex] = string(
@@ -190,88 +320,113 @@ contract EscrowManager {
 
   //*********************************************************************
   //*********************************************************************
+  //                        Request Functions
+  //*********************************************************************
+  //*********************************************************************
+
+  function sendRequest(uint256 escrowId) external {
+    require(escrowId < escrowCount, "Invalid escrow ID");
+    Escrow storage escrow = escrows[escrowId];
+    bool starter;
+    if (!escrow.started) {
+      require(
+        msg.sender == escrow.buyer,
+        "Only the Buyer can send the Start Request"
+      );
+      starter = true;
+    } else {
+      require(
+        msg.sender == escrow.seller,
+        "Only the Seller can send the End Request"
+      );
+      starter = false;
+    }
+
+    address buyer = msg.sender;
+    address seller = escrows[escrowId].seller;
+
+    escrow.requests[escrows[escrowId].buyRequestCount] = Request({
+      requestId: escrow.buyRequestCount,
+      buyer: buyer,
+      seller: seller,
+      status: RequestStatus.Pending,
+      isStartRequest: starter
+    });
+
+    escrows[escrowId].buyRequestCount++;
+  }
+
+  function respondToRequest(
+    uint256 escrowId,
+    uint256 requestId,
+    bool accept
+  ) external {
+    require(escrowId < escrowCount, "Invalid escrow ID");
+    Escrow storage escrow = escrows[escrowId];
+    require(requestId < escrow.buyRequestCount, "Invalid request ID");
+    Request storage request = escrow.requests[requestId];
+
+    require(
+      request.status == RequestStatus.Pending,
+      "Request has already been responded to"
+    );
+    bool isStartRequest;
+
+    if (!escrow.started) {
+      require(
+        msg.sender == escrow.seller,
+        "Only the Seller can accpet the Start Request"
+      );
+      isStartRequest = true;
+    } else {
+      require(
+        msg.sender == escrow.buyer,
+        "Only the Buyer can accept the End Request"
+      );
+      isStartRequest = false;
+    }
+
+    if (accept) {
+      if (!escrow.started) {
+        escrow.started = true;
+      } else {
+        escrowDone(escrow);
+      }
+      request.status = RequestStatus.Accepted;
+    } else {
+      request.status = RequestStatus.Declined;
+    }
+  }
+
+  //*********************************************************************
+  //*********************************************************************
   //                        Acceptance Functions
   //*********************************************************************
   //*********************************************************************
 
-  function acceptBuyer(
-    bool _accept,
-    uint256 escrowId
-  ) external payable isBuyer(escrowId) {
-    Escrow storage currentEscrow = escrows[escrowId];
-
-    if (_accept) {
-      require(msg.value >= currentEscrow.money, "Insufficient funds");
-
-      currentEscrow.money += msg.value;
-    }
-
-    currentEscrow.buyerAccepted = _accept;
-  }
-
-  function acceptSeller(
-    bool _accept,
-    uint256 escrowId
-  ) external isSeller(escrowId) {
-    Escrow storage currentEscrow = escrows[escrowId];
-
-    if (_accept) {
-      currentEscrow.sellerAccepted = true;
-    } else {
-      payable(currentEscrow.buyer).transfer(currentEscrow.money);
-      currentEscrow.money = 0;
-    }
-  }
-
-  function acceptDone(
-    bool _accept,
-    uint256 escrowId
-  ) external isEscrowParty(escrowId) {
-    Escrow storage currentEscrow = escrows[escrowId];
-    require(currentEscrow.started, "The escrow first has to start");
-    if (msg.sender == currentEscrow.buyer) {
-      currentEscrow.buyerAccepted = _accept;
-    } else if (msg.sender == currentEscrow.seller) {
-      currentEscrow.sellerAccepted = _accept;
-    }
-    if (currentEscrow.buyerAccepted && currentEscrow.sellerAccepted) {
-      //TODO
-      escrowDone(currentEscrow);
-    }
-  }
-
-  //TODO
   function escrowDone(Escrow storage escrow) internal {
     payable(escrow.seller).transfer(escrow.money);
     escrow.money = 0;
-  }
-
-  function startWork(uint256 escrowId) external isSeller(escrowId) {
-    require(
-      escrows[escrowId].buyerAccepted,
-      "The Buyer has first to confirm the Trade"
-    );
-    require(
-      escrows[escrowId].sellerAccepted,
-      "You have to first confirm the Trade"
-    );
-    escrows[escrowId].started = true;
-    escrows[escrowId].sellerAccepted = false;
-    escrows[escrowId].buyerAccepted = false;
+    escrow.isDone = true;
   }
 
   function cancelEscrow(uint256 escrowId) external isEscrowParty(escrowId) {
     Escrow storage currentEscrow = escrows[escrowId];
-    if (
-      currentEscrow.buyerAccepted == false &&
-      currentEscrow.sellerAccepted == false
-    ) {
-      payable(currentEscrow.buyer).transfer(currentEscrow.money);
-      currentEscrow.money = 0;
-    } else {
-      //TODO
-      startComitteeVote();
-    }
+
+    require(!currentEscrow.started, "Cannot cancel a started escrow");
+
+    payable(currentEscrow.buyer).transfer(currentEscrow.money);
+
+    // Reset the escrow state
+    currentEscrow.buyer = address(0);
+    currentEscrow.seller = address(0);
+    currentEscrow.money = 0;
+    currentEscrow.started = false;
+    currentEscrow.isDone = false;
+    currentEscrow.buyerChatCount = 0;
+    currentEscrow.sellerChatCount = 0;
+    currentEscrow.generalChatCount = 0;
+    currentEscrow.buyRequestCount = 0;
   }
 
   //*********************************************************************
