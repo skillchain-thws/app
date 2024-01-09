@@ -29,8 +29,6 @@ contract JobManager {
     uint price;
     mapping(uint256 => BuyRequest) buyRequests;
     uint256 buyRequestCount;
-    mapping(uint256 => Review) reviewsJob;
-    uint256 reviewCount;
     bool inProgress;
     string[] tags;
   }
@@ -266,7 +264,7 @@ contract JobManager {
     escrowManager.createEscrow(
       currentBuyRequest.buyer,
       jobId,
-      currentBuyRequest.comment
+      jobs[jobId].price
     );
   }
 

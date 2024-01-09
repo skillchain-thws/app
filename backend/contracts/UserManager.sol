@@ -13,10 +13,6 @@ contract UserManager {
   struct User {
     address owner;
     string userName;
-    mapping(uint256 => Review) reviewsBuyer;
-    uint256 reviewsBuyerCount;
-    mapping(uint256 => Review) reviewsSeller;
-    uint256 reviewsSellerCount;
     bool isJudge;
     uint256[] jobIds;
   }
@@ -26,8 +22,6 @@ contract UserManager {
     string userName;
     bool isJudge;
     uint256[] jobIds;
-    uint256 reviewsBuyerCount;
-    uint256 reviewsSellerCount;
   }
 
   constructor(address _freelancerMarketplaceAddress) {
@@ -51,20 +45,11 @@ contract UserManager {
       address owner,
       string memory userName,
       bool isJudge,
-      uint256[] memory jobIds,
-      uint256 reviewsBuyerCount,
-      uint256 reviewSellerCount
+      uint256[] memory jobIds
     )
   {
     User storage user = users[_address];
-    return (
-      user.owner,
-      user.userName,
-      user.isJudge,
-      user.jobIds,
-      user.reviewsBuyerCount,
-      user.reviewsSellerCount
-    );
+    return (user.owner, user.userName, user.isJudge, user.jobIds);
   }
 
   function getAllUserAddresses() external view returns (address[] memory) {
@@ -87,8 +72,6 @@ contract UserManager {
       SimpleUser memory _user;
       _user.owner = user.owner;
       _user.userName = user.userName;
-      _user.reviewsBuyerCount = user.reviewsBuyerCount;
-      _user.reviewsSellerCount = user.reviewsSellerCount;
       _user.isJudge = user.isJudge;
       _user.jobIds = user.jobIds;
 
@@ -102,25 +85,6 @@ contract UserManager {
     address userAddress
   ) external view returns (uint256[] memory) {
     return users[userAddress].jobIds;
-  }
-
-  function getReviewsByUser(
-    address userAddress
-  ) internal view returns (Review[] memory, Review[] memory) {
-    User storage user = users[userAddress];
-
-    Review[] memory buyerReviews = new Review[](user.reviewsBuyerCount);
-    Review[] memory sellerReviews = new Review[](user.reviewsSellerCount);
-
-    for (uint256 i = 0; i < user.reviewsBuyerCount; i++) {
-      buyerReviews[i] = user.reviewsBuyer[i];
-    }
-
-    for (uint256 j = 0; j < user.reviewsSellerCount; j++) {
-      sellerReviews[j] = user.reviewsSeller[j];
-    }
-
-    return (buyerReviews, sellerReviews);
   }
 
   //*********************************************************************
@@ -142,8 +106,6 @@ contract UserManager {
     newUser.owner = msg.sender;
     newUser.userName = _name;
     newUser.isJudge = false;
-    newUser.reviewsBuyerCount = 0;
-    newUser.reviewsSellerCount = 0;
 
     addresses[userCount] = msg.sender;
     userCount++;
@@ -202,41 +164,6 @@ contract UserManager {
     users[userAddress].isJudge = false;
 
     emit JudgeUnset(userAddress);
-  }
-
-  //*********************************************************************
-  //*********************************************************************
-  //                        Review Functions
-  //*********************************************************************
-  //*********************************************************************
-
-  event UserReviewAdded(address userAddress, string comment, uint8 rating);
-
-  function addUserReview(
-    address userAddress,
-    string memory comment,
-    uint8 rating
-  ) external {
-    require(
-      freelancerMarketplace.nonEmptyString(comment),
-      "Comment must not be empty"
-    );
-    require(users[userAddress].owner != address(0), "User does not exist");
-    require(
-      users[msg.sender].owner != address(0),
-      "Only a User can write a Review"
-    );
-    require(userAddress != msg.sender, "You can't Review yourself");
-
-    uint256 userIndex = users[userAddress].reviewsBuyerCount;
-    Review storage newReview = users[userAddress].reviewsBuyer[userIndex];
-    newReview.comment = comment;
-    newReview.rating = rating;
-    newReview.commenter = msg.sender;
-
-    users[userAddress].reviewsBuyerCount++;
-
-    emit UserReviewAdded(userAddress, comment, rating);
   }
 
   //*********************************************************************

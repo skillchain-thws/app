@@ -16,19 +16,10 @@ contract EscrowManager {
     address buyer;
     address seller;
     uint money;
+    uint price;
     bool started;
     bool isDone;
-    mapping(uint256 => string) generalChat;
-    uint256 generalChatCount;
-    mapping(uint256 => string) buyerChat;
-    uint256 buyerChatCount;
-    mapping(uint256 => string) sellerChat;
-    uint256 sellerChatCount;
-    mapping(uint8 => address) comittee;
-    uint8 comitteeCount;
-    mapping(address => bool) votes;
-    mapping(uint256 => Request) requests;
-    uint256 buyRequestCount;
+    Request currentRequest;
   }
 
   struct SimplifiedEscrow {
@@ -36,18 +27,19 @@ contract EscrowManager {
     address buyer;
     address seller;
     uint money;
+    uint price;
     bool started;
     bool isDone;
   }
 
   enum RequestStatus {
+    Start,
     Pending,
     Accepted,
     Declined
   }
 
   struct Request {
-    uint256 requestId;
     address buyer;
     address seller;
     RequestStatus status;
@@ -99,6 +91,14 @@ contract EscrowManager {
     revert("Escrow not found for the given job ID");
   }
 
+  function getCurrentRequest(
+    uint256 escrowId
+  ) external view returns (Request memory) {
+    require(escrowId < escrowCount, "Invalid escrow ID");
+    Escrow storage escrow = escrows[escrowId];
+    return escrow.currentRequest;
+  }
+
   function getEscrow(
     uint256 escrowId
   )
@@ -111,6 +111,7 @@ contract EscrowManager {
       address buyer,
       address seller,
       uint money,
+      uint price,
       bool started,
       bool isDone
     )
@@ -122,163 +123,10 @@ contract EscrowManager {
       tempEscrow.buyer,
       tempEscrow.seller,
       tempEscrow.money,
+      tempEscrow.price,
       tempEscrow.started,
       tempEscrow.isDone
     );
-  }
-
-  function getPendingRequests(
-    uint256 escrowId
-  ) external view returns (Request[] memory) {
-    require(escrowId < escrowCount, "Invalid escrow ID");
-    Escrow storage escrow = escrows[escrowId];
-
-    Request[] memory pendingRequests;
-    uint256 pendingCount;
-
-    for (uint256 i = 0; i < escrow.buyRequestCount; i++) {
-      if (escrow.requests[i].status == RequestStatus.Pending) {
-        pendingRequests[pendingCount] = escrow.requests[i];
-        pendingCount++;
-      }
-    }
-
-    return pendingRequests;
-  }
-
-  function getAcceptedRequests(
-    uint256 escrowId
-  ) external view returns (Request[] memory) {
-    require(escrowId < escrowCount, "Invalid escrow ID");
-    Escrow storage escrow = escrows[escrowId];
-
-    Request[] memory acceptedRequests;
-    uint256 acceptedCount;
-
-    for (uint256 i = 0; i < escrow.buyRequestCount; i++) {
-      if (escrow.requests[i].status == RequestStatus.Accepted) {
-        acceptedRequests[acceptedCount] = escrow.requests[i];
-        acceptedCount++;
-      }
-    }
-
-    return acceptedRequests;
-  }
-
-  function getDeclinedRequests(
-    uint256 escrowId
-  ) external view returns (Request[] memory) {
-    require(escrowId < escrowCount, "Invalid escrow ID");
-    Escrow storage escrow = escrows[escrowId];
-
-    Request[] memory declinedRequests;
-    uint256 declinedCount;
-
-    for (uint256 i = 0; i < escrow.buyRequestCount; i++) {
-      if (escrow.requests[i].status == RequestStatus.Declined) {
-        declinedRequests[declinedCount] = escrow.requests[i];
-        declinedCount++;
-      }
-    }
-
-    return declinedRequests;
-  }
-
-  function getPendingRequestsForStartedEscrow(
-    uint256 escrowId
-  ) external view returns (Request[] memory) {
-    require(escrowId < escrowCount, "Invalid escrow ID");
-    Escrow storage escrow = escrows[escrowId];
-
-    require(escrow.started, "Escrow is not started");
-
-    Request[] memory pendingRequests;
-    uint256 pendingCount;
-
-    for (uint256 i = 0; i < escrow.buyRequestCount; i++) {
-      if (escrow.requests[i].status == RequestStatus.Pending) {
-        pendingRequests[pendingCount] = escrow.requests[i];
-        pendingCount++;
-      }
-    }
-
-    return pendingRequests;
-  }
-
-  function getAcceptedRequestsForStartedEscrow(
-    uint256 escrowId
-  ) external view returns (Request[] memory) {
-    require(escrowId < escrowCount, "Invalid escrow ID");
-    Escrow storage escrow = escrows[escrowId];
-
-    require(escrow.started, "Escrow is not started");
-
-    Request[] memory acceptedRequests;
-    uint256 acceptedCount;
-
-    for (uint256 i = 0; i < escrow.buyRequestCount; i++) {
-      if (escrow.requests[i].status == RequestStatus.Accepted) {
-        acceptedRequests[acceptedCount] = escrow.requests[i];
-        acceptedCount++;
-      }
-    }
-
-    return acceptedRequests;
-  }
-
-  function getDeclinedRequestsForStartedEscrow(
-    uint256 escrowId
-  ) external view returns (Request[] memory) {
-    require(escrowId < escrowCount, "Invalid escrow ID");
-    Escrow storage escrow = escrows[escrowId];
-
-    require(escrow.started, "Escrow is not started");
-
-    Request[] memory declinedRequests;
-    uint256 declinedCount;
-
-    for (uint256 i = 0; i < escrow.buyRequestCount; i++) {
-      if (escrow.requests[i].status == RequestStatus.Declined) {
-        declinedRequests[declinedCount] = escrow.requests[i];
-        declinedCount++;
-      }
-    }
-
-    return declinedRequests;
-  }
-
-  function getChats(
-    uint256 escrowId
-  )
-    public
-    view
-    escrowExists(escrowId)
-    isEscrowParty(escrowId)
-    returns (
-      string[] memory generalChat,
-      string[] memory buyerChat,
-      string[] memory sellerChat
-    )
-  {
-    Escrow storage tempEscrow = escrows[escrowId];
-
-    generalChat = new string[](tempEscrow.generalChatCount);
-    buyerChat = new string[](tempEscrow.buyerChatCount);
-    sellerChat = new string[](tempEscrow.sellerChatCount);
-
-    for (uint256 i = 0; i < tempEscrow.generalChatCount; i++) {
-      generalChat[i] = tempEscrow.generalChat[i];
-    }
-
-    for (uint256 i = 0; i < tempEscrow.buyerChatCount; i++) {
-      buyerChat[i] = tempEscrow.buyerChat[i];
-    }
-
-    for (uint256 i = 0; i < tempEscrow.sellerChatCount; i++) {
-      sellerChat[i] = tempEscrow.sellerChat[i];
-    }
-
-    return (generalChat, buyerChat, sellerChat);
   }
 
   //*********************************************************************
@@ -287,35 +135,16 @@ contract EscrowManager {
   //*********************************************************************
   //*********************************************************************
 
-  event EscrowStarted(address buyer, address seller, uint256 jobId);
-
-  function createEscrow(
-    address buyer,
-    uint256 jobId,
-    string memory buyerMessage
-  ) external {
+  function createEscrow(address buyer, uint256 jobId, uint price) external {
     address seller = jobManager.getJobOwner(jobId);
 
     Escrow storage newEscrow = escrows[escrowCount];
     newEscrow.jobId = jobId;
     newEscrow.buyer = buyer;
     newEscrow.seller = seller;
-
-    uint256 buyerChatIndex = newEscrow.buyerChatCount;
-    newEscrow.buyerChat[buyerChatIndex] = string(
-      abi.encodePacked("Buyer: ", buyerMessage)
-    );
-    newEscrow.buyerChatCount++;
-
-    uint256 generalChatIndex = newEscrow.generalChatCount;
-    newEscrow.generalChat[generalChatIndex] = string(
-      abi.encodePacked("Buyer: ", buyerMessage)
-    );
-    newEscrow.generalChatCount++;
+    newEscrow.price = price;
 
     escrowCount++;
-
-    emit EscrowStarted(msg.sender, seller, jobId);
   }
 
   //*********************************************************************
@@ -327,13 +156,17 @@ contract EscrowManager {
   function sendRequest(uint256 escrowId) external payable {
     require(escrowId < escrowCount, "Invalid escrow ID");
     Escrow storage escrow = escrows[escrowId];
+    require(
+      escrow.currentRequest.status != RequestStatus.Pending,
+      "Cant Send a new request while currentone is pending"
+    );
     bool starter;
     if (!escrow.started) {
       require(
         msg.sender == escrow.buyer,
         "Only the Buyer can send the Start Request"
       );
-      require(msg.value > 0, "Sent value must be greater than 0");
+      require(msg.value < escrow.price, "invalid Funds");
       escrows[escrowId].money += msg.value;
       starter = true;
     } else {
@@ -344,33 +177,20 @@ contract EscrowManager {
       starter = false;
     }
 
-    address buyer = msg.sender;
-    address seller = escrows[escrowId].seller;
-
-    escrow.requests[escrows[escrowId].buyRequestCount] = Request({
-      requestId: escrow.buyRequestCount,
-      buyer: buyer,
-      seller: seller,
+    escrow.currentRequest = Request({
+      buyer: msg.sender,
+      seller: escrow.seller,
       status: RequestStatus.Pending,
       isStartRequest: starter
     });
-
-    escrows[escrowId].buyRequestCount++;
   }
 
-  function respondToRequest(
-    uint256 escrowId,
-    uint256 requestId,
-    bool accept
-  ) external {
+  function respondToRequest(uint256 escrowId, bool accept) external {
     require(escrowId < escrowCount, "Invalid escrow ID");
     Escrow storage escrow = escrows[escrowId];
-    require(requestId < escrow.buyRequestCount, "Invalid request ID");
-    Request storage request = escrow.requests[requestId];
-
     require(
-      request.status == RequestStatus.Pending,
-      "Request has already been responded to"
+      escrow.currentRequest.status == RequestStatus.Pending,
+      "You can only interact with pending requests"
     );
     bool isStartRequest;
 
@@ -394,13 +214,13 @@ contract EscrowManager {
       } else {
         escrowDone(escrow);
       }
-      request.status = RequestStatus.Accepted;
+      escrow.currentRequest.status = RequestStatus.Accepted;
     } else {
       if (!escrow.started) {
         payable(escrow.buyer).transfer(escrow.money);
         escrow.money = 0;
       }
-      request.status = RequestStatus.Declined;
+      escrow.currentRequest.status = RequestStatus.Declined;
     }
   }
 
@@ -429,59 +249,6 @@ contract EscrowManager {
     currentEscrow.money = 0;
     currentEscrow.started = false;
     currentEscrow.isDone = false;
-    currentEscrow.buyerChatCount = 0;
-    currentEscrow.sellerChatCount = 0;
-    currentEscrow.generalChatCount = 0;
-    currentEscrow.buyRequestCount = 0;
-  }
-
-  //*********************************************************************
-  //*********************************************************************
-  //                        Comittee Functions
-  //*********************************************************************
-  //*********************************************************************
-
-  //TODO
-  function startComitteeVote() internal {}
-
-  //*********************************************************************
-  //*********************************************************************
-  //                        Chat Functions
-  //*********************************************************************
-  //*********************************************************************
-
-  function sendMessageToBuyerChat(
-    uint256 escrowId,
-    string memory message
-  ) public escrowExists(escrowId) isBuyer(escrowId) {
-    Escrow storage currentEscrow = escrows[escrowId];
-
-    uint256 buyerChatIndex = currentEscrow.buyerChatCount;
-    currentEscrow.buyerChat[buyerChatIndex] = message;
-    currentEscrow.buyerChatCount++;
-
-    uint256 generalChatIndex = currentEscrow.generalChatCount;
-    currentEscrow.generalChat[generalChatIndex] = string(
-      abi.encodePacked("Buyer: ", message)
-    );
-    currentEscrow.generalChatCount++;
-  }
-
-  function sendMessageToSellerChat(
-    uint256 escrowId,
-    string memory message
-  ) public escrowExists(escrowId) isSeller(escrowId) {
-    Escrow storage currentEscrow = escrows[escrowId];
-
-    uint256 sellerChatIndex = currentEscrow.sellerChatCount;
-    currentEscrow.sellerChat[sellerChatIndex] = message;
-    currentEscrow.sellerChatCount++;
-
-    uint256 generalChatIndex = currentEscrow.generalChatCount;
-    currentEscrow.generalChat[generalChatIndex] = string(
-      abi.encodePacked("Seller: ", message)
-    );
-    currentEscrow.generalChatCount++;
   }
 
   //*********************************************************************
