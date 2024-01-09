@@ -324,7 +324,7 @@ contract EscrowManager {
   //*********************************************************************
   //*********************************************************************
 
-  function sendRequest(uint256 escrowId) external {
+  function sendRequest(uint256 escrowId) external payable {
     require(escrowId < escrowCount, "Invalid escrow ID");
     Escrow storage escrow = escrows[escrowId];
     bool starter;
@@ -333,6 +333,8 @@ contract EscrowManager {
         msg.sender == escrow.buyer,
         "Only the Buyer can send the Start Request"
       );
+      require(msg.value > 0, "Sent value must be greater than 0");
+      escrows[escrowId].money += msg.value;
       starter = true;
     } else {
       require(
@@ -394,6 +396,10 @@ contract EscrowManager {
       }
       request.status = RequestStatus.Accepted;
     } else {
+      if (!escrow.started) {
+        payable(escrow.buyer).transfer(escrow.money);
+        escrow.money = 0;
+      }
       request.status = RequestStatus.Declined;
     }
   }
@@ -405,7 +411,7 @@ contract EscrowManager {
   //*********************************************************************
 
   function escrowDone(Escrow storage escrow) internal {
-    payable(escrow.seller).transfer(escrow.money);
+    payable(escrow.buyer).transfer(escrow.money);
     escrow.money = 0;
     escrow.isDone = true;
   }
