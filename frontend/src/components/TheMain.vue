@@ -8,7 +8,7 @@ const { toast } = useToast()
 store.isConnected && await store.fetchUser()
 
 watch(route, () => {
-  if (store.isRegisterd || route.path === '/register')
+  if (store.isRegistered || route.path === '/register')
     return
 
   router.push('/register')

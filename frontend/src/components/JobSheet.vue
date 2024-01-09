@@ -25,8 +25,6 @@ watch(
         userName: res[1],
         isJudge: res[2],
         jobIds: res[3].map(Number),
-        reviewsBuyerCount: Number(res[4]),
-        reviewSellerCount: Number(res[5]),
       }
     })
 
@@ -61,7 +59,7 @@ async function handleSendRequest() {
   }
 }
 
-async function hanldeDeleteJob() {
+async function handleDeleteJob() {
   await jobFactory.deleteJob(props.job.id)
 }
 </script>
@@ -106,7 +104,7 @@ async function hanldeDeleteJob() {
       </template>
 
       <template v-else>
-        <Button class="w-full mt-3" variant="destructive" @click="hanldeDeleteJob">
+        <Button class="w-full mt-3" variant="destructive" @click="handleDeleteJob">
           delete
         </Button>
       </template>
@@ -134,18 +132,6 @@ async function hanldeDeleteJob() {
             <div class="col-span-2">
               <Badge variant="outline">
                 {{ seller.isJudge ? 'yes' : 'no' }}
-              </Badge>
-            </div>
-            <div>buyer reviewed</div>
-            <div class="col-span-2">
-              <Badge variant="outline">
-                {{ seller.reviewsBuyerCount }}
-              </Badge>
-            </div>
-            <div>seller reviewed</div>
-            <div class="col-span-2">
-              <Badge variant="outline">
-                {{ seller.reviewSellerCount }}
               </Badge>
             </div>
           </div>

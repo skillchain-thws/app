@@ -23,8 +23,6 @@ async function fetch() {
     userName: x[1],
     isJudge: x[2],
     jobIds: x[3].map(Number),
-    reviewsBuyerCount: Number(x[4]),
-    reviewSellerCount: Number(x[5]),
   }))
 }
 onMounted(() => {
@@ -60,8 +58,6 @@ async function handleUpdateReviewer(addr: string, v: boolean) {
             <TableHead>username</TableHead>
             <TableHead>address</TableHead>
             <TableHead>jobs posted</TableHead>
-            <TableHead>sellers reviewed</TableHead>
-            <TableHead>buyers reviewed</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -76,8 +72,6 @@ async function handleUpdateReviewer(addr: string, v: boolean) {
               {{ user.owner }}
             </TableCell>
             <TableCell>{{ user.jobIds.length }}</TableCell>
-            <TableCell>{{ user.reviewSellerCount }}</TableCell>
-            <TableCell>{{ user.reviewsBuyerCount }}</TableCell>
           </TableRow>
         </TableBody>
       </Table>

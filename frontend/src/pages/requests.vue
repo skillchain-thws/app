@@ -18,51 +18,48 @@ const store = useStore()
 const jobFactory = await store.getJobFactory()
 const pendingJobs = shallowRef<CustomJob[]>([])
 const acceptedJobs = shallowRef<CustomJob[]>([])
+const jobId = ref<number>()
 
-jobFactory.getAllJobsOfUser(store.address)
-  .then((res) => {
-    const _jobs = res.map(x => ({
-      owner: x[0],
-      id: Number(x[1]),
-      title: x[2],
-      description: x[3],
-      price: Number(x[4]),
-      inProcess: x[5],
-      tags: x[6],
-      requests: [] as Request[],
+async function fetch() {
+  const jobs = (await jobFactory.getAllJobsOfUser(store.address)).map(x => ({
+    owner: x[0],
+    id: Number(x[1]),
+    title: x[2],
+    description: x[3],
+    price: Number(x[4]),
+    inProcess: x[5],
+    tags: x[6],
+    requests: [] as Request[],
+  }))
+
+  const promises = jobs.map(job => jobFactory.getJobBuyRequests(job.id))
+  const res2 = await Promise.all(promises)
+  res2.forEach((x, i) => {
+    const js = x.map(y => ({
+      id: Number(y[1]),
+      buyer: y[2],
+      message: y[3],
+      accepted: y[4],
     }))
 
-    const promises = _jobs.map(job => jobFactory.getJobBuyRequests(job.id))
-    Promise.all(promises)
-      .then((res) => {
-        res.forEach((x, i) => {
-          const js = x.map(y => ({
-            id: Number(y[1]),
-            buyer: y[2],
-            message: y[3],
-            accepted: y[4],
-          }))
-
-          _jobs[i].requests.push(...js)
-        })
-
-        const jobs = _jobs.reduce((acc, cur) => {
-          if (cur.requests.some(r => r.accepted))
-            acc.acceptedJobs.push(cur)
-          else
-            acc.pendingJobs.push(cur)
-          return acc
-        }, {
-          pendingJobs: [] as CustomJob[],
-          acceptedJobs: [] as CustomJob[],
-        })
-
-        pendingJobs.value = jobs.pendingJobs
-        acceptedJobs.value = jobs.acceptedJobs
-      })
+    jobs[i].requests.push(...js)
   })
 
-const jobId = ref<number>()
+  const _jobs = jobs.reduce((acc, cur) => {
+    cur.requests.some(r => r.accepted)
+      ? acc.acceptedJobs.push(cur)
+      : acc.pendingJobs.push(cur)
+    return acc
+  }, { pendingJobs: [] as CustomJob[], acceptedJobs: [] as CustomJob[] })
+
+  pendingJobs.value = _jobs.pendingJobs
+  acceptedJobs.value = _jobs.acceptedJobs
+}
+
+onMounted(() => {
+  fetch()
+})
+
 async function handleAcceptRequest(requestId: number) {
   if (jobId.value !== 0 && !jobId.value)
     return

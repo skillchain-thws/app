@@ -1,17 +1,10 @@
 import { EscrowManager__factory, FreelancerMarketplace__factory, JobManager__factory, UserManager__factory } from '@/typechain/factories'
+import type { User } from '@/types'
 import { shortenAddr } from '@/utils'
 import type { JsonRpcSigner } from 'ethers'
 import { BrowserProvider } from 'ethers'
 import { defineStore } from 'pinia'
 
-interface User {
-  owner: string
-  userName: string
-  isJudge: boolean
-  jobIds: number[]
-  reviewsBuyerCount: number
-  reviewSellerCount: number
-}
 export const useStore = defineStore('metamask', () => {
   const signer = shallowRef<JsonRpcSigner>()
   const provider = shallowRef(new BrowserProvider(window.ethereum))
@@ -24,10 +17,11 @@ export const useStore = defineStore('metamask', () => {
     userName: '',
     isJudge: false,
     jobIds: [],
-    reviewsBuyerCount: 0,
-    reviewSellerCount: 0,
   })
-  const isRegisterd = computed(() => !!user.value.userName)
+  const isRegistered = computed(() => !!user.value.userName)
+
+  window.ethereum.on('accountsChanged', () => window.location.reload())
+  window.ethereum.on('chainChanged', () => window.location.reload())
 
   async function fetchUser() {
     const factory = await getUserFactory()
@@ -37,8 +31,6 @@ export const useStore = defineStore('metamask', () => {
       userName: u[1],
       isJudge: u[2],
       jobIds: u[3].map(Number),
-      reviewsBuyerCount: Number(u[4]),
-      reviewSellerCount: Number(u[5]),
     }
   }
 
@@ -89,7 +81,7 @@ export const useStore = defineStore('metamask', () => {
     isConnected,
     address,
     shortAddress,
-    isRegisterd,
+    isRegistered,
     user,
     balance,
   }

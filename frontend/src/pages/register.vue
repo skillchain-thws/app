@@ -9,7 +9,7 @@ const username = ref('')
 
 onMounted(() => {
   input.value?.$el.focus()
-  if (store.isRegisterd)
+  if (store.isRegistered)
     router.push('/')
 })
 

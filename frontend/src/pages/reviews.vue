@@ -12,7 +12,7 @@ async function fetch() {
 
   const jobIds = await userFactory.getAllJobIds(store.address)
   for (const id of jobIds) {
-    let escrowId
+    let escrowId: bigint
     try {
       escrowId = await escrowFactory.getEscrowIdFromJob(id)
     }
@@ -31,9 +31,9 @@ async function fetch() {
       buyer: escrow[2],
       seller: escrow[3],
       money: Number(escrow[4]),
-      started: escrow[5],
-      buyerAccepted: escrow[6],
-      sellerAccepted: escrow[7],
+      price: Number(escrow[5]),
+      started: escrow[6],
+      isDone: escrow[7],
     })
   }
   escrows.value = _escrows
@@ -46,17 +46,8 @@ onMounted(() => {
 
 <template>
   <div class="py-10">
-    <template v-if="store.user?.isJudge">
-      User is reviewer
-      <pre>
+    <pre>
       {{ escrows }}
-      </pre>
-      <Button @click="escrowFactory.acceptBuyer(true, 0)">
-        buyer
-      </Button>
-      <Button @click="escrowFactory.acceptSeller(true, 0)">
-        seller
-      </Button>
-    </template>
+    </pre>
   </div>
 </template>

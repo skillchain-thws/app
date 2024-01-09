@@ -1,13 +1,10 @@
-<script lang="ts">
-import type { ToastRootEmits, ToastRootProps } from 'radix-vue'
-import type { VariantProps } from 'class-variance-authority'
-</script>
-
 <script setup lang="ts">
+import type { VariantProps } from 'class-variance-authority'
+import type { ToastRootEmits, ToastRootProps } from 'radix-vue'
 import { ToastRoot, useEmitAsProps } from 'radix-vue'
 
-import { toastVariants } from '.'
 import { cn } from '@/lib/utils'
+import { toastVariants } from '.'
 
 interface ToastVariantProps extends VariantProps<typeof toastVariants> {}
 

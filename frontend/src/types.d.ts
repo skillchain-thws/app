@@ -16,9 +16,9 @@ export interface Escrow {
   buyer: string
   seller: string
   money: number
+  price: number
   started: boolean
-  buyerAccepted: boolean
-  sellerAccepted: boolean
+  isDone: boolean
 }
 
 export interface User {
@@ -26,12 +26,11 @@ export interface User {
   userName: string
   isJudge: boolean
   jobIds: number[]
-  reviewsBuyerCount: number
-  reviewSellerCount: number
 }
 
 declare global {
   interface Window {
-    ethereum: Eip1193Provider
+    ethereum: Eip1193Provider &
+    { on(event: string, fn: () => void): void }
   }
 }
