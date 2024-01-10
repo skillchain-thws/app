@@ -9,6 +9,14 @@ export interface Job {
   inProcess: boolean
   tags: string[]
 }
+export type CustomJob = Job & { requests: Request[] }
+
+export interface Request {
+  id: number
+  buyer: string
+  message: string
+  accepted: boolean
+}
 
 export interface Escrow {
   escrowId: number

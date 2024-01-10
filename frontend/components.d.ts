@@ -47,6 +47,8 @@ declare module 'vue' {
     Popover: typeof import('./src/components/ui/popover/Popover.vue')['default']
     PopoverContent: typeof import('./src/components/ui/popover/PopoverContent.vue')['default']
     PopoverTrigger: typeof import('./src/components/ui/popover/PopoverTrigger.vue')['default']
+    RequestSection: typeof import('./src/components/RequestSection.vue')['default']
+    RequestSectionSkeleton: typeof import('./src/components/RequestSectionSkeleton.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     ScrollArea: typeof import('./src/components/ui/scroll-area/ScrollArea.vue')['default']
