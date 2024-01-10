@@ -34,6 +34,7 @@ export interface User {
   userName: string
   isJudge: boolean
   jobIds: number[]
+  escrowIds: number[]
 }
 
 declare global {

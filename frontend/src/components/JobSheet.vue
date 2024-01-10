@@ -19,12 +19,13 @@ watch(
     seller.value = undefined
     otherJobs.value = []
 
-    userFactory.getUser(props.job.owner).then((res) => {
+    userFactory.getUser(props.job.owner).then((u) => {
       seller.value = {
-        owner: res[0],
-        userName: res[1],
-        isJudge: res[2],
-        jobIds: res[3].map(Number),
+        owner: u[0],
+        userName: u[1],
+        isJudge: u[2],
+        jobIds: u[3].map(Number),
+        escrowIds: u[4].map(Number),
       }
     })
 

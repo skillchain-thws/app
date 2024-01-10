@@ -144,6 +144,9 @@ contract EscrowManager {
     newEscrow.seller = seller;
     newEscrow.price = price;
 
+    userManager.addEscrowId(escrowCount, buyer);
+    userManager.addEscrowId(escrowCount, seller);
+
     escrowCount++;
   }
 

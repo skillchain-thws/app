@@ -15,6 +15,7 @@ contract UserManager {
     string userName;
     bool isJudge;
     uint256[] jobIds;
+    uint256[] escrowIds;
   }
 
   constructor(address _freelancerMarketplaceAddress) {
@@ -38,11 +39,18 @@ contract UserManager {
       address owner,
       string memory userName,
       bool isJudge,
-      uint256[] memory jobIds
+      uint256[] memory jobIds,
+      uint256[] memory escrowIds
     )
   {
     User storage user = users[_address];
-    return (user.owner, user.userName, user.isJudge, user.jobIds);
+    return (
+      user.owner,
+      user.userName,
+      user.isJudge,
+      user.jobIds,
+      user.escrowIds
+    );
   }
 
   function getAllUserAddresses() external view returns (address[] memory) {
@@ -128,6 +136,32 @@ contract UserManager {
     }
 
     require(indexToRemove < currentUser.jobIds.length, "Job ID not found");
+
+    currentUser.jobIds[indexToRemove] = currentUser.jobIds[
+      currentUser.jobIds.length - 1
+    ];
+    currentUser.jobIds.pop();
+  }
+
+  function addEscrowId(uint256 escrowId, address _address) external {
+    users[_address].escrowIds.push(escrowId);
+  }
+
+  function removeEscrowId(uint256 escrowId, address _address) external {
+    User storage currentUser = users[_address];
+    uint256 indexToRemove;
+
+    for (uint256 i = 0; i < currentUser.jobIds.length; i++) {
+      if (currentUser.escrowIds[i] == escrowId) {
+        indexToRemove = i;
+        break;
+      }
+    }
+
+    require(
+      indexToRemove < currentUser.escrowIds.length,
+      "Escrow ID not found"
+    );
 
     currentUser.jobIds[indexToRemove] = currentUser.jobIds[
       currentUser.jobIds.length - 1

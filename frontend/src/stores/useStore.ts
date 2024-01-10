@@ -17,6 +17,7 @@ export const useStore = defineStore('metamask', () => {
     userName: '',
     isJudge: false,
     jobIds: [],
+    escrowIds: [],
   })
   const isRegistered = computed(() => !!user.value.userName)
 
@@ -31,6 +32,7 @@ export const useStore = defineStore('metamask', () => {
       userName: u[1],
       isJudge: u[2],
       jobIds: u[3].map(Number),
+      escrowIds: u[4].map(Number),
     }
   }
 
