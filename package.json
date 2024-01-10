@@ -2,7 +2,7 @@
   "type": "module",
   "version": "1.0.0",
   "private": true,
-  "packageManager": "pnpm@8.13.1",
+  "packageManager": "pnpm@8.14.1",
   "scripts": {
     "dev": "pnpm --filter=./frontend dev",
     "build": "pnpm --filter=./frontend build",
@@ -10,7 +10,7 @@
     "postinstall": "npx simple-git-hooks"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^2.6.1",
+    "@antfu/eslint-config": "^2.6.2",
     "eslint": "^8.56.0",
     "eslint-define-config": "^2.1.0",
     "lint-staged": "^15.2.0",
