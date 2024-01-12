@@ -21,8 +21,10 @@ export const useStore = defineStore('metamask', () => {
   })
   const isRegistered = computed(() => !!user.value.userName)
 
-  window.ethereum.on('accountsChanged', () => window.location.reload())
-  window.ethereum.on('chainChanged', () => window.location.reload())
+  if (window.ethereum) {
+    window.ethereum.on('accountsChanged', () => window.location.reload())
+    window.ethereum.on('chainChanged', () => window.location.reload())
+  }
 
   async function fetchUser() {
     const factory = await getUserFactory()

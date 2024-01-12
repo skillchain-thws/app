@@ -89,3 +89,17 @@ pnpm dev
 - Open your browser and enter the following URL:
 [http://localhost:5173/](http://localhost:5173/)
 > Ensure all terminals remain active to keep both frontend and backend services running.
+
+### Docker Production Build
+
+First, build the vitesse image by opening the terminal in the project's root directory.
+
+```bash
+docker buildx build . -t skillchain:latest
+```
+
+Run the image and specify port mapping with the `-p` flag.
+
+```bash
+docker run --rm -it -p 8080:80 skillchain:latest
+```
