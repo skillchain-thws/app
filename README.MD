@@ -1,12 +1,16 @@
 
-# Skillchain
+# skillchain
 
 skillchain is your go-to decentralized platform for seamless freelance connections. Connect securely, find diverse freelance services, and transact effortlessly with smart contracts. Join our skillchain community for a world of freelance opportunities. Smart. Secure. Simple. Join skillchain today.
 
+- [skillchain](#skillchain)
+  - [Prepare](#prepare)
+  - [Usage](#usage)
+    - [Development](#development)
+    - [Document](#document)
+    - [Docker](#docker)
 
-## Usage
-
-### Prepare
+## Prepare
 Install Node.js and npm from [here](https://nodejs.org/).
 
 Once Node.js is installed, globally install `pnpm` by running:
@@ -20,6 +24,9 @@ pnpm install
 ```
 
 Install the Metamask browser extension from [here](https://metamask.io/download.html).
+
+## Usage
+
 
 ### Development
 Navigate to the `/backend` directory and run these 2 commands in 2 different terminals
