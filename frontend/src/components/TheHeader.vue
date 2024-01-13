@@ -11,7 +11,7 @@ const navs
      ? [
          { to: '/', label: 'jobs' },
          { to: '/create_job', label: 'create job' },
-         { to: '/users', label: 'users' },
+         //  { to: '/users', label: 'users' },
          { to: '/chats', label: 'chats' },
          { to: '/requests', label: 'requests' },
          { to: '/reviews', label: 'reviews' },

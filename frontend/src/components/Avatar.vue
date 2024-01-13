@@ -12,10 +12,6 @@ watchEffect(() => {
   jazz()
 })
 
-watch(() => props.address, () => {
-  jazz()
-})
-
 function jazz() {
   if (!el.value)
     return
@@ -26,5 +22,5 @@ function jazz() {
 </script>
 
 <template>
-  <div ref="el" />
+  <div ref="el" :style="{ height: `${size}px` }" />
 </template>

@@ -3,7 +3,17 @@ import type { Job } from '@/types'
 
 const store = useStore()
 
-const emptyJob = () => ({ title: '', description: '', tags: [], price: 0, id: 0, inProcess: false, owner: '0x0000000000000000000000000000000000000000' })
+function emptyJob() {
+  return {
+    title: '',
+    description: '',
+    tags: [],
+    price: 0,
+    id: 0,
+    inProcess: false,
+    owner: '0x0000000000000000000000000000000000000000',
+  }
+}
 const job = ref<Job>(emptyJob())
 const error = ref({ title: '', description: '' })
 
@@ -70,8 +80,8 @@ async function handleCreateJob() {
     </div>
 
     <div class="flex items-center justify-center">
-      <div class="w-[80%]">
-        <JobCard v-bind="job" class="w-full border-primary" />
+      <div class="w-[80%] ">
+        <JobCard v-bind="job" class="w-full border-primary min-h-[210px]" />
       </div>
     </div>
   </form>

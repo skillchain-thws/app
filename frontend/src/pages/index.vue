@@ -16,16 +16,12 @@ const sortOpts = [
 ] as const
 
 const jobs = shallowRef<Job[]>([])
-const myJobs = computed(() => showMyOnly.value ? jobs.value.filter(j => compareAddress(j.owner, store.address)) : jobs.value)
 const data = computed(() => {
+  const my = showMyOnly.value ? jobs.value.filter(j => compareAddress(j.owner, store.address)) : jobs.value
   const f = qDebounced.value
-    ? myJobs.value.filter(j => JSON.stringify(j).toLowerCase().includes(q.value.toLowerCase()))
-    : myJobs.value
-  return f.sort((a, b) => {
-    if (sortOpt.value === 'lth')
-      return a.price - b.price
-    return b.price - a.price
-  })
+    ? my.filter(j => JSON.stringify(j).toLowerCase().includes(q.value.toLowerCase()))
+    : my
+  return f.toSorted((a, b) => sortOpt.value === 'lth' ? a.price - b.price : b.price - a.price)
 })
 
 onMounted(() => {
