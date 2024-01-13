@@ -1,21 +1,53 @@
 <script setup lang="ts">
+import { fetchEscrow, fetchRequest, fetchUser } from '@/lib/fetch'
+import type { Escrow } from '@/types'
 import { shortenAddr } from '@/utils'
 import { Forward } from 'lucide-vue-next'
 
-const list = [
-  { address: '0xbDA5747bFD65F08deb54cb465eB87D40e51B197E', username: 'tester' },
-  { address: '0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097', username: 'tester' },
-  { address: '0x1CBd3b2770909D4e10f157cABC84C7264073C9Ec', username: 'tester' },
-  { address: '0xFABB0ac9d68B0B445fB7357272Ff202C5651694a', username: 'tester' },
-  { address: '0x14dC79964da2C08b23698B3D3cc7Ca32193d9955', username: 'tester' },
-  { address: '0xCBDE0ac9d68B0B445fB73asdfsFf202C56512342', username: 'tester' },
-  { address: '0xGREE79964da2C08b23698B3D3cc7Ca3219xxbqwe', username: 'tester' },
-  { address: '0x5gFD79964da2C08b23698B3D3cc7Ca3219xcvbxc', username: 'tester' },
-]
+type CustomEscrow = Escrow & { buyerUsername: string, sellerUsername: string }
 
-const reciever = shallowRef(
-  { address: '0xbDA5747bFD65F08deb54cb465eB87D40e51B197E', username: 'reciever' },
-)
+const store = useStore()
+const escrows = shallowRef<CustomEscrow[]>([])
+const escrowFactory = await store.getEscrowFactory()
+const receiver = shallowRef({ address: '', username: '' })
+
+async function fetch() {
+  const _escrows: CustomEscrow[] = []
+
+  for (const id of store.user.escrowIds) {
+    const escrow = await fetchEscrow(id)
+    if (!escrow)
+      return
+
+    const buyer = await fetchUser(escrow.buyer)
+    const seller = await fetchUser(escrow.seller)
+    _escrows.push({
+      ...escrow,
+      buyerUsername: buyer.userName,
+      sellerUsername: seller.userName,
+    })
+  }
+
+  escrows.value = _escrows
+  console.log(_escrows[0])
+  const request = await fetchRequest(0)
+  console.log(request)
+
+  if (_escrows.length) {
+    receiver.value = {
+      address: _escrows[0].seller,
+      username: _escrows[0].sellerUsername,
+    }
+  }
+}
+
+onMounted(() => {
+  fetch()
+})
+
+async function handleSendOffer() {
+  await escrowFactory.sendRequest(0)
+}
 
 const message = ref('')
 function handleSend() {
@@ -29,14 +61,14 @@ function handleSend() {
       <div class="col-span-1">
         <ScrollArea class="h-[800px] pr-5">
           <ul class="space-y-3">
-            <li v-for="{ address, username } in list" :key="address" class="cursor-pointer" @click="reciever = { address, username }">
-              <div class="border rounded-md px-2 py-4 hover:border-primary transition-colors" :class="{ 'border-primary': reciever.address === address }">
+            <li v-for="escrow in escrows" :key="escrow.escrowId" class="cursor-pointer" @click="receiver = { address: escrow.seller, username: escrow.sellerUsername }">
+              <div class="border rounded-md px-2 py-4 hover:border-primary transition-colors" :class="{ 'border-primary': receiver.address === escrow.seller }">
                 <div class="flex items-center">
-                  <Avatar class="w-[20%]" :size="45" :address="address" />
+                  <Avatar class="w-[20%]" :size="45" :address="escrow.seller" />
                   <div>
                     <div class="space-x-2">
-                      <span class="font-medium">{{ username }}</span>
-                      <span class="text-muted-foreground">{{ shortenAddr(address) }}</span>
+                      <span class="font-medium">{{ escrow.sellerUsername }}</span>
+                      <span class="text-muted-foreground">{{ shortenAddr(escrow.seller) }}</span>
                     </div>
                     <p>You: Lorem ipsum dolor sit amet.</p>
                   </div>
@@ -48,31 +80,22 @@ function handleSend() {
       </div>
       <div class="col-span-2 flex flex-col border rounded-md">
         <div class="border-b flex items-center gap-3 px-3 py-3">
-          <Avatar :address="reciever.address" :size="35" />
+          <Avatar :address="receiver.address" :size="35" />
           <div class="space-x-2">
-            <span class="font-medium">{{ reciever.username }}</span>
-            <span class="text-muted-foreground tracking-wide">{{ reciever.address }}</span>
+            <span class="font-medium">{{ receiver.username }}</span>
+            <span class="text-muted-foreground tracking-wide">{{ receiver.address }}</span>
           </div>
         </div>
         <ScrollArea class="grow p-3 pt-5">
           <div class="flex flex-col gap-3 h-full">
             <ChatBox>
-              Lorem ipsum dolor, sit amet consectetur adipisicing elit. Nulla, ratione.
+              {{ receiver.username }} hat accepted your job request. send an offer now.
             </ChatBox>
-            <ChatBox dir="right">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Aliquam, dolorum!
-            </ChatBox>
+
             <ChatBox>
-              Lorem ipsum dolor sit amet.
-            </ChatBox>
-            <ChatBox>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit.
-            </ChatBox>
-            <ChatBox dir="right">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Inventore porro dicta amet rem quis a.
-            </ChatBox>
-            <ChatBox dir="right">
-              lorem ipsum dolor sit amet.
+              <Button @click="handleSendOffer">
+                send
+              </Button>
             </ChatBox>
           </div>
         </ScrollArea>

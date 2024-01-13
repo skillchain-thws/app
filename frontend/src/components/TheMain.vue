@@ -1,11 +1,13 @@
 <script setup lang="ts">
+import { fetchUser } from '@/lib/fetch'
 import { useToast } from './ui/toast'
 
 const store = useStore()
 const router = useRouter()
 const route = useRoute()
 const { toast } = useToast()
-store.isConnected && await store.fetchUser()
+if (store.isConnected)
+  store.user = await fetchUser(store.address)
 
 watch(route, () => {
   if (store.isRegistered || route.path === '/register')

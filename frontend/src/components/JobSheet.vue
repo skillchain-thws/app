@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { fetchUser } from '@/lib/fetch'
 import type { Job, User } from '@/types'
+import { compareAddress } from '@/utils'
 
 const props = defineProps<{
   job: Job
@@ -8,7 +10,6 @@ const props = defineProps<{
 const open = defineModel<boolean>('open', { default: false })
 
 const store = useStore()
-const userFactory = await store.getUserFactory()
 const jobFactory = await store.getJobFactory()
 const seller = shallowRef<User>()
 const otherJobs = shallowRef<Job[]>([])
@@ -19,14 +20,8 @@ watch(
     seller.value = undefined
     otherJobs.value = []
 
-    userFactory.getUser(props.job.owner).then((u) => {
-      seller.value = {
-        owner: u[0],
-        userName: u[1],
-        isJudge: u[2],
-        jobIds: u[3].map(Number),
-        escrowIds: u[4].map(Number),
-      }
+    fetchUser(props.job.owner).then((u) => {
+      seller.value = u
     })
 
     jobFactory.getAllJobsOfUser(props.job.owner).then((res) => {
@@ -86,8 +81,7 @@ async function handleDeleteJob() {
       <JobPrice>
         {{ job.price }}
       </JobPrice>
-
-      <template v-if="job.owner.toLowerCase() !== store.address.toLowerCase()">
+      <template v-if="!compareAddress(job.owner, store.address)">
         <form class="mt-3 space-y-3" @submit.prevent="handleSendRequest">
           <div class="space-y-1">
             <Textarea v-model="message" placeholder="leave a message" />

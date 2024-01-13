@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Input } from '@/components/ui/input'
+import { fetchUser } from '@/lib/fetch'
 
 const store = useStore()
 const router = useRouter()
@@ -17,7 +18,7 @@ async function handleCreateUsername() {
   const response = await userFactory.registerUser(username.value)
   const receipt = await response.wait()
   if (receipt?.status === 1) {
-    await store.fetchUser()
+    await fetchUser(store.address)
     router.push('/')
   }
 }

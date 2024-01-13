@@ -46,6 +46,14 @@ contract EscrowManager {
     bool isStartRequest;
   }
 
+  event EscrowCreated(
+    uint256 escrowId,
+    uint256 jobId,
+    address buyer,
+    address seller,
+    uint price
+  );
+
   constructor(address _freelancerMarketplaceAddress) {
     freelancerMarketplace = FreelancerMarketplace(
       _freelancerMarketplaceAddress
@@ -148,6 +156,8 @@ contract EscrowManager {
     userManager.addEscrowId(escrowCount, seller);
 
     escrowCount++;
+
+    emit EscrowCreated(escrowCount, jobId, buyer, seller, price);
   }
 
   //*********************************************************************
@@ -169,7 +179,7 @@ contract EscrowManager {
         msg.sender == escrow.buyer,
         "Only the Buyer can send the Start Request"
       );
-      require(msg.value < escrow.price, "invalid Funds");
+      require(msg.value >= escrow.price, "invalid Funds");
       escrows[escrowId].money += msg.value;
       starter = true;
     } else {

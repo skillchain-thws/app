@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import type { CustomJob as JobWithRequests, Request } from '@/types'
+import type { Job } from '@/types'
+
+export type JobWithRequests = Job & { requests: CustomRequest[] }
+interface CustomRequest {
+  id: number
+  buyer: string
+  message: string
+  accepted: boolean
+}
 
 const store = useStore()
 
@@ -18,7 +26,7 @@ async function fetch() {
     price: Number(x[4]),
     inProcess: x[5],
     tags: x[6],
-    requests: [] as Request[],
+    requests: [] as CustomRequest[],
   }))
 
   const promises = jobs.map(job => jobFactory.getJobBuyRequests(job.id))

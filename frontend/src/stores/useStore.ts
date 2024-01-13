@@ -26,18 +26,6 @@ export const useStore = defineStore('metamask', () => {
     window.ethereum.on('chainChanged', () => window.location.reload())
   }
 
-  async function fetchUser() {
-    const factory = await getUserFactory()
-    const u = await factory.getUser(address.value)
-    user.value = {
-      owner: u[0],
-      userName: u[1],
-      isJudge: u[2],
-      jobIds: u[3].map(Number),
-      escrowIds: u[4].map(Number),
-    }
-  }
-
   async function connect() {
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }) as string[]
     address.value = accounts[0]
@@ -80,7 +68,6 @@ export const useStore = defineStore('metamask', () => {
     getJobFactory,
     getUserFactory,
     getEscrowFactory,
-    fetchUser,
 
     isConnected,
     address,

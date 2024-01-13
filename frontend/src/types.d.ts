@@ -1,4 +1,5 @@
 import type { Eip1193Provider } from 'ethers'
+import type { EscrowRequestStatus } from './constants'
 
 export interface Job {
   owner: string
@@ -8,14 +9,6 @@ export interface Job {
   price: number
   inProcess: boolean
   tags: string[]
-}
-export type CustomJob = Job & { requests: Request[] }
-
-export interface Request {
-  id: number
-  buyer: string
-  message: string
-  accepted: boolean
 }
 
 export interface Escrow {
@@ -35,6 +28,13 @@ export interface User {
   isJudge: boolean
   jobIds: number[]
   escrowIds: number[]
+}
+
+export interface EscrowRequest {
+  buyer: string
+  seller: string
+  status: EscrowRequestStatus
+  isStartRequest: boolean
 }
 
 declare global {

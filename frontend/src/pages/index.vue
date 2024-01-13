@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { EMPTY_ADDRESS } from '@/constants'
+import { fetchAllJobs } from '@/lib/fetch'
 import type { Job } from '@/types'
+import { compareAddress } from '@/utils'
 import { Heart } from 'lucide-vue-next'
 
 const store = useStore()
@@ -14,9 +15,8 @@ const sortOpts = [
   { label: 'price: hight to low', value: 'htl' },
 ] as const
 
-const jobFactory = await store.getJobFactory()
 const jobs = shallowRef<Job[]>([])
-const myJobs = computed(() => showMyOnly.value ? jobs.value.filter(j => j.owner.toLowerCase() === store.address.toLowerCase()) : jobs.value)
+const myJobs = computed(() => showMyOnly.value ? jobs.value.filter(j => compareAddress(j.owner, store.address)) : jobs.value)
 const data = computed(() => {
   const f = qDebounced.value
     ? myJobs.value.filter(j => JSON.stringify(j).toLowerCase().includes(q.value.toLowerCase()))
@@ -29,18 +29,8 @@ const data = computed(() => {
 })
 
 onMounted(() => {
-  jobFactory.getAllJobs().then((res) => {
+  fetchAllJobs().then((res) => {
     jobs.value = res
-      .filter(x => x[0] !== EMPTY_ADDRESS)
-      .map(j => ({
-        owner: j[0],
-        id: Number(j[1]),
-        title: j[2],
-        description: j[3],
-        price: Number(j[4]),
-        inProcess: j[5],
-        tags: j[6],
-      }))
   })
 })
 

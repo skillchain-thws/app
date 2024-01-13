@@ -75,6 +75,7 @@ contract UserManager {
       _user.userName = user.userName;
       _user.isJudge = user.isJudge;
       _user.jobIds = user.jobIds;
+      _user.escrowIds = user.escrowIds;
 
       allUsers[i] = _user;
     }

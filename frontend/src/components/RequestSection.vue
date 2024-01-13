@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CustomJob as JobWithRequests } from '@/types'
+import type { JobWithRequests } from '@/pages/requests.vue'
 import { ChevronDown } from 'lucide-vue-next'
 
 defineProps<{
