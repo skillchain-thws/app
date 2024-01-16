@@ -4,12 +4,6 @@ import "./UserManager.sol";
 import "./JobManager.sol";
 import "./EscrowManager.sol";
 
-struct Review {
-  string comment;
-  uint8 rating;
-  address commenter;
-}
-
 contract FreelancerMarketplace {
   address owner;
   UserManager userManager;

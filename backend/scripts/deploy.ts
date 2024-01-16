@@ -15,6 +15,8 @@ async function main() {
   const job = await ethers.deployContract('JobManager', [market.target], { signer: admin })
   const user = await ethers.deployContract('UserManager', [market.target], { signer: admin })
   const escrow = await ethers.deployContract('EscrowManager', [market.target], { signer: admin })
+  const chat = await ethers.deployContract('ChatManager', [], { signer: admin })
+  const review = await ethers.deployContract('ReviewManager', [], { signer: admin })
 
   if (
     market.target !== '0x73511669fd4dE447feD18BB79bAFeAC93aB7F31f'
@@ -28,6 +30,8 @@ async function main() {
     job.waitForDeployment(),
     user.waitForDeployment(),
     escrow.waitForDeployment(),
+    chat.waitForDeployment(),
+    review.waitForDeployment(),
   ])
 
   await Promise.all([
