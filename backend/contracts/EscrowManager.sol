@@ -156,9 +156,9 @@ contract EscrowManager {
     userManager.addEscrowId(escrowCount, buyer);
     userManager.addEscrowId(escrowCount, seller);
 
-    escrowCount++;
-
     emit EscrowCreated(escrowCount, jobId, buyer, seller, price);
+
+    escrowCount++;
   }
 
   //*********************************************************************
