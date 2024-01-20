@@ -61,13 +61,26 @@ async function main() {
     }
 
     await user.registerUser('admin')
-    for (const { title, description, price, tags } of jobs)
-      await job.addJob(title, description, price, tags)
-
     const account0 = await useAccount(signers[0], 'acc0')
-    await account0.job.sendBuyRequest(0, 'message')
-    await account0.job.sendBuyRequest(1, 'message')
-    await account0.job.sendBuyRequest(2, 'message')
+    const account1 = await useAccount(signers[1], 'acc1')
+
+    for (const { title, description, price, tags } of jobs.slice(0, 5))
+      await account0.job.addJob(title, description, price, tags)
+
+    for (const { title, description, price, tags } of jobs.slice(5, 10))
+      await account1.job.addJob(title, description, price, tags)
+
+    await account1.job.sendBuyRequest(0, 'message')
+    await account0.job.acceptBuyRequest(0, 0)
+
+    await account1.job.sendBuyRequest(1, 'message')
+    await account0.job.acceptBuyRequest(1, 0)
+
+    await account0.job.sendBuyRequest(5, 'message')
+    await account1.job.acceptBuyRequest(5, 0)
+
+    await account0.job.sendBuyRequest(6, 'message')
+    await account1.job.acceptBuyRequest(6, 0)
   }
 }
 
