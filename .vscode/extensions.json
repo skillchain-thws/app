@@ -5,6 +5,10 @@
     "vue.volar",
     "dbaeumer.vscode-eslint",
     "editorconfig.editorconfig",
-    "nomicfoundation.hardhat-solidity"
+    "nomicfoundation.hardhat-solidity",
+    "ms-azuretools.vscode-docker",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+    "vue.vscode-typescript-vue-plugin"
   ]
 }
