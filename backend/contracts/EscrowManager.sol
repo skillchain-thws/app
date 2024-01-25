@@ -16,6 +16,7 @@ contract EscrowManager {
   CommitteeManager committeeManager;
   ChatManager chatManager;
 
+
   struct Escrow {
     uint256 jobId;
     address buyer;
@@ -86,6 +87,7 @@ contract EscrowManager {
     );
     userManager = UserManager(_address);
   }
+
 
   function setCommitteeManager(address _address) external {
     require(
@@ -175,6 +177,7 @@ contract EscrowManager {
 
     userManager.addEscrowId(escrowCount, buyer);
     userManager.addEscrowId(escrowCount, seller);
+
 
     // openChannel for this escrow and send first message
     chatManager.openChannel(escrowCount);
@@ -293,7 +296,8 @@ contract EscrowManager {
     // TO-DO: Prüfen ob escrowDone schon aufgerufen werden kann
     // escrowDone(escrows[escrowId]);
   }
-
+  
+  
   function escrowDone(Escrow storage escrow) internal {
     payable(escrow.buyer).transfer(escrow.money);
     escrow.money = 0;
@@ -351,4 +355,5 @@ contract EscrowManager {
     );
     _;
   }
+
 }

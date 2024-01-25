@@ -15,14 +15,16 @@ async function main() {
   const job = await ethers.deployContract('JobManager', [market.target], { signer: admin })
   const user = await ethers.deployContract('UserManager', [market.target], { signer: admin })
   const escrow = await ethers.deployContract('EscrowManager', [market.target], { signer: admin })
-  const chat = await ethers.deployContract('ChatManager', [], { signer: admin })
-  const review = await ethers.deployContract('ReviewManager', [], { signer: admin })
+  const chat = await ethers.deployContract('ChatManager', [market.target], { signer: admin })
+  const review = await ethers.deployContract('ReviewManager', [market.target], { signer: admin })
 
   if (
     market.target !== '0x73511669fd4dE447feD18BB79bAFeAC93aB7F31f'
     || job.target !== '0xB581C9264f59BF0289fA76D61B2D0746dCE3C30D'
     || user.target !== '0xC469e7aE4aD962c30c7111dc580B4adbc7E914DD'
     || escrow.target !== '0x43ca3D2C94be00692D207C6A1e60D8B325c6f12f'
+    || chat.target !== '0xb09da8a5B236fE0295A345035287e80bb0008290'
+    || review.target !== '0x5095d3313C76E8d29163e40a0223A5816a8037D8'
   )
     throw new Error ('Wrong deployed addresses! Restart node and try again')
 
@@ -37,8 +39,13 @@ async function main() {
   await Promise.all([
     job.setUserManager(user.target),
     job.setEscrowManager(escrow.target),
+
     escrow.setUserManager(user.target),
     escrow.setJobManager(job.target),
+
+    chat.setJobManager(job.target),
+    chat.setEscrowManager(escrow.target),
+    chat.setUserManager(user.target),
   ])
 
   const isDev = true
@@ -54,32 +61,26 @@ async function main() {
     }
 
     await user.registerUser('admin')
-    for (const { title, description, price, tags } of jobs.slice(0, 3))
-      await job.addJob(title, description, price, tags)
-
     const account0 = await useAccount(signers[0], 'acc0')
-    for (const { title, description, price, tags } of jobs.slice(3, 6))
+    const account1 = await useAccount(signers[1], 'acc1')
+
+    for (const { title, description, price, tags } of jobs.slice(0, 5))
       await account0.job.addJob(title, description, price, tags)
 
-    const account1 = await useAccount(signers[1], 'acc1')
-    for (const { title, description, price, tags } of jobs.slice(6, 9))
+    for (const { title, description, price, tags } of jobs.slice(5, 10))
       await account1.job.addJob(title, description, price, tags)
 
-    const account2 = await useAccount(signers[2], 'acc2')
-    for (const { title, description, price, tags } of jobs.slice(9, 10))
-      await account2.job.addJob(title, description, price, tags)
+    await account1.job.sendBuyRequest(0, 'message')
+    await account0.job.acceptBuyRequest(0, 0)
 
-    await job.sendBuyRequest(3, ' ')
-    await job.sendBuyRequest(6, ' ')
-    await job.sendBuyRequest(9, ' ')
+    await account1.job.sendBuyRequest(1, 'message')
+    await account0.job.acceptBuyRequest(1, 0)
 
-    await account0.job.sendBuyRequest(0, ' ')
-    await account0.job.sendBuyRequest(1, ' ')
-    await account0.job.sendBuyRequest(2, ' ')
+    await account0.job.sendBuyRequest(5, 'message')
+    await account1.job.acceptBuyRequest(5, 0)
 
-    await account1.job.sendBuyRequest(4, ' ')
-    await account1.job.sendBuyRequest(5, ' ')
-    await account1.job.sendBuyRequest(9, ' ')
+    await account0.job.sendBuyRequest(6, 'message')
+    await account1.job.acceptBuyRequest(6, 0)
   }
 }
 
