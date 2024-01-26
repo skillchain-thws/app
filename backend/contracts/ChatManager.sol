@@ -119,13 +119,7 @@ contract ChatManager {
   //*********************************************************************
 
   // Open a new communication channel for a given escrow
-  function openChannel(uint _escrowId) public isEscrowEntity(_escrowId) {
-    require(
-      channels[_escrowId].participantSeller == address(0) &&
-        channels[_escrowId].participantBuyer == address(0),
-      "Channel is already opened!"
-    );
-
+  function openChannel(uint _escrowId) public {
     // Destruct escrow from getEscrow from EscrowManager to get the addresses of buyer and seller
     (, , address buyer, address seller, , , , ) = escrowManager.getEscrow(
       _escrowId
@@ -144,7 +138,7 @@ contract ChatManager {
   }
 
   // Close an existing communication channel for a given escrow
-  function closeChannel(uint _escrowId) public isEscrowEntity(_escrowId) {
+  function closeChannel(uint _escrowId) public {
     // Fetch the corresponding channel
     Channel storage channel = channels[_escrowId];
 
@@ -165,10 +159,7 @@ contract ChatManager {
   //*********************************************************************
 
   // Send a message in the channel (channelId == escrowId)
-  function sendMessage(
-    uint _escrowId,
-    string memory _content
-  ) public isEscrowEntity(_escrowId) {
+  function sendMessage(uint _escrowId, string memory _content) public {
     // Get channel by escrowId
     Channel storage channel = channels[_escrowId];
 

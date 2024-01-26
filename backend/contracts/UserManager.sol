@@ -2,9 +2,11 @@
 pragma solidity ^0.8.4;
 
 import "./FreelancerMarketplace.sol";
+import "./CommitteeManager.sol";
 
 contract UserManager {
   FreelancerMarketplace freelancerMarketplace;
+  CommitteeManager committeeManager;
 
   mapping(address => User) public users;
   mapping(uint256 => address) public addresses;
@@ -22,6 +24,20 @@ contract UserManager {
     freelancerMarketplace = FreelancerMarketplace(
       _freelancerMarketplaceAddress
     );
+  }
+
+  //*********************************************************************
+  //*********************************************************************
+  //                        Setter Functions
+  //*********************************************************************
+  //*********************************************************************
+
+  function setCommitteeManager(address _address) external {
+    require(
+      freelancerMarketplace.onlyAdmin(),
+      "Only the Admin can add Managers"
+    );
+    committeeManager = CommitteeManager(_address);
   }
 
   //*********************************************************************
@@ -109,6 +125,9 @@ contract UserManager {
     newUser.userName = _name;
     newUser.isJudge = false;
 
+    // Every registered users becomse a judge, if he does not want to he has to call unsetJudge
+    setJudge(msg.sender);
+
     addresses[userCount] = msg.sender;
     userCount++;
 
@@ -178,9 +197,10 @@ contract UserManager {
 
   event JudgeSet(address userAddress);
 
-  function setJudge(address userAddress) external {
-    require(freelancerMarketplace.onlyAdmin(), "You need to be Admin");
+  function setJudge(address userAddress) public {
+    //require(!users[userAddress].isJudge, "You are already a judge");
     users[userAddress].isJudge = true;
+    committeeManager.joinCommittee(userAddress);
 
     emit JudgeSet(userAddress);
   }
@@ -188,8 +208,10 @@ contract UserManager {
   event JudgeUnset(address userAddress);
 
   function unsetJudge(address userAddress) external {
-    require(freelancerMarketplace.onlyAdmin(), "You need to be Admin");
+    require(users[userAddress].isJudge, "You have not been a judge");
     users[userAddress].isJudge = false;
+    // Set status of this committee member to unavailable
+    committeeManager.markMemberAsUnavailable(userAddress);
 
     emit JudgeUnset(userAddress);
   }

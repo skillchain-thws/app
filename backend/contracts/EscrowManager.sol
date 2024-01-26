@@ -4,6 +4,8 @@ pragma solidity >=0.7.0 <0.9.0;
 import "./FreelancerMarketplace.sol";
 import "./UserManager.sol";
 import "./JobManager.sol";
+import "./CommitteeManager.sol";
+import "./ChatManager.sol";
 
 contract EscrowManager {
   mapping(uint256 => Escrow) public escrows;
@@ -11,6 +13,8 @@ contract EscrowManager {
   FreelancerMarketplace freelancerMarketplace;
   JobManager jobManager;
   UserManager userManager;
+  CommitteeManager committeeManager;
+  ChatManager chatManager;
 
   struct Escrow {
     uint256 jobId;
@@ -81,6 +85,22 @@ contract EscrowManager {
       "Only the Admin can add Managers"
     );
     userManager = UserManager(_address);
+  }
+
+  function setCommitteeManager(address _address) external {
+    require(
+      freelancerMarketplace.onlyAdmin(),
+      "Only the Admin can add Managers"
+    );
+    committeeManager = CommitteeManager(_address);
+  }
+
+  function setChatManager(address _address) external {
+    require(
+      freelancerMarketplace.onlyAdmin(),
+      "Only the Admin can add Managers"
+    );
+    chatManager = ChatManager(_address);
   }
 
   //*********************************************************************
@@ -156,10 +176,19 @@ contract EscrowManager {
     userManager.addEscrowId(escrowCount, buyer);
     userManager.addEscrowId(escrowCount, seller);
 
-    emit EscrowCreated(escrowCount, jobId, buyer, seller, price);
+    // openChannel for this escrow and send first message
+    chatManager.openChannel(escrowCount);
+    chatManager.sendMessage(
+      escrowCount,
+      "This escrow started, hit me a message"
+    );
 
     escrowCount++;
+
+    emit EscrowCreated(escrowCount, jobId, buyer, seller, price);
   }
+
+  function createEscrowTrigger() internal {}
 
   //*********************************************************************
   //*********************************************************************
@@ -244,10 +273,32 @@ contract EscrowManager {
   //*********************************************************************
   //*********************************************************************
 
+  // Function to update the Escrow price after committee vote
+  function updateEscrow(uint escrowId, uint newAmount, bool accepted) external {
+    // Ensure that the escrow is not marked as done
+    require(!escrows[escrowId].isDone, "Escrow is already completed");
+    // Check if Committee accpeted the request or not, if yes handle refund and update escrow price
+    // if not mark escrow as Done
+    if (accepted) {
+      uint refundAmount = escrows[escrowId].price - newAmount;
+      // Update the escrow with the new amount
+      escrows[escrowId].price = newAmount;
+      // The differing ammount will be sent back to the buyer
+      if (refundAmount > 0) {
+        // TO-DO: Hier schauen, wie genau die Zahlung abläuft
+        //payable(escrows[escrowId].buyer).transfer(refundAmount);
+        refundAmount = 0;
+      }
+    }
+    // TO-DO: Prüfen ob escrowDone schon aufgerufen werden kann
+    // escrowDone(escrows[escrowId]);
+  }
+
   function escrowDone(Escrow storage escrow) internal {
     payable(escrow.buyer).transfer(escrow.money);
     escrow.money = 0;
     escrow.isDone = true;
+    chatManager.closeChannel(escrow.jobId);
   }
 
   function cancelEscrow(uint256 escrowId) external isEscrowParty(escrowId) {
@@ -299,12 +350,5 @@ contract EscrowManager {
       "You are not the buyer in the escrow"
     );
     _;
-  }
-
-  // Function to call modifier isEscrowParty from outsid
-  function isEscrowEntity(
-    uint _escrowId
-  ) public view isEscrowParty(_escrowId) returns (bool) {
-    return true;
   }
 }
