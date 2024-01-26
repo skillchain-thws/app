@@ -17,6 +17,7 @@ contract EscrowManager {
   ChatManager chatManager;
 
   struct Escrow {
+    uint256 escrowId;
     uint256 jobId;
     address buyer;
     address seller;
@@ -28,6 +29,7 @@ contract EscrowManager {
   }
 
   struct SimplifiedEscrow {
+    uint256 escrowId;
     uint256 jobId;
     address buyer;
     address seller;
@@ -168,6 +170,7 @@ contract EscrowManager {
     address seller = jobManager.getJobOwner(jobId);
 
     Escrow storage newEscrow = escrows[escrowCount];
+    newEscrow.escrowId = escrowCount;
     newEscrow.jobId = jobId;
     newEscrow.buyer = buyer;
     newEscrow.seller = seller;
@@ -178,17 +181,12 @@ contract EscrowManager {
 
     // openChannel for this escrow and send first message
     chatManager.openChannel(escrowCount);
-    chatManager.sendMessage(
-      escrowCount,
-      "This escrow started, hit me a message"
-    );
+    chatManager.sendMessage(escrowCount, "__OPENED__");
 
     escrowCount++;
 
     emit EscrowCreated(escrowCount, jobId, buyer, seller, price);
   }
-
-  function createEscrowTrigger() internal {}
 
   //*********************************************************************
   //*********************************************************************
@@ -201,30 +199,22 @@ contract EscrowManager {
     Escrow storage escrow = escrows[escrowId];
     require(
       escrow.currentRequest.status != RequestStatus.Pending,
-      "Cant Send a new request while currentone is pending"
+      "Cant Send a new request while current one is pending"
     );
-    bool starter;
-    if (!escrow.started) {
-      require(
-        msg.sender == escrow.buyer,
-        "Only the Buyer can send the Start Request"
-      );
-      require(msg.value < escrow.price, "invalid Funds");
-      escrows[escrowId].money += msg.value;
-      starter = true;
-    } else {
-      require(
-        msg.sender == escrow.seller,
-        "Only the Seller can send the End Request"
-      );
-      starter = false;
-    }
+    require(!escrow.started, "Escrow must not be started");
+    require(
+      msg.sender == escrow.buyer,
+      "Only the Buyer can send the Start Request"
+    );
+    require(msg.value < escrow.price, "invalid Funds");
 
+    escrows[escrowId].money += msg.value;
+    escrow.started = true;
     escrow.currentRequest = Request({
       buyer: msg.sender,
       seller: escrow.seller,
       status: RequestStatus.Pending,
-      isStartRequest: starter
+      isStartRequest: true
     });
   }
 
@@ -235,34 +225,16 @@ contract EscrowManager {
       escrow.currentRequest.status == RequestStatus.Pending,
       "You can only interact with pending requests"
     );
-    bool isStartRequest;
 
-    if (!escrow.started) {
-      require(
-        msg.sender == escrow.seller,
-        "Only the Seller can accpet the Start Request"
-      );
-      isStartRequest = true;
-    } else {
-      require(
-        msg.sender == escrow.buyer,
-        "Only the Buyer can accept the End Request"
-      );
-      isStartRequest = false;
-    }
+    require(
+      msg.sender == escrow.seller,
+      "Only the Seller can accept the End Request"
+    );
 
     if (accept) {
-      if (!escrow.started) {
-        escrow.started = true;
-      } else {
-        escrowDone(escrow);
-      }
+      escrowDone(escrow);
       escrow.currentRequest.status = RequestStatus.Accepted;
     } else {
-      if (!escrow.started) {
-        payable(escrow.buyer).transfer(escrow.money);
-        escrow.money = 0;
-      }
       escrow.currentRequest.status = RequestStatus.Declined;
     }
   }
@@ -298,7 +270,8 @@ contract EscrowManager {
     payable(escrow.buyer).transfer(escrow.money);
     escrow.money = 0;
     escrow.isDone = true;
-    chatManager.closeChannel(escrow.jobId);
+    chatManager.sendMessage(escrow.escrowId, "__CLOSED__");
+    chatManager.closeChannel(escrow.escrowId);
   }
 
   function cancelEscrow(uint256 escrowId) external isEscrowParty(escrowId) {
