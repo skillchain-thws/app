@@ -111,6 +111,10 @@ contract EscrowManager {
   //*********************************************************************
   //*********************************************************************
 
+  function getEscrowCount() external view returns (uint256 count) {
+    return escrowCount;
+  }
+
   function getEscrowIdFromJob(
     uint256 jobId
   ) external view returns (uint256 escrowId) {
@@ -179,9 +183,7 @@ contract EscrowManager {
     userManager.addEscrowId(escrowCount, buyer);
     userManager.addEscrowId(escrowCount, seller);
 
-    // openChannel for this escrow and send first message
     chatManager.openChannel(escrowCount);
-    chatManager.sendMessage(escrowCount, "__OPENED__");
 
     escrowCount++;
 
@@ -270,7 +272,6 @@ contract EscrowManager {
     payable(escrow.buyer).transfer(escrow.money);
     escrow.money = 0;
     escrow.isDone = true;
-    chatManager.sendMessage(escrow.escrowId, "__CLOSED__");
     chatManager.closeChannel(escrow.escrowId);
   }
 

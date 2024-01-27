@@ -33,7 +33,6 @@ const isNoReceiver = computed(() =>
 const messages = shallowRef<Message[]>([])
 const role = ref<'buyer' | 'seller'>('buyer')
 const s = ref('')
-const offerPrice = ref(currentEscrow.value.job.price)
 const router = useRouter()
 const route = useRoute()
 const isProcessing = ref(false)
@@ -98,20 +97,15 @@ async function handleChangeEscrow(e: CustomEscrow) {
   router.push(`/chats?id=${e.escrowId}`)
   role.value = e.buyerUsername === store.user.userName ? 'buyer' : 'seller'
   currentEscrow.value = e
-  offerPrice.value = e.job.price
-  setTimeout(async () => {
-    messages.value = await fetchMessages(e.escrowId)
-  }, 100)
+  messages.value = await fetchMessages(e.escrowId)
 }
 
 async function handleResponseFromBuyer() {
   isProcessing.value = true
   const res = await escrowFactory.sendRequest(currentEscrow.value.escrowId)
   const receipt = await res.wait()
-  if (receipt?.status === 1) {
-    messages.value = await fetchMessages(currentEscrow.value.escrowId)
+  if (receipt?.status === 1)
     currentEscrow.value.started = true
-  }
 
   isProcessing.value = false
 }
@@ -119,10 +113,8 @@ async function handleResponseFromBuyer() {
 async function handleResponseFromSeller(accepted: boolean) {
   const response = await escrowFactory.respondToRequest(currentEscrow.value.escrowId, accepted)
   const receipt = await response.wait()
-  if (receipt?.status === 1) {
-    messages.value = await fetchMessages(currentEscrow.value.escrowId)
+  if (receipt?.status === 1)
     currentEscrow.value.isDone = true
-  }
 }
 
 const newMessage = ref('')
@@ -264,52 +256,45 @@ async function handleSend() {
 
         <ScrollArea v-else class="grow p-3">
           <div class="flex flex-col gap-2 h-full">
+            <template v-if="currentEscrow.started && messages.length === 0">
+              <p class="text-sm text-center text-muted-foreground">
+                you both are now connected
+              </p>
+            </template>
+
+            <template v-if="!currentEscrow.started">
+              <template v-if="role === 'buyer'">
+                <ChatBox>
+                  <BaseUsername>{{ currentEscrow.sellerUsername }}</BaseUsername>
+                  hat accepted your job buy request!
+                </ChatBox>
+                <ChatBox>
+                  click accept to connect with them.
+                </ChatBox>
+                <ChatBox parent-class="">
+                  <Button
+                    size="sm"
+                    :disabled="isProcessing"
+                    @click="handleResponseFromBuyer"
+                  >
+                    accept
+                  </Button>
+                </ChatBox>
+              </template>
+              <template v-else>
+                <ChatBox dir="right">
+                  you hat already sent job request to <BaseUsername>{{ currentEscrow.buyerUsername }}</BaseUsername>.
+                </ChatBox>
+                <ChatBox dir="right">
+                  wait for them to accept!
+                </ChatBox>
+              </template>
+            </template>
+
             <template
               v-for="{ sender, timestamp, content } in messages" :key="timestamp"
             >
-              <template v-if="content === '__OPENED__' && !currentEscrow.started">
-                <template v-if="role === 'buyer'">
-                  <ChatBox>
-                    <BaseUsername>{{ currentEscrow.sellerUsername }}</BaseUsername>
-                    hat accepted your job buy request!
-                  </ChatBox>
-                  <ChatBox>
-                    click accept to connect with them.
-                  </ChatBox>
-                  <ChatBox parent-class="">
-                    <Button
-                      size="sm"
-                      :disabled="isProcessing"
-                      @click="handleResponseFromBuyer"
-                    >
-                      accept
-                    </Button>
-                  </ChatBox>
-                </template>
-                <template v-else>
-                  <ChatBox dir="right">
-                    you hat already sent job request to <BaseUsername>{{ currentEscrow.buyerUsername }}</BaseUsername>.
-                  </ChatBox>
-                  <ChatBox dir="right">
-                    wait for them to accept!
-                  </ChatBox>
-                </template>
-              </template>
-
-              <template v-else-if="content === '__OPENED__' && currentEscrow.started">
-                <p class="text-sm text-center text-muted-foreground">
-                  you both are now connected
-                </p>
-              </template>
-
-              <template v-else-if="content === '__CLOSED__'">
-                <p class="text-sm text-center text-muted-foreground">
-                  escrow is done. this channel is closed
-                </p>
-              </template>
-
               <ChatBox
-                v-else
                 :dir="compareAddress(sender, store.address) ? 'right' : 'left'"
               >
                 {{ content }}
@@ -319,6 +304,12 @@ async function handleSend() {
                   </p>
                 </template>
               </ChatBox>
+            </template>
+
+            <template v-if="currentEscrow.isDone">
+              <p class="text-sm text-center text-muted-foreground">
+                escrow is done. this channel is closed
+              </p>
             </template>
           </div>
         </ScrollArea>

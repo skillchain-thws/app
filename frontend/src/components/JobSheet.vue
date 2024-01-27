@@ -7,6 +7,10 @@ const props = defineProps<{
   job: Job
 }>()
 
+const emits = defineEmits<{
+  (e: 'deleted'): void
+}>()
+
 const open = defineModel<boolean>('open', { default: false })
 
 const store = useStore()
@@ -56,7 +60,12 @@ async function handleSendRequest() {
 }
 
 async function handleDeleteJob() {
-  await jobFactory.deleteJob(props.job.id)
+  const response = await jobFactory.deleteJob(props.job.id)
+  const receipt = await response.wait()
+  if (receipt?.status === 1) {
+    open.value = false
+    emits('deleted')
+  }
 }
 </script>
 
@@ -135,7 +144,10 @@ async function handleDeleteJob() {
         <template v-if="otherJobs.length">
           <div class="space-y-5 mt-10">
             <h3 class="text-xl">
-              more from @{{ seller.userName }}
+              more from
+              <BaseUsername>
+                {{ seller.userName }}
+              </BaseUsername>
             </h3>
 
             <ScrollArea class="h-[400px]">
