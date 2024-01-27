@@ -13,7 +13,7 @@ const chatFactory = await store.getChatFactory()
 
 const escrowsAsBuyer = shallowRef<CustomEscrow[]>([])
 const escrowsAsSeller = shallowRef<CustomEscrow[]>([])
-const currentEscrow = shallowRef<CustomEscrow>({
+const currentEscrow = ref<CustomEscrow>({
   buyer: EMPTY_ADDRESS,
   buyerUsername: 'n.a.',
   escrowId: -1,
@@ -35,7 +35,6 @@ const role = ref<'buyer' | 'seller'>('buyer')
 const s = ref('')
 const router = useRouter()
 const route = useRoute()
-const isProcessing = ref(false)
 
 async function fetch() {
   const _escrowsAsBuyer: CustomEscrow[] = []
@@ -101,13 +100,10 @@ async function handleChangeEscrow(e: CustomEscrow) {
 }
 
 async function handleResponseFromBuyer() {
-  isProcessing.value = true
   const res = await escrowFactory.sendRequest(currentEscrow.value.escrowId)
   const receipt = await res.wait()
   if (receipt?.status === 1)
     currentEscrow.value.started = true
-
-  isProcessing.value = false
 }
 
 async function handleResponseFromSeller(accepted: boolean) {
@@ -274,7 +270,6 @@ async function handleSend() {
                 <ChatBox parent-class="">
                   <Button
                     size="sm"
-                    :disabled="isProcessing"
                     @click="handleResponseFromBuyer"
                   >
                     accept
@@ -307,9 +302,7 @@ async function handleSend() {
             </template>
 
             <template v-if="currentEscrow.isDone">
-              <p class="text-sm text-center text-muted-foreground">
-                escrow is done. this channel is closed
-              </p>
+              <ChatReview :escrow-id="currentEscrow.escrowId" />
             </template>
           </div>
         </ScrollArea>

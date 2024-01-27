@@ -10,7 +10,7 @@ const navs
    () => isEthereum && store.isConnected
      ? [
          { to: '/', label: 'jobs' },
-         //  { to: '/users', label: 'users' },
+         { to: '/users', label: 'users' },
          { to: '/chats', label: 'chats' },
          { to: '/requests', label: 'requests' },
          { to: '/reviews', label: 'reviews' },
