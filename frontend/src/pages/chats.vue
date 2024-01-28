@@ -3,7 +3,7 @@ import { EMPTY_ADDRESS } from '@/constants'
 import { fetchEscrow, fetchJob, fetchMessages, fetchUser } from '@/lib/fetch'
 import type { Escrow, Job, Message } from '@/types'
 import { compareAddress, shortenAddr } from '@/utils'
-import { Forward, MessageCircleOff } from 'lucide-vue-next'
+import { Forward, MessageCircleOff, MoreVertical } from 'lucide-vue-next'
 
 type CustomEscrow = Escrow & { buyerUsername: string, sellerUsername: string, job: Job }
 
@@ -125,6 +125,11 @@ async function handleSend() {
     newMessage.value = ''
   }
 }
+
+const committeeFactory = await store.getCommitteeFactory()
+async function handleOpenCommittee() {
+  await committeeFactory.openCommitteeReview(currentEscrow.value.escrowId, 10, 'something')
+}
 </script>
 
 <template>
@@ -231,13 +236,28 @@ async function handleSend() {
               <span class="text-muted-foreground">{{ currentEscrow.buyer }}</span>
             </div>
             <div class="ml-auto">
-              <Button
+              <DropdownMenu
                 v-if="currentEscrow.started && !currentEscrow.isDone"
-                size="sm"
-                @click="handleResponseFromSeller(true)"
               >
-                accept
-              </Button>
+                <DropdownMenuTrigger>
+                  <Button variant="outline" size="icon" class="h-8 w-8">
+                    <MoreVertical :size="20" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem @click="handleOpenCommittee">
+                    request committee
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem @click="handleResponseFromSeller(true)">
+                    accept
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem class="text-destructive" @click="handleResponseFromSeller(false)">
+                    decline
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </template>
         </div>

@@ -1,3 +1,4 @@
+/* eslint-disable unused-imports/no-unused-vars */
 import type { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers'
 import { ethers } from 'hardhat'
 import { exit } from 'node:process'
@@ -77,6 +78,14 @@ async function main() {
     await user.registerUser('admin')
     const account0 = await useAccount(signers[0], 'acc0')
     const account1 = await useAccount(signers[1], 'acc1')
+    const account2 = await useAccount(signers[2], 'acc2')
+    const account3 = await useAccount(signers[3], 'acc3')
+    const account4 = await useAccount(signers[4], 'acc4')
+    const account5 = await useAccount(signers[5], 'acc5')
+    const account6 = await useAccount(signers[6], 'acc6')
+    const account7 = await useAccount(signers[7], 'acc7')
+    const account8 = await useAccount(signers[8], 'acc8')
+    const account9 = await useAccount(signers[9], 'acc9')
 
     for (const { title, description, price, tags } of jobs.slice(0, 5))
       await account0.job.addJob(title, description, price, tags)
