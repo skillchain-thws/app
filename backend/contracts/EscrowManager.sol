@@ -208,10 +208,11 @@ contract EscrowManager {
       msg.sender == escrow.buyer,
       "Only the Buyer can send the Start Request"
     );
-    require(msg.value < escrow.price, "invalid Funds");
+    require(msg.value == escrow.price, "invalid Funds");
 
-    escrows[escrowId].money += msg.value;
+    escrow.money += msg.value;
     escrow.started = true;
+
     escrow.currentRequest = Request({
       buyer: msg.sender,
       seller: escrow.seller,
@@ -248,28 +249,35 @@ contract EscrowManager {
   //*********************************************************************
 
   // Function to update the Escrow price after committee vote
-  function updateEscrow(uint escrowId, uint newAmount, bool accepted) external {
+  function updateEscrow(
+    uint escrowId,
+    uint newAmount,
+    bool accepted
+  ) external onlyCommitteeMember(escrowId) {
     // Ensure that the escrow is not marked as done
     require(!escrows[escrowId].isDone, "Escrow is already completed");
+
+    Escrow storage currentEscrow = escrows[escrowId];
     // Check if Committee accpeted the request or not, if yes handle refund and update escrow price
     // if not mark escrow as Done
     if (accepted) {
-      uint refundAmount = escrows[escrowId].price - newAmount;
+      uint refundAmount = currentEscrow.money - newAmount;
       // Update the escrow with the new amount
-      escrows[escrowId].price = newAmount;
+
       // The differing ammount will be sent back to the buyer
       if (refundAmount > 0) {
         // TO-DO: Hier schauen, wie genau die Zahlung abläuft
-        //payable(escrows[escrowId].buyer).transfer(refundAmount);
+        payable(currentEscrow.buyer).transfer(refundAmount);
         refundAmount = 0;
       }
+      currentEscrow.money = newAmount;
     }
     // TO-DO: Prüfen ob escrowDone schon aufgerufen werden kann
-    // escrowDone(escrows[escrowId]);
+    escrowDone(currentEscrow);
   }
 
   function escrowDone(Escrow storage escrow) internal {
-    payable(escrow.buyer).transfer(escrow.money);
+    payable(escrow.seller).transfer(escrow.money);
     escrow.money = 0;
     escrow.isDone = true;
     chatManager.closeChannel(escrow.escrowId);
@@ -288,6 +296,10 @@ contract EscrowManager {
     currentEscrow.money = 0;
     currentEscrow.started = false;
     currentEscrow.isDone = false;
+
+    // Close ChatChannel
+    chatManager.closeChannel(escrowId);
+    chatManager.sendMessage(escrowId, "This escrow was canceled");
   }
 
   //*********************************************************************
@@ -323,6 +335,26 @@ contract EscrowManager {
       msg.sender == escrows[escrowId].buyer,
       "You are not the buyer in the escrow"
     );
+    _;
+  }
+
+  modifier onlyCommitteeMember(uint escrowId) {
+    bool _isCommitteeMember = false;
+    address[] memory committeeMemberArray = committeeManager
+      .getCommitteeMemberArray(escrowId);
+    for (uint i = 0; i < committeeMemberArray.length; i++) {
+      if (committeeMemberArray[i] == msg.sender) {
+        _isCommitteeMember = true;
+        break;
+      }
+    }
+
+    require(
+      _isCommitteeMember,
+      "you are not a part of the committee for this escrow"
+    );
+
+    // Continue with the execution of the function
     _;
   }
 }
