@@ -125,7 +125,7 @@ First, build the skillchain image by opening the terminal in the project's root 
 docker buildx build . -t skillchain:latest
 ```
 
-Run the image and specify port mapping with the `-p` flag.
+Run the image and specify port mapping with the `-p` flag, for e.g. port `8080`.
 
 ```bash
 docker run --rm -it -p 8080:80 skillchain:latest
