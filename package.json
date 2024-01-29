@@ -9,8 +9,6 @@
     "be:node": "pnpm --filter=./backend node",
     "be:deploy:local": "pnpm --filter=./backend deploy:local",
     "be:build": "pnpm --filter=./backend build",
-    "docs:dev": "pnpm --filter=./docs dev",
-    "docs:build": "pnpm --filter=./docs build",
     "postinstall": "npx simple-git-hooks"
   },
   "devDependencies": {

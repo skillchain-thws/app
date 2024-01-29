@@ -7,7 +7,6 @@ skillchain is your go-to decentralized platform for seamless freelance connectio
   - [Prepare](#prepare)
   - [Usage](#usage)
     - [Development](#development)
-    - [Document](#document)
     - [Docker](#docker)
 
 ## Prepare
@@ -117,16 +116,6 @@ pnpm fe:dev
 
 Open your browser and enter the following URL: [http://localhost:5173](http://localhost:5173)
 > Ensure all terminals remain active to keep both frontend and backend services running.
-
-### Document
-
-To start dev server for docs navigate to `/docs` and run this command
-
-```
-pnpm docs:dev
-```
-
-For more information see [here.](https://vitepress.dev/guide/getting-started)
 
 ### Docker
 
