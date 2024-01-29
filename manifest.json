@@ -3,19 +3,19 @@
     "apps": [
       {
         "name": "app",
-        "headCommitId": "beaba2e8a58dbbaa0de52f5e71c73073ebe3b585",
-        "updatedAt": "2024-01-29T11:08:58.421Z",
-        "href": "ci/app/beaba2",
+        "headCommitId": "a75f784c06daef76baef0b1594af54d70de06da3",
+        "updatedAt": "2024-01-29T11:14:46.318Z",
+        "href": "ci/app/a75f78",
         "pullRequestUrl": "https://github.com/chubetho/skillchain/pull/6",
-        "githubPagesUrl": "https://chubetho.github.io/skillchain/ci/app/beaba2"
+        "githubPagesUrl": "https://chubetho.github.io/skillchain/ci/app/a75f78"
       },
       {
         "name": "docs",
-        "headCommitId": "beaba2e8a58dbbaa0de52f5e71c73073ebe3b585",
-        "updatedAt": "2024-01-29T11:08:58.421Z",
-        "href": "ci/docs/beaba2",
+        "headCommitId": "a75f784c06daef76baef0b1594af54d70de06da3",
+        "updatedAt": "2024-01-29T11:14:46.318Z",
+        "href": "ci/docs/a75f78",
         "pullRequestUrl": "https://github.com/chubetho/skillchain/pull/6",
-        "githubPagesUrl": "https://chubetho.github.io/skillchain/ci/docs/beaba2"
+        "githubPagesUrl": "https://chubetho.github.io/skillchain/ci/docs/a75f78"
       }
     ]
   }
