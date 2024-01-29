@@ -1,0 +1,22 @@
+{
+  "ci": {
+    "apps": [
+      {
+        "name": "app",
+        "headCommitId": "beaba2e8a58dbbaa0de52f5e71c73073ebe3b585",
+        "updatedAt": "2024-01-29T11:08:58.421Z",
+        "href": "ci/app/beaba2",
+        "pullRequestUrl": "https://github.com/chubetho/skillchain/pull/6",
+        "githubPagesUrl": "https://chubetho.github.io/skillchain/ci/app/beaba2"
+      },
+      {
+        "name": "docs",
+        "headCommitId": "beaba2e8a58dbbaa0de52f5e71c73073ebe3b585",
+        "updatedAt": "2024-01-29T11:08:58.421Z",
+        "href": "ci/docs/beaba2",
+        "pullRequestUrl": "https://github.com/chubetho/skillchain/pull/6",
+        "githubPagesUrl": "https://chubetho.github.io/skillchain/ci/docs/beaba2"
+      }
+    ]
+  }
+}
