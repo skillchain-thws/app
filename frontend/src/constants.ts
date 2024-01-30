@@ -6,3 +6,9 @@ export enum EscrowRequestStatus {
   Accepted,
   Declined,
 }
+
+export enum AcceptanceStatus {
+  Pending,
+  Accepted,
+  Declined,
+}

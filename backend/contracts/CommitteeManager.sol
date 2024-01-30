@@ -35,6 +35,7 @@ contract CommitteeManager {
     uint requiredCommitteeMembers;
     bool isClosed;
     AcceptanceStatus status;
+    uint escrowId;
   }
 
   struct CommitteeVote {
@@ -127,7 +128,7 @@ contract CommitteeManager {
 
   // Function to retrieve details of a review request
   function getReviewRequestDetails(
-    uint escrowId
+    uint _escrowId
   )
     external
     view
@@ -137,11 +138,12 @@ contract CommitteeManager {
       string memory reason,
       uint requiredCommitteeMembers,
       bool isClosed,
-      AcceptanceStatus status
+      AcceptanceStatus status,
+      uint escrowId
     )
   {
     // Retrieve the review request for the specified escrowId
-    ReviewRequest storage request = reviewRequests[escrowId];
+    ReviewRequest storage request = reviewRequests[_escrowId];
 
     // Return the details as a tuple
     return (
@@ -150,7 +152,8 @@ contract CommitteeManager {
       request.reason,
       request.requiredCommitteeMembers,
       request.isClosed,
-      request.status
+      request.status,
+      request.escrowId
     );
   }
 
@@ -306,14 +309,14 @@ contract CommitteeManager {
   // happy with the result, so they will request a Committee Review
   // Review consists of new ammount (ether) and a string reason to describe why a review is requested
   function openCommitteeReview(
-    uint escrowId,
+    uint _escrowId,
     uint newAmount,
     string calldata _reason
-  ) external onlyEscrowEntity(escrowId) {
+  ) external onlyEscrowEntity(_escrowId) {
     require(newAmount > 0, "New amount must be greater than 0");
     // Überprüfen, ob bereits eine Review-Anfrage für diese Escrow-ID geöffnet wurde
     require(
-      !reviewRequests[escrowId].isClosed,
+      !reviewRequests[_escrowId].isClosed,
       "Review request already opened"
     );
 
@@ -329,14 +332,15 @@ contract CommitteeManager {
       reason: _reason,
       requiredCommitteeMembers: requiredCommitteeMembers,
       isClosed: false,
-      status: AcceptanceStatus.Pending
+      status: AcceptanceStatus.Pending,
+      escrowId: _escrowId
     });
 
     // Permanently store the new review request in the mapping, with the escrowId as key
-    reviewRequests[escrowId] = newRequest;
+    reviewRequests[_escrowId] = newRequest;
 
     // Trigger the event to notify the frontend
-    emit CommitteeReviewOpened(escrowId, requiredCommitteeMembers);
+    emit CommitteeReviewOpened(_escrowId, requiredCommitteeMembers);
   }
 
   // Committee Members can Vote true = Yes/ false = No on the Review request

@@ -68,6 +68,7 @@ export interface ReviewRequestDetail {
   requiredCommitteeMembers: number
   isClosed: boolean
   status: number
+  escrowId: number
 }
 
 declare global {

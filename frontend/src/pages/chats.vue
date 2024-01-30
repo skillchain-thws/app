@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import { EMPTY_ADDRESS, EscrowRequestStatus } from '@/constants'
-import { fetchEscrow, fetchJob, fetchMessages, fetchRequest, fetchUser } from '@/lib/fetch'
-import type { Escrow, EscrowRequest, Job, Message } from '@/types'
+import { fetchEscrow, fetchJob, fetchMessages, fetchRequest, fetchRequestDetails, fetchUser } from '@/lib/fetch'
+import type { Escrow, EscrowRequest, Job, Message, ReviewRequestDetail } from '@/types'
 import { compareAddress, shortenAddr } from '@/utils'
 import { CheckCircle2, Forward, HelpCircle, MessageCircleOff, MoreVertical, XCircle } from 'lucide-vue-next'
 
 type CustomEscrow = Escrow & { buyerUsername: string, sellerUsername: string, job: Job }
 
+const router = useRouter()
+const route = useRoute()
+
 const store = useStore()
 const escrowFactory = await store.getEscrowFactory()
 const chatFactory = await store.getChatFactory()
+const committeeFactory = await store.getCommitteeFactory()
 
 const escrowsAsBuyer = shallowRef<CustomEscrow[]>([])
 const escrowsAsSeller = shallowRef<CustomEscrow[]>([])
@@ -22,8 +26,7 @@ const isNoReceiver = computed(() =>
 const messages = shallowRef<Message[]>([])
 const role = ref<'buyer' | 'seller'>('buyer')
 const s = ref('')
-const router = useRouter()
-const route = useRoute()
+const reviewRequestDetails = shallowRef<ReviewRequestDetail & { username: string }>()
 
 async function fetch() {
   const _escrowsAsBuyer: CustomEscrow[] = []
@@ -87,6 +90,13 @@ async function handleChangeEscrow(e: CustomEscrow) {
   currentEscrow.value = e
   currentRequest.value = await fetchRequest(e.escrowId)
   messages.value = await fetchMessages(e.escrowId)
+
+  const rrd = await fetchRequestDetails(e.escrowId)
+  reviewRequestDetails.value
+  = {
+      ...rrd,
+      username: compareAddress(e.buyer, rrd.requester) ? e.buyerUsername : e.sellerUsername,
+    }
 }
 
 async function handleResponseFromBuyer() {
@@ -128,7 +138,6 @@ async function handleSend() {
   }
 }
 
-const committeeFactory = await store.getCommitteeFactory()
 const isCommitteeDialogOpen = ref(false)
 const newAmount = ref(0)
 const reason = ref('')
@@ -269,7 +278,7 @@ async function handleOpenCommittee() {
 
           <div class="ml-auto">
             <DropdownMenu
-              v-if="currentRequest?.status === EscrowRequestStatus.Pending"
+              v-if="currentRequest?.status === EscrowRequestStatus.Pending && !compareAddress(reviewRequestDetails?.requester ?? '', store.address)"
             >
               <DropdownMenuTrigger>
                 <Button variant="outline" size="icon" class="h-8 w-8">
@@ -304,7 +313,7 @@ async function handleOpenCommittee() {
                   <DropdownMenuSeparator />
                 </template>
 
-                <DropdownMenuItem class="text-orange-500 dark:text-orange-400 pr-4" @click="handleOpenCommitteeDialog">
+                <DropdownMenuItem class="text-yellow-500 dark:text-yellow-400 pr-4" @click="handleOpenCommitteeDialog">
                   <div class="gap-2 flex items-center">
                     <HelpCircle :size="24" />
                     <span class="text-base">committee</span>
@@ -381,6 +390,12 @@ async function handleOpenCommittee() {
             <template v-if="currentRequest?.status === EscrowRequestStatus.Declined">
               <p class="text-sm text-center text-muted-foreground">
                 escrow has been canceled.
+              </p>
+            </template>
+
+            <template v-if="currentEscrow && reviewRequestDetails?.requester !== EMPTY_ADDRESS">
+              <p class="text-sm text-center text-muted-foreground">
+                a committee has been requested by <BaseUsername>{{ reviewRequestDetails?.username }}</BaseUsername>
               </p>
             </template>
           </div>

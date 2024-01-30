@@ -1,5 +1,5 @@
 import { EMPTY_ADDRESS } from '@/constants'
-import type { Escrow, EscrowRequest, Job, Message, User } from '@/types'
+import type { Escrow, EscrowRequest, Job, Message, ReviewRequestDetail, User } from '@/types'
 
 export async function fetchEscrow(id: number): Promise<Escrow | undefined> {
   const store = useStore()
@@ -20,6 +20,25 @@ export async function fetchEscrow(id: number): Promise<Escrow | undefined> {
     started: escrow[6],
     isDone: escrow[7],
   }
+}
+
+export async function fetchEscrows(): Promise<Escrow[]> {
+  const store = useStore()
+  const factory = await store.getEscrowFactory()
+  const escrows = await factory.getAllEscrows()
+  return escrows
+    .filter(e => e.buyer !== EMPTY_ADDRESS && e.seller !== EMPTY_ADDRESS)
+    .map(e => ({
+      escrowId: Number(e[0]),
+      jobId: Number(e[1]),
+      buyer: e[2],
+      seller: e[3],
+      money: Number(e[4]),
+      price: Number(e[5]),
+      started: e[6],
+      isDone: e[7],
+
+    }))
 }
 
 export async function fetchUser(addr: string): Promise<User> {
@@ -88,4 +107,19 @@ export async function fetchMessages(id: number): Promise<Message[]> {
     timestamp: Number(m[2]),
     content: m[3],
   }))
+}
+
+export async function fetchRequestDetails(escrowId: number): Promise<ReviewRequestDetail> {
+  const store = useStore()
+  const factory = await store.getCommitteeFactory()
+  const r = await factory.getReviewRequestDetails(escrowId)
+  return {
+    requester: r[0],
+    newAmount: Number([1]),
+    reason: r[2],
+    requiredCommitteeMembers: Number(r[3]),
+    isClosed: r[4],
+    status: Number(r[5]),
+    escrowId: Number(r[6]),
+  }
 }
