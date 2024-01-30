@@ -208,7 +208,7 @@ contract EscrowManager {
       msg.sender == escrow.buyer,
       "Only the Buyer can send the Start Request"
     );
-    require(msg.value == escrow.price, "invalid Funds");
+    require(msg.value < escrow.price, "invalid Funds"); // TODO why not `<` but `==` @sobs
 
     escrow.money += msg.value;
     escrow.started = true;
@@ -235,10 +235,19 @@ contract EscrowManager {
     );
 
     if (accept) {
-      escrowDone(escrow);
       escrow.currentRequest.status = RequestStatus.Accepted;
+      escrowDone(escrow);
     } else {
       escrow.currentRequest.status = RequestStatus.Declined;
+      payable(escrow.buyer).transfer(escrow.money);
+
+      escrow.buyer = address(0);
+      escrow.seller = address(0);
+      escrow.money = 0;
+      escrow.started = false;
+      escrow.isDone = false;
+
+      chatManager.closeChannel(escrowId);
     }
   }
 

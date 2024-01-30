@@ -21,6 +21,10 @@ contract FreelancerMarketplace {
     return true;
   }
 
+  function isAdmin(address a) external view returns (bool) {
+    return a == owner;
+  }
+
   function nonEmptyString(string memory str) external pure returns (bool) {
     require(bytes(str).length > 0, "String must not be empty");
     return true;

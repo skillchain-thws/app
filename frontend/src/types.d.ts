@@ -61,6 +61,15 @@ export interface ReviewResponse {
   responseComment: string
 }
 
+export interface ReviewRequestDetail {
+  requester: string
+  newAmount: number
+  reason: string
+  requiredCommitteeMembers: number
+  isClosed: boolean
+  status: number
+}
+
 declare global {
   interface Window {
     ethereum: Eip1193Provider &

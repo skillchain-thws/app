@@ -75,9 +75,7 @@ const jobId = ref(-1)
                     </div>
 
                     <RouterLink v-if="r.accepted" :to="{ path: '/chats', query: { id: r.escrowId } }">
-                      <Button>
-                        to chat
-                      </Button>
+                      <Button>chat</Button>
                     </RouterLink>
                     <Button v-else @click="emits('accept', jobId, r.id)">
                       accept

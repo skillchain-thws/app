@@ -240,11 +240,14 @@ contract CommitteeManager {
 
     // Iterate through the mapping committeeMembers
     for (uint i = 0; i < allCommitteeMemberCount; i++) {
-      // Check if the committee member is available
-      if (committeeMembers[i].availability == MemberAvailability.Available) {
+      address memberAddress = committeeMembers[i].committeeMemberAddress;
+      // Check if the committee member is available and not is admin
+      if (
+        committeeMembers[i].availability == MemberAvailability.Available &&
+        !freelancerMarketplace.isAdmin(memberAddress)
+      ) {
         // Add the available committee member to the array
-        availableMembers[availableIndex] = committeeMembers[i]
-          .committeeMemberAddress;
+        availableMembers[availableIndex] = memberAddress;
         availableIndex++;
       }
     }

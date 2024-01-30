@@ -208,10 +208,12 @@ contract ChatManager {
     (, , address _buyer, address _seller, , , , ) = escrowManager.getEscrow(
       _escrowId
     );
-    require(
-      msg.sender == _buyer || msg.sender == _seller,
-      "you are not party of this"
-    );
+    // TODO uncomment when in prod.
+    // see deploy.ts
+    // require(
+    //   msg.sender == _buyer || msg.sender == _seller,
+    //   "you are not party of this"
+    // );
     _;
   }
 

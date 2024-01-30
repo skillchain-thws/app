@@ -3,7 +3,7 @@ import { EMPTY_ADDRESS } from '@/constants'
 import { fetchEscrow, fetchJob, fetchMessages, fetchUser } from '@/lib/fetch'
 import type { Escrow, Job, Message } from '@/types'
 import { compareAddress, shortenAddr } from '@/utils'
-import { Forward, MessageCircleOff, MoreVertical } from 'lucide-vue-next'
+import { CheckCircle2, Forward, HelpCircle, MessageCircleOff, MoreVertical, XCircle } from 'lucide-vue-next'
 
 type CustomEscrow = Escrow & { buyerUsername: string, sellerUsername: string, job: Job }
 
@@ -127,8 +127,30 @@ async function handleSend() {
 }
 
 const committeeFactory = await store.getCommitteeFactory()
+const isCommitteeDialogOpen = ref(false)
+const newAmount = ref(0)
+const reason = ref('')
+const isReasonError = ref(false)
+
+function handleOpenCommitteeDialog() {
+  isCommitteeDialogOpen.value = true
+  newAmount.value = currentEscrow.value.price
+}
+
 async function handleOpenCommittee() {
-  await committeeFactory.openCommitteeReview(currentEscrow.value.escrowId, 10, 'something')
+  isReasonError.value = false
+
+  if (reason.value.length < 5) {
+    isReasonError.value = true
+    return
+  }
+
+  const response = await committeeFactory.openCommitteeReview(currentEscrow.value.escrowId, newAmount.value, reason.value)
+  const receipt = await response.wait()
+  if (receipt?.status === 1) {
+    isCommitteeDialogOpen.value = false
+    reason.value = ''
+  }
 }
 </script>
 
@@ -235,31 +257,54 @@ async function handleOpenCommittee() {
               <span class="font-medium">{{ currentEscrow.buyerUsername }}</span>
               <span class="text-muted-foreground">{{ currentEscrow.buyer }}</span>
             </div>
-            <div class="ml-auto">
-              <DropdownMenu
-                v-if="currentEscrow.started && !currentEscrow.isDone"
-              >
-                <DropdownMenuTrigger>
-                  <Button variant="outline" size="icon" class="h-8 w-8">
-                    <MoreVertical :size="20" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem @click="handleOpenCommittee">
-                    request committee
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem @click="handleResponseFromSeller(true)">
-                    accept
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem class="text-destructive" @click="handleResponseFromSeller(false)">
-                    decline
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
           </template>
+
+          <div class="ml-auto">
+            <DropdownMenu
+              v-if="currentEscrow.started && !currentEscrow.isDone"
+            >
+              <DropdownMenuTrigger>
+                <Button variant="outline" size="icon" class="h-8 w-8">
+                  <MoreVertical :size="20" />
+                </Button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent align="end">
+                <template v-if="role === 'seller'">
+                  <DropdownMenuItem
+                    class="text-highlight pr-4"
+                    @click="handleResponseFromSeller(true)"
+                  >
+                    <div class="gap-2 flex items-center">
+                      <CheckCircle2 :size="24" />
+                      <span class="text-base">accept</span>
+                    </div>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuItem
+                    class="text-destructive pr-4"
+                    @click="handleResponseFromSeller(false)"
+                  >
+                    <div class="gap-2 flex items-center">
+                      <XCircle :size="24" />
+                      <span class="text-base">decline</span>
+                    </div>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+                </template>
+
+                <DropdownMenuItem class="text-orange-500 dark:text-orange-400 pr-4" @click="handleOpenCommitteeDialog">
+                  <div class="gap-2 flex items-center">
+                    <HelpCircle :size="24" />
+                    <span class="text-base">committee</span>
+                  </div>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
 
         <div v-if="isNoReceiver" class="h-full flex-center">
@@ -285,14 +330,14 @@ async function handleOpenCommittee() {
                   hat accepted your job buy request!
                 </ChatBox>
                 <ChatBox>
-                  click accept to connect with them.
+                  click this button to connect with them.
                 </ChatBox>
                 <ChatBox parent-class="">
                   <Button
                     size="sm"
                     @click="handleResponseFromBuyer"
                   >
-                    accept
+                    connect
                   </Button>
                 </ChatBox>
               </template>
@@ -340,4 +385,29 @@ async function handleOpenCommittee() {
       </div>
     </div>
   </div>
+
+  <Dialog v-model:open="isCommitteeDialogOpen">
+    <DialogContent class="sm:max-w-[425px]">
+      <DialogHeader>
+        <DialogTitle>request committee</DialogTitle>
+        <DialogDescription />
+      </DialogHeader>
+
+      <form class="space-y-3" @submit.prevent="handleOpenCommittee">
+        <Label class="flex items-center gap-3">
+          <span>amount</span>
+          <Input v-model="newAmount" min="0" type="number" />
+        </Label>
+
+        <Textarea v-model="reason" placeholder="reason why you want to open a committee" />
+
+        <p v-if="isReasonError" class="text-destructive">
+          reason should have more than 5 characters
+        </p>
+        <Button class="w-full" type="submit">
+          request
+        </Button>
+      </form>
+    </DialogContent>
+  </Dialog>
 </template>
