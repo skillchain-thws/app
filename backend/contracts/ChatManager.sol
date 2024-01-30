@@ -130,7 +130,8 @@ contract ChatManager {
   //*********************************************************************
 
   // Open a new communication channel for a given escrow
-  function openChannel(uint _escrowId) public onlyEscrowEntity(_escrowId) {
+  // TODO onlyEscrowEntity(_escrowId)
+  function openChannel(uint _escrowId) public {
     // Destruct escrow from getEscrow from EscrowManager to get the addresses of buyer and seller
     (, , address buyer, address seller, , , , ) = escrowManager.getEscrow(
       _escrowId
@@ -149,7 +150,8 @@ contract ChatManager {
   }
 
   // Close an existing communication channel for a given escrow
-  function closeChannel(uint _escrowId) public onlyAuthorized(_escrowId) {
+  // TODO onlyAuthorized(_escrowId)
+  function closeChannel(uint _escrowId) public {
     // Fetch the corresponding channel
     Channel storage channel = channels[_escrowId];
 
@@ -208,12 +210,10 @@ contract ChatManager {
     (, , address _buyer, address _seller, , , , ) = escrowManager.getEscrow(
       _escrowId
     );
-    // TODO uncomment when in prod.
-    // see deploy.ts
-    // require(
-    //   msg.sender == _buyer || msg.sender == _seller,
-    //   "you are not party of this"
-    // );
+    require(
+      msg.sender == _buyer || msg.sender == _seller,
+      "you are not party of this"
+    );
     _;
   }
 

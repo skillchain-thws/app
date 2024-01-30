@@ -64,7 +64,7 @@ async function handleResponseToReview() {
   const request = await reviewFactory.createResponse(review.value.id, response.value)
   const receipt = await request.wait()
   if (receipt?.status === 1)
-    console.log(await reviewFactory.getResponse(review.value.id))
+    await findReviewAndResponse()
 }
 
 function handleChooseRating(v: number) {
@@ -105,7 +105,6 @@ async function findReviewAndResponse() {
     }
   }
   catch (e) {
-    console.log(e)
   }
 }
 
@@ -134,7 +133,7 @@ onMounted(findReviewAndResponse)
           </p>
 
           <Button
-            v-if="reviewingUsername === store.user.userName && !reviewResponse"
+            v-if="beingReviewedUsername === store.user.userName && !reviewResponse"
             size="icon"
             class="ml-auto"
             variant="ghost"

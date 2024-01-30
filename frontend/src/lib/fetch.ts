@@ -65,10 +65,10 @@ export async function fetchJob(id: number): Promise<Job> {
   }
 }
 
-export async function fetchRequest(id: number): Promise<EscrowRequest> {
+export async function fetchRequest(escrowId: number): Promise<EscrowRequest> {
   const store = useStore()
   const factory = await store.getEscrowFactory()
-  const request = await factory.getCurrentRequest(id)
+  const request = await factory.getCurrentRequest(escrowId)
 
   return {
     buyer: request[0],

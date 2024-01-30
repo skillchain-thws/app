@@ -55,7 +55,7 @@ async function handleCreateJob() {
 <template>
   <Dialog v-model:open="open">
     <DialogTrigger as-child>
-      <Card class="group flex flex-center cursor-pointer hover:border-primary transition-colors">
+      <Card class="group flex flex-center cursor-pointer hover:border-primary transition-colors min-h-[254px]">
         <Plus :size="80" class="stroke-1 text-muted-foreground group-hover:text-primary transition-colors" />
       </Card>
     </DialogTrigger>

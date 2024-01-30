@@ -199,16 +199,20 @@ contract EscrowManager {
   function sendRequest(uint256 escrowId) external payable {
     require(escrowId < escrowCount, "Invalid escrow ID");
     Escrow storage escrow = escrows[escrowId];
+
     require(
       escrow.currentRequest.status != RequestStatus.Pending,
-      "Cant Send a new request while current one is pending"
+      "Cannot send a new request while the current one is pending"
     );
+
     require(!escrow.started, "Escrow must not be started");
+
     require(
       msg.sender == escrow.buyer,
-      "Only the Buyer can send the Start Request"
+      "Only the buyer can send the start request"
     );
-    require(msg.value < escrow.price, "invalid Funds"); // TODO why not `<` but `==` @sobs
+
+    require(msg.value == escrow.price, "invalid Funds");
 
     escrow.money += msg.value;
     escrow.started = true;
@@ -236,19 +240,15 @@ contract EscrowManager {
 
     if (accept) {
       escrow.currentRequest.status = RequestStatus.Accepted;
-      escrowDone(escrow);
+      payable(escrow.seller).transfer(escrow.money);
     } else {
       escrow.currentRequest.status = RequestStatus.Declined;
       payable(escrow.buyer).transfer(escrow.money);
-
-      escrow.buyer = address(0);
-      escrow.seller = address(0);
-      escrow.money = 0;
-      escrow.started = false;
-      escrow.isDone = false;
-
-      chatManager.closeChannel(escrowId);
     }
+
+    escrow.money = 0;
+    escrow.isDone = true;
+    chatManager.closeChannel(escrow.escrowId);
   }
 
   //*********************************************************************
