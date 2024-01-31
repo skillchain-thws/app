@@ -34,7 +34,7 @@ async function handleCreateJob() {
   error.value = { title: '', description: '' }
 
   if (job.value.title && job.value.description) {
-    const res = await jobFactory.addJob(job.value.title, job.value.description, job.value.price, job.value.tags)
+    const res = await jobFactory.addJob(job.value.title, job.value.description, BigInt(job.value.price) * 1000000000000000000n, job.value.tags)
     const receipt = await res.wait()
     if (receipt?.status === 1) {
       emits('created')

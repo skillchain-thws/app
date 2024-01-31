@@ -1,19 +1,34 @@
 <script setup lang="ts">
 import { AcceptanceStatus, EMPTY_ADDRESS } from '@/constants'
-import { fetchEscrows, fetchRequestDetails } from '@/lib/fetch'
+import { fetchEscrows, fetchRequestDetails, fetchUser } from '@/lib/fetch'
 import type { ReviewRequestDetail } from '@/types'
+import { parseEther } from 'ethers'
+import { ExternalLink } from 'lucide-vue-next'
+
+type CustomReviewRequestDetail = ReviewRequestDetail & { requestUsername: string }
 
 const q = ref('')
 const qDebounced = refDebounced(q, 500)
 
-const committees = ref<ReviewRequestDetail[]>([])
+const committees = ref<CustomReviewRequestDetail[]>([])
+
+async function fetchCommitteeDetails(escrowId: number) {
+  const d = await fetchRequestDetails(escrowId)
+  if (d.requester === EMPTY_ADDRESS)
+    return
+
+  const user = await fetchUser(d.requester)
+  return {
+    ...d,
+    requestUsername: user.userName,
+  }
+}
 
 onMounted(async () => {
-  committees.value = (await Promise.all(
-    (await fetchEscrows())
-      .map(e => fetchRequestDetails(e.escrowId)),
-  ))
-    .filter(x => x.requester !== EMPTY_ADDRESS)
+  const escrows = await fetchEscrows()
+  const details = await Promise.all(escrows.map(e => fetchCommitteeDetails(e.escrowId)))
+  committees.value = details.filter(Boolean) as CustomReviewRequestDetail[]
+  console.log(parseEther('1.0'))
 })
 </script>
 
@@ -30,42 +45,62 @@ onMounted(async () => {
 
       <Table>
         <TableCaption>a list of all committees</TableCaption>
+        <colgroup>
+          <col class="w-[10%]">
+          <col class="w-[10%]">
+          <col class="w-[60%]">
+          <col class="w-[15%]">
+          <col class="w-[5%]">
+        </colgroup>
         <TableHeader>
           <TableRow>
             <TableHead>requester</TableHead>
             <TableHead>amount</TableHead>
             <TableHead>reason</TableHead>
-            <TableHead>member count</TableHead>
-            <TableHead>status</TableHead>
-            <TableHead>go</TableHead>
+
+            <TableHead class="text-center">
+              status
+            </TableHead>
+            <TableHead />
           </TableRow>
         </TableHeader>
         <TableBody>
           <TableRow v-for="c in committees" :key="c.escrowId">
-            <TableCell>abc</TableCell>
-            <TableCell>{{ c.newAmount }}</TableCell>
-            <TableCell>{{ c.reason }}</TableCell>
-            <TableCell>{{ c.requiredCommitteeMembers }}</TableCell>
+            <TableCell class="font-medium">
+              {{ c.requestUsername }}
+            </TableCell>
             <TableCell>
+              <JobPrice>
+                <template #parent>
+                  <span class="mr-1">
+                    {{ c.newAmount }}
+                  </span>
+                </template>
+              </JobPrice>
+            </TableCell>
+            <TableCell>{{ c.reason }}</TableCell>
+            <TableCell class="text-center">
               <template v-if="AcceptanceStatus[c.status] === 'Pending'">
                 <Badge class="bg-yellow-500 dark:bg-yellow-400">
-                  Pending
+                  pending
                 </Badge>
               </template>
               <template v-if="AcceptanceStatus[c.status] === 'Accepted'">
                 <Badge class="bg-highlight">
-                  Accepted
+                  accepted
                 </Badge>
               </template>
               <template v-if="AcceptanceStatus[c.status] === 'Declined'">
                 <Badge variant="destructive">
-                  Declined
+                  declined
                 </Badge>
               </template>
             </TableCell>
             <TableCell>
               <RouterLink :to="{ path: `/committees/${c.escrowId}` }">
-                to
+                <Button variant="ghost" size="icon">
+                  <ExternalLink :size="20" />
+                </Button>
               </RouterLink>
             </TableCell>
           </TableRow>

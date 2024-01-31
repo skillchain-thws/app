@@ -81,10 +81,10 @@ async function main() {
       await useAccount(signers[i], `acc${i}`)
 
     for (const { title, description, price, tags } of jobs.slice(0, 5))
-      await account0.job.addJob(title, description, price, tags)
+      await account0.job.addJob(title, description, price * 1000000000000000000n, tags)
 
     for (const { title, description, price, tags } of jobs.slice(5, 10))
-      await account1.job.addJob(title, description, price, tags)
+      await account1.job.addJob(title, description, price * 1000000000000000000n, tags)
 
     await account1.job.sendBuyRequest(0, 'message')
     await account0.job.acceptBuyRequest(0, 0)

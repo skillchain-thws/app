@@ -32,7 +32,7 @@ defineProps<Job>()
 
     <CardFooter class="mt-auto">
       <JobPrice>
-        {{ price }}
+        {{ Math.floor(price * 10e-19) }}
       </JobPrice>
     </CardFooter>
   </Card>

@@ -103,7 +103,7 @@ async function handleResponseFromBuyer() {
   if (!currentEscrow.value)
     return
 
-  const res = await escrowFactory.sendRequest(currentEscrow.value.escrowId, { value: currentEscrow.value.price })
+  const res = await escrowFactory.sendRequest(currentEscrow.value.escrowId, { value: BigInt(currentEscrow.value.price) })
   const receipt = await res.wait()
   if (receipt?.status === 1) {
     if (!currentRequest.value)
@@ -203,7 +203,7 @@ async function handleOpenCommittee() {
                     </p>
                     <JobPrice>
                       <template #parent>
-                        <span class="font-normal mr-1">{{ e.job.price }}</span>
+                        <span class="font-normal mr-1">{{ Math.floor(e.job.price * 10e-19) }}</span>
                       </template>
                     </JobPrice>
                   </div>
@@ -237,7 +237,7 @@ async function handleOpenCommittee() {
                     </p>
                     <JobPrice>
                       <template #parent>
-                        <span class="font-normal mr-1">{{ e.job.price }}</span>
+                        <span class="font-normal mr-1">{{ Math.floor(e.job.price * 10e-19) }}</span>
                       </template>
                     </JobPrice>
                   </div>
