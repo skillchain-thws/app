@@ -10,6 +10,12 @@ const q = ref('')
 const qDebounced = refDebounced(q, 500)
 
 const committees = ref<CustomReviewRequestDetail[]>([])
+const showCommittees = computed(() => {
+  if (!qDebounced.value)
+    return committees.value
+
+  return committees.value.filter(({ requestUsername, newAmount, reason, status }) => JSON.stringify({ requestUsername, newAmount, reason, status }).includes(qDebounced.value))
+})
 
 async function fetchCommitteeDetails(escrowId: number) {
   const d = await fetchRequestDetails(escrowId)
@@ -38,7 +44,7 @@ onMounted(async () => {
 
     <div class="pb-8 space-y-8">
       <h1 class="text-4xl">
-        committees {{ qDebounced }}
+        committees
       </h1>
 
       <Table>
@@ -63,7 +69,7 @@ onMounted(async () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow v-for="c in committees" :key="c.escrowId">
+          <TableRow v-for="c in showCommittees" :key="c.escrowId">
             <TableCell class="font-medium">
               {{ c.requestUsername }}
             </TableCell>

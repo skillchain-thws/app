@@ -18,8 +18,19 @@ const committeeFactory = await store.getCommitteeFactory()
 
 const { toast } = useToast()
 
+const q = ref('')
+const qDebounced = refDebounced(q, 500)
+
 const escrowsAsBuyer = shallowRef<CustomEscrow[]>([])
+const showEscrowAsBuyer = computed(() =>
+  qDebounced.value
+    ? escrowsAsBuyer.value.filter(({ buyerUsername, sellerUsername, job: { description, title } }) => JSON.stringify({ buyerUsername, sellerUsername, title, description }).includes(qDebounced.value))
+    : escrowsAsBuyer.value)
 const escrowsAsSeller = shallowRef<CustomEscrow[]>([])
+const showEscrowsAsSeller = computed(() =>
+  qDebounced.value
+    ? escrowsAsSeller.value.filter(({ buyerUsername, sellerUsername, job: { description, title } }) => JSON.stringify({ buyerUsername, sellerUsername, title, description }).includes(qDebounced.value))
+    : escrowsAsBuyer.value)
 const currentEscrow = ref<CustomEscrow>()
 const currentRequest = ref<EscrowRequest>()
 const isNoReceiver = computed(() =>
@@ -28,7 +39,6 @@ const isNoReceiver = computed(() =>
   || currentEscrow.value?.seller === EMPTY_ADDRESS)
 const messages = shallowRef<Message[]>([])
 const role = ref<'buyer' | 'seller'>('buyer')
-const s = ref('')
 const reviewRequestDetails = shallowRef<ReviewRequestDetail & { username: string }>()
 
 async function fetch() {
@@ -192,7 +202,7 @@ async function handleOpenCommittee() {
   <div class="py-10">
     <div class="grid grid-cols-3 gap-5">
       <div class="col-span-1" :class="isNoReceiver ? 'border rounded-md' : 'border-none'">
-        <BaseSearch v-if="!isNoReceiver" v-model="s" placeholder="search for chats" />
+        <BaseSearch v-if="!isNoReceiver" v-model="q" placeholder="search for chats" />
 
         <div v-if="!isNoReceiver" class="relative my-6">
           <Separator />
@@ -204,7 +214,7 @@ async function handleOpenCommittee() {
         <ScrollArea class="h-[600px]">
           <ul v-if="escrowsAsBuyer.length" class="space-y-3">
             <li
-              v-for="e in escrowsAsBuyer"
+              v-for="e in showEscrowAsBuyer"
               :key="e.escrowId"
               class="cursor-pointer"
               @click="handleChangeEscrow(e)"
@@ -241,7 +251,7 @@ async function handleOpenCommittee() {
 
           <ul v-if="escrowsAsSeller.length" class="space-y-3">
             <li
-              v-for="e in escrowsAsSeller"
+              v-for="e in showEscrowsAsSeller"
               :key="e.escrowId"
               class="cursor-pointer"
               @click="handleChangeEscrow(e)"
@@ -425,7 +435,7 @@ async function handleOpenCommittee() {
         <div class="mt-auto p-3">
           <form class="flex items-center gap-3" @submit.prevent="handleSend">
             <div class="grow">
-              <Textarea class="min-h-0" model="newMessage" placeholder="type something here..." />
+              <Textarea v-model="newMessage" class="min-h-0" placeholder="type something here..." @keyup.ctrl.enter="handleSend" />
             </div>
             <Button
               size="icon"
