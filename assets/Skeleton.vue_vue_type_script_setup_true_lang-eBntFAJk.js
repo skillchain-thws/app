@@ -1,6 +1,0 @@
-import{c as d,i as u,d as a,o as s,j as t,r as l,k as o,u as r,h as c}from"./index-zZq7Hbs8.js";/**
- * @license lucide-vue-next v0.303.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */const g=d("ChevronDownIcon",[["path",{d:"m6 9 6 6 6-6",key:"qrunsl"}]]),p=u("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",{variants:{variant:{default:"border-transparent bg-primary text-primary-foreground hover:bg-primary/80",secondary:"border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",destructive:"border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",outline:"text-foreground"}},defaultVariants:{variant:"default"}}),m=a({__name:"Badge",props:{variant:{}},setup(n){return(e,i)=>(s(),t("div",{class:o(r(c)(r(p)({variant:e.variant}),e.$attrs.class??""))},[l(e.$slots,"default")],2))}}),b=a({__name:"Skeleton",props:{class:{}},setup(n){const e=n;return(i,f)=>(s(),t("div",{class:o(r(c)("animate-pulse rounded-md bg-secondary",e.class))},null,2))}});export{g as C,m as _,b as a};
