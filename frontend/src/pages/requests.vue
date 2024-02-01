@@ -24,7 +24,7 @@ async function fetch() {
     id: Number(x[1]),
     title: x[2],
     description: x[3],
-    price: Number(x[4]),
+    price: x[4],
     inProcess: x[5],
     tags: x[6],
     requests: [] as CustomRequest[],

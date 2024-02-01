@@ -2,7 +2,6 @@
 import { AcceptanceStatus, EMPTY_ADDRESS } from '@/constants'
 import { fetchEscrows, fetchRequestDetails, fetchUser } from '@/lib/fetch'
 import type { ReviewRequestDetail } from '@/types'
-import { parseEther } from 'ethers'
 import { ExternalLink } from 'lucide-vue-next'
 
 type CustomReviewRequestDetail = ReviewRequestDetail & { requestUsername: string }
@@ -28,7 +27,6 @@ onMounted(async () => {
   const escrows = await fetchEscrows()
   const details = await Promise.all(escrows.map(e => fetchCommitteeDetails(e.escrowId)))
   committees.value = details.filter(Boolean) as CustomReviewRequestDetail[]
-  console.log(parseEther('1.0'))
 })
 </script>
 

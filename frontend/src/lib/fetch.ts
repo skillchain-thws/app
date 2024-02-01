@@ -15,8 +15,8 @@ export async function fetchEscrow(id: number): Promise<Escrow | undefined> {
     jobId: Number(escrow[1]),
     buyer: escrow[2],
     seller: escrow[3],
-    money: Number(escrow[4]),
-    price: Number(escrow[5]),
+    money: escrow[4],
+    price: escrow[5],
     started: escrow[6],
     isDone: escrow[7],
   }
@@ -33,8 +33,8 @@ export async function fetchEscrows(): Promise<Escrow[]> {
       jobId: Number(e[1]),
       buyer: e[2],
       seller: e[3],
-      money: Number(e[4]),
-      price: Number(e[5]),
+      money: e[4],
+      price: e[5],
       started: e[6],
       isDone: e[7],
 
@@ -63,7 +63,7 @@ export async function fetchAllJobs(): Promise<Job[]> {
     id: Number(x[1]),
     title: x[2],
     description: x[3],
-    price: Number(x[4]),
+    price: x[4],
     inProcess: x[5],
     tags: x[6],
   }))
@@ -78,7 +78,7 @@ export async function fetchJob(id: number): Promise<Job> {
     id: Number(j[1]),
     title: j[2],
     description: j[3],
-    price: Number(j[4]),
+    price: j[4],
     inProcess: j[5],
     tags: j[6],
   }

@@ -12,3 +12,9 @@ export enum AcceptanceStatus {
   Accepted,
   Declined,
 }
+
+export enum MemberVote {
+  Pending,
+  No,
+  Yes,
+}

@@ -6,7 +6,7 @@ export interface Job {
   id: number
   title: string
   description: string
-  price: number
+  price: bigint
   inProcess: boolean
   tags: string[]
 }
@@ -16,8 +16,8 @@ export interface Escrow {
   jobId: number
   buyer: string
   seller: string
-  money: number
-  price: number
+  money: bigint
+  price: bigint
   started: boolean
   isDone: boolean
 }

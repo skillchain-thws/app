@@ -14,7 +14,7 @@ function emptyJob() {
     title: '',
     description: '',
     tags: [],
-    price: 0,
+    price: 0n,
     id: 0,
     inProcess: false,
     owner: '0x0000000000000000000000000000000000000000',
@@ -34,7 +34,7 @@ async function handleCreateJob() {
   error.value = { title: '', description: '' }
 
   if (job.value.title && job.value.description) {
-    const res = await jobFactory.addJob(job.value.title, job.value.description, BigInt(job.value.price) * 1000000000000000000n, job.value.tags)
+    const res = await jobFactory.addJob(job.value.title, job.value.description, job.value.price, job.value.tags)
     const receipt = await res.wait()
     if (receipt?.status === 1) {
       emits('created')
@@ -85,12 +85,11 @@ async function handleCreateJob() {
               {{ error.description }}
             </p>
           </div>
-
           <div class="flex gap-3">
             <div class="w-[120px]">
               <div class="space-y-1">
                 <Label for="budget" class="font-light  text-muted-foreground">budget</Label>
-                <Input id="budget" v-model.number="job.price" min="0" step="1" type="number" />
+                <Input id="budget" min="0" step="1" type="number" @update:model-value="v => job.price = toWEI(v)" />
               </div>
             </div>
 
