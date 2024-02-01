@@ -2,45 +2,75 @@
 pragma solidity ^0.8.4;
 
 import {Test, console} from "forge-std/Test.sol";
+import {ManagerSetup} from "./ManagerSetup.t.sol";
 import {ChatManager} from "../contracts/ChatManager.sol";
-import {FreelancerMarketplace} from "../contracts/FreelancerMarketplace.sol";
-import {EscrowManager} from "../contracts/EscrowManager.sol";
-import {JobManager} from "../contracts/JobManager.sol";
-import {UserManager} from "../contracts/UserManager.sol";
-import {CommitteeManager} from "../contracts/CommitteeManager.sol";
 
-contract ChatManagerTest is Test {
-  ChatManager public chatManager;
-  FreelancerMarketplace public freelancerMarketplace;
-  EscrowManager public escrowManager;
-  JobManager public jobManager;
-  UserManager public userManager;
-  CommitteeManager public committeeManager;
+contract ChatManagerTest is Test, ManagerSetup {
+    function setUp() public {}
 
-  address[2] public accounts;
+    function test_openChannel() public {
+        vm.startPrank(accounts[1]);
+        escrowManager.createEscrow(accounts[3], 0, 2);
+        ChatManager.Channel memory channel = chatManager.getChannel(1);
+        bool isOpen = false;
+        if (channel.channelStatus == ChatManager.ChannelStatus.Open) {
+            isOpen = true;
+        }
+        assertEq(channel.escrowId, 1, "Escrow ID should match");
+        assertEq(isOpen, true, "Channel should be open");
+        assertEq(channel.messageCount, 0, "Message count should be 0");
+        vm.stopPrank();
+    }
 
-  function setUp() public {
-    accounts[0] = vm.addr(
-      0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-    );
-    accounts[1] = vm.addr(
-      0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
-    );
+    function test_closeChannel() public {
+        vm.startPrank(accounts[1]);
+        chatManager.closeChannel(0);
+        ChatManager.Channel memory channel = chatManager.getChannel(0);
+        bool isClosed = false;
+        if (channel.channelStatus == ChatManager.ChannelStatus.Closed) {
+            isClosed = true;
+        }
+        assertEq(channel.escrowId, 0, "Escrow ID should match");
+        assertEq(isClosed, true, "Channel should be closed");
+        vm.stopPrank();
+    }
 
-    chatManager = new ChatManager(address(freelancerMarketplace));
-    freelancerMarketplace = new FreelancerMarketplace();
-    escrowManager = new EscrowManager(address(freelancerMarketplace));
-    jobManager = new JobManager(address(freelancerMarketplace));
-    userManager = new UserManager(address(freelancerMarketplace));
-    committeeManager = new CommitteeManager(address(freelancerMarketplace));
+    function test_sendMessage() public {
+        vm.startPrank(accounts[1]);
+        chatManager.sendMessage(0, "Hello, world!");
 
-    // Set Managers
-    chatManager.setEscrowManager(address(escrowManager));
-    chatManager.setJobManager(address(jobManager));
-    chatManager.setUserManager(address(userManager));
-    chatManager.setCommitteeManager(address(committeeManager));
-  }
+        ChatManager.Message memory message = chatManager.getMessage(0, 0);
 
-  // Unit tests:
-  // ...
+        assertEq(message.sender, accounts[1], "Sender should match");
+        assertEq(message.receiver, accounts[2], "Receiver should match");
+        assertEq(
+            message.content,
+            "Hello, world!",
+            "Message content should match"
+        );
+        vm.stopPrank();
+    }
+
+    function test_getAllChannelMessages() public {
+        vm.startPrank(accounts[1]);
+        escrowManager.createEscrow(accounts[4], 0, 2);
+        chatManager.sendMessage(1, "Message 1");
+        chatManager.sendMessage(1, "Message 2");
+
+        ChatManager.Message[] memory messages = chatManager
+            .getAllChannelMessages(1);
+
+        assertEq(messages.length, 2, "Message array length should be 2");
+        assertEq(
+            messages[0].content,
+            "Message 1",
+            "First message content should match"
+        );
+        assertEq(
+            messages[1].content,
+            "Message 2",
+            "Second message content should match"
+        );
+        vm.stopPrank();
+    }
 }

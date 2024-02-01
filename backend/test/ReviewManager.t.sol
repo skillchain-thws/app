@@ -2,41 +2,68 @@
 pragma solidity ^0.8.4;
 
 import {Test, console} from "forge-std/Test.sol";
-import {ReviewManager} from "../contracts/ReviewManager.sol";
-import {FreelancerMarketplace} from "../contracts/FreelancerMarketplace.sol";
-import {EscrowManager} from "../contracts/EscrowManager.sol";
-import {JobManager} from "../contracts/JobManager.sol";
-import {UserManager} from "../contracts/UserManager.sol";
+import {ManagerSetup} from "./ManagerSetup.t.sol";
 
-contract ReviewManagerTest is Test {
-  ReviewManager public reviewManager;
-  FreelancerMarketplace public freelancerMarketplace;
-  EscrowManager public escrowManager;
-  JobManager public jobManager;
-  UserManager public userManager;
+contract ReviewManagerTest is Test, ManagerSetup {
+    function test_createReview() public {
+        // Erstelle eine Bewertung für eine bestimmte Escrow-ID
+        vm.prank(accounts[2]);
+        reviewManager.createReview(0, 5, "Excellent work!");
 
-  address[2] public accounts;
+        // Überprüfe, ob die Bewertung erfolgreich erstellt wurde, indem die Details abgerufen und überprüft werden
+        (
+            ,
+            uint rating,
+            address reviewingAddress,
+            address beingReviewedAddress,
+            string memory reviewComment,
+            uint relevantEscrowId,
+            bool responded,
+            uint id
+        ) = reviewManager.getReview(1);
+        console.log(reviewingAddress);
+        assertEq(rating, 5, "Rating should be 5");
+        assertEq(
+            reviewingAddress,
+            accounts[2],
+            "Reviewing address should match"
+        );
+        assertEq(
+            beingReviewedAddress,
+            accounts[1],
+            "Being reviewed address should match"
+        );
+        assertEq(
+            reviewComment,
+            "Excellent work!",
+            "Review comment should match"
+        );
+        assertEq(relevantEscrowId, 0, "Escrow ID should match");
+        assertEq(responded, false, "Response should not be added yet");
+        assertEq(id, 1, "ID should be 1");
+        vm.stopPrank();
+    }
 
-  function setUp() public {
-    accounts[0] = vm.addr(
-      0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-    );
-    accounts[1] = vm.addr(
-      0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
-    );
+    function test_createResponse() public {
+        // Erstelle eine Bewertung für eine bestimmte Escrow-ID
+        vm.startPrank(accounts[2]);
+        reviewManager.createReview(0, 5, "Excellent work!");
+        vm.stopPrank();
 
-    reviewManager = new ReviewManager(address(freelancerMarketplace));
-    freelancerMarketplace = new FreelancerMarketplace();
-    escrowManager = new EscrowManager(address(freelancerMarketplace));
-    jobManager = new JobManager(address(freelancerMarketplace));
-    userManager = new UserManager(address(freelancerMarketplace));
+        // Erstelle eine Antwort auf die erstellte Bewertung
+        vm.startPrank(accounts[1]);
+        reviewManager.createResponse(1, "Thank you!");
 
-    // Set Managers
-    reviewManager.setEscrowManager(address(escrowManager));
-    reviewManager.setJobManager(address(jobManager));
-    reviewManager.setUserManager(address(userManager));
-  }
+        // Überprüfe, ob die Antwort erfolgreich erstellt wurde, indem die Details abgerufen und überprüft werden
+        (, address responder, string memory responseComment) = reviewManager
+            .getResponse(1);
 
-  // Unit tests:
-  // ...
+        assertEq(responder, accounts[1], "Responder should match");
+        assertEq(
+            responseComment,
+            "Thank you!",
+            "Response comment should match"
+        );
+        vm.stopPrank();
+    }
 }
