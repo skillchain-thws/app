@@ -334,9 +334,11 @@ contract CommitteeManager {
     // Create temporary Review Request instance in memory and assign the new values
     ReviewRequest memory newRequest = ReviewRequest({
       requester: msg.sender,
+      // TODO newAmount always return 1
       newAmount: newAmount,
       reason: _reason,
-      requiredCommitteeMembers: requiredCommitteeMembers,
+      // TODO determineRequiredCommitteeMembers always return 9
+      requiredCommitteeMembers: 3,
       isClosed: false,
       status: AcceptanceStatus.Pending,
       escrowId: _escrowId
@@ -350,10 +352,8 @@ contract CommitteeManager {
   }
 
   // Committee Members can Vote true = Yes/ false = No on the Review request
-  function voteReviewRequest(
-    uint escrowId,
-    bool _vote
-  ) external onlyCommitteeMemberOfRequest(escrowId) {
+  // TODO onlyCommitteeMemberOfRequest(escrowId)
+  function voteReviewRequest(uint escrowId, bool _vote) external {
     ReviewRequest storage request = reviewRequests[escrowId];
     require(!request.isClosed, "Review request is closed");
 

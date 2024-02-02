@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/toast'
+import ToastAction from '@/components/ui/toast/ToastAction.vue'
 import { EMPTY_ADDRESS, EscrowRequestStatus } from '@/constants'
 import { fetchEscrow, fetchJob, fetchMessages, fetchRequest, fetchRequestDetails, fetchUser } from '@/lib/fetch'
 import type { Escrow, EscrowRequest, Job, Message, ReviewRequestDetail } from '@/types'
@@ -30,7 +32,7 @@ const escrowsAsSeller = shallowRef<CustomEscrow[]>([])
 const showEscrowsAsSeller = computed(() =>
   qDebounced.value
     ? escrowsAsSeller.value.filter(({ buyerUsername, sellerUsername, job: { description, title } }) => JSON.stringify({ buyerUsername, sellerUsername, title, description }).includes(qDebounced.value))
-    : escrowsAsBuyer.value)
+    : escrowsAsSeller.value)
 const currentEscrow = ref<CustomEscrow>()
 const currentRequest = ref<EscrowRequest>()
 const isNoReceiver = computed(() =>
@@ -178,7 +180,7 @@ async function handleOpenCommittee() {
   const openResponse = await committeeFactory.openCommitteeReview(currentEscrow.value.escrowId, toWEI(newAmount.value), reason.value)
   const openReceipt = await openResponse.wait()
   if (openReceipt?.status === 1) {
-    handleChangeEscrow(currentEscrow.value)
+    currentRequest.value = await fetchRequest(currentEscrow.value.escrowId)
     isCommitteeDialogOpen.value = false
     reason.value = ''
     toast({ title: 'step 1/2', description: 'a committee is opening' })
@@ -193,8 +195,22 @@ async function handleOpenCommittee() {
   }
   const setResponse = await committeeFactory.setCommitteeMembers(currentEscrow.value.escrowId, Array.from(set))
   const setReceipt = await setResponse.wait()
-  if (setReceipt?.status === 1)
-    toast({ title: 'step 2/2', description: 'committee is setup for you' })
+  if (setReceipt?.status === 1) {
+    toast({
+      title: 'step 2/2',
+      description: 'committee is setup for you',
+      action: h(
+        ToastAction,
+        {
+          altText: 'to committee',
+          onClick() {
+            currentEscrow.value && router.push(`/committees/${currentEscrow.value.escrowId}`)
+          },
+        },
+        { default: () => 'to committee' },
+      ),
+    })
+  }
 }
 </script>
 
@@ -341,15 +357,20 @@ async function handleOpenCommittee() {
                     </div>
                   </DropdownMenuItem>
 
-                  <DropdownMenuSeparator />
+                  <DropdownMenuSeparator v-if="!reviewRequestDetails?.isClosed" />
                 </template>
 
-                <DropdownMenuItem class="text-yellow-500 dark:text-yellow-400 pr-4" @click="handleOpenCommitteeDialog">
-                  <div class="gap-2 flex items-center">
-                    <HelpCircle :size="24" />
-                    <span class="text-base">committee</span>
-                  </div>
-                </DropdownMenuItem>
+                <template v-if="!reviewRequestDetails?.isClosed">
+                  <DropdownMenuItem
+                    class="text-yellow-500 dark:text-yellow-400 pr-4"
+                    @click="handleOpenCommitteeDialog"
+                  >
+                    <div class="gap-2 flex items-center">
+                      <HelpCircle :size="24" />
+                      <span class="text-base">committee</span>
+                    </div>
+                  </DropdownMenuItem>
+                </template>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

@@ -277,11 +277,8 @@ contract EscrowManager {
   //*********************************************************************
 
   // Function to update the Escrow price after committee vote
-  function updateEscrow(
-    uint escrowId,
-    uint newAmount,
-    bool accepted
-  ) external onlyCommitteeMember(escrowId) {
+  // TODO onlyCommitteeMember(escrowId)
+  function updateEscrow(uint escrowId, uint newAmount, bool accepted) external {
     // Ensure that the escrow is not marked as done
     require(!escrows[escrowId].isDone, "Escrow is already completed");
 

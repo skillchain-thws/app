@@ -19,14 +19,17 @@ const votedCount = computed(() => voters.value.filter(v => v.vote).length)
 const messages = ref<Message[]>()
 
 onMounted(async () => {
+  fetchDetails()
+  fetchVoters()
+})
+
+async function fetchDetails() {
   const d = await fetchRequestDetails(id.value)
   if (d.requester === EMPTY_ADDRESS)
     router.push('/committees')
   const user = await fetchUser(d.requester)
   details.value = { ...d, userName: user.userName }
-
-  fetchVoters()
-})
+}
 
 async function fetchVoters() {
   const res = await committeeFactory.getCommitteeVotes(id.value)
@@ -47,16 +50,39 @@ async function handleVote(vote: boolean) {
     return
   const res = await committeeFactory.voteReviewRequest(details.value.escrowId, vote)
   const receipt = await res.wait()
-  if (receipt?.status === 1)
+  if (receipt?.status === 1) {
     fetchVoters()
+    fetchDetails()
+  }
 }
 </script>
 
 <template>
   <div class="py-10 space-y-6">
-    <div class="space-y-6">
+    <div class="space-y-3">
       <div class="flex items-center justify-between">
-        <span class="text-3xl font-light">details</span>
+        <div class="flex items-center gap-3">
+          <span class="text-3xl font-light">details</span>
+
+          <div class="mt-0.5">
+            <template v-if="details?.status === 0">
+              <Badge class="bg-yellow-500 dark:bg-yellow-400">
+                pending
+              </Badge>
+            </template>
+            <template v-else-if="details?.status === 1">
+              <Badge class="bg-highlight">
+                accepted
+              </Badge>
+            </template>
+            <template v-else>
+              <Badge variant="destructive">
+                declined
+              </Badge>
+            </template>
+          </div>
+        </div>
+
         <RouterLink to="/committees">
           <Button size="sm">
             <MoveLeft class="mr-2" /> Back
@@ -110,16 +136,18 @@ async function handleVote(vote: boolean) {
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="space-y-3">
-        <div class="pr-5 flex items-center justify-between">
-          <span class="text-3xl font-light">members</span>
-          <span class="font-medium">voted: {{ votedCount }} / {{ voters.length }}</span>
-        </div>
+    <div class="space-y-3">
+      <div class="pr-5 flex items-center justify-between">
+        <span class="text-3xl font-light">members</span>
+        <span class="font-medium">voted: {{ votedCount }} / {{ voters.length }}</span>
+      </div>
 
-        <ul class="space-y-3">
-          <li v-for="voter in voters" :key="voter.userName">
-            <div class="py-3 px-4 rounded-md border flex items-center gap-6">
+      <ul class="grid grid-cols-3 gap-3">
+        <li v-for="voter in voters" :key="voter.userName">
+          <div class="p-3 rounded-md border flex flex-col gap-6" :class="{ 'border-primary/50': voter.vote }">
+            <div class="flex items-center gap-6">
               <div>
                 <Avatar :address="voter.address" :size="45" />
               </div>
@@ -132,31 +160,32 @@ async function handleVote(vote: boolean) {
                   {{ voter.address }}
                 </p>
               </div>
-
-              <div class="ml-auto flex items-center gap-3">
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  :disabled="voter.userName !== store.user.userName"
-                  @click="handleVote(true)"
-                >
-                  <ThumbsUp :size="20" stroke-width="1.25" :class="{ 'stroke-highlight': voter.vote === 2 }" />
-                </Button>
-
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  :disabled="voter.userName !== store.user.userName"
-                  @click="handleVote(false)"
-                >
-                  <ThumbsDown :size="20" stroke-width="1.25" :class="{ 'stroke-destructive': voter.vote === 1 }" />
-                </Button>
-                <!-- {{ MemberVote[voter.vote] }} -->
-              </div>
             </div>
-          </li>
-        </ul>
-      </div>
+
+            <div class="ml-auto flex items-center gap-3">
+              <Button
+                variant="secondary"
+                size="icon"
+                :disabled="voter.userName !== store.user.userName"
+                class="disabled:opacity-70"
+                @click="handleVote(true)"
+              >
+                <ThumbsUp :size="20" stroke-width="1.25" :class="{ 'stroke-highlight': voter.vote === 2 }" />
+              </Button>
+
+              <Button
+                variant="secondary"
+                size="icon"
+                :disabled="voter.userName !== store.user.userName"
+                class="disabled:opacity-70"
+                @click="handleVote(false)"
+              >
+                <ThumbsDown :size="20" stroke-width="1.25" :class="{ 'stroke-destructive': voter.vote === 1 }" />
+              </Button>
+            </div>
+          </div>
+        </li>
+      </ul>
     </div>
   </div>
 </template>

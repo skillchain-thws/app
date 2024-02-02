@@ -110,9 +110,10 @@ contract ChatManager {
   }
 
   // Retrieve all messages in a channel
+  // TODO onlyAuthorized(_escrowId)
   function getAllChannelMessages(
     uint _escrowId
-  ) public view onlyAuthorized(_escrowId) returns (Message[] memory) {
+  ) public view returns (Message[] memory) {
     uint count = channels[_escrowId].messageCount;
     Message[] memory allMessages = new Message[](count);
 
@@ -154,12 +155,6 @@ contract ChatManager {
   function closeChannel(uint _escrowId) public {
     // Fetch the corresponding channel
     Channel storage channel = channels[_escrowId];
-
-    // Ensure that the channel is currently open
-    require(
-      channel.channelStatus == ChannelStatus.Open,
-      "Channel is not open."
-    );
 
     // Update channel status to Closed
     channel.channelStatus = ChannelStatus.Closed;
