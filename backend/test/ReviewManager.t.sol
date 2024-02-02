@@ -21,7 +21,6 @@ contract ReviewManagerTest is Test, ManagerSetup {
             bool responded,
             uint id
         ) = reviewManager.getReview(1);
-        console.log(reviewingAddress);
         assertEq(rating, 5, "Rating should be 5");
         assertEq(
             reviewingAddress,

@@ -67,37 +67,47 @@ contract ManagerSetup is Test {
         committeeManager.setUserManager(address(userManager));
         vm.stopPrank();
 
-        // Register user
+        // Register user and add funds (100 ether each)
         // Account admin
         vm.prank(accounts[0]);
         userManager.registerUser("admin");
+        vm.deal(accounts[0], 100 ether);
         // Account 1
         vm.prank(accounts[1]);
         userManager.registerUser("Acc1");
+        vm.deal(accounts[1], 100 ether);
         // Account 2
         vm.prank(accounts[2]);
         userManager.registerUser("Acc2");
+        vm.deal(accounts[2], 100 ether);
         // Account 3
         vm.prank(accounts[3]);
         userManager.registerUser("Acc3");
+        vm.deal(accounts[3], 100 ether);
         // Account 4
         vm.prank(accounts[4]);
         userManager.registerUser("Acc4");
+        vm.deal(accounts[4], 100 ether);
         // Account 5
         vm.prank(accounts[5]);
         userManager.registerUser("Acc5");
+        vm.deal(accounts[5], 100 ether);
         // Account 6
         vm.prank(accounts[6]);
         userManager.registerUser("Acc6");
+        vm.deal(accounts[6], 100 ether);
         // Account 7
         vm.prank(accounts[7]);
         userManager.registerUser("Acc7");
+        vm.deal(accounts[7], 100 ether);
         // Account 8
         vm.prank(accounts[8]);
         userManager.registerUser("Acc8");
+        vm.deal(accounts[8], 100 ether);
         // Account 9
         vm.prank(accounts[9]);
         userManager.registerUser("Acc9");
+        vm.deal(accounts[9], 100 ether);
 
         // Create initial demo job and escrow between Acc1 and Acc2
         // Create a Job
@@ -114,5 +124,9 @@ contract ManagerSetup is Test {
         // Accept Buy Request
         vm.prank(accounts[1]);
         jobManager.acceptBuyRequest(0, 0);
+
+        // Send Escrow Start Request
+        vm.prank(accounts[2]);
+        escrowManager.sendRequest{value: 3}(0);
     }
 }
