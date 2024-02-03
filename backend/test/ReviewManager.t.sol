@@ -5,12 +5,13 @@ import {Test, console} from "forge-std/Test.sol";
 import {ManagerSetup} from "./ManagerSetup.t.sol";
 
 contract ReviewManagerTest is Test, ManagerSetup {
+    // Test creating a review
     function test_createReview() public {
-        // Erstelle eine Bewertung für eine bestimmte Escrow-ID
+        // Create a review for a specific escrow ID
         vm.prank(accounts[2]);
         reviewManager.createReview(0, 5, "Excellent work!");
 
-        // Überprüfe, ob die Bewertung erfolgreich erstellt wurde, indem die Details abgerufen und überprüft werden
+        // Check if the review was successfully created by retrieving and verifying the details
         (
             ,
             uint rating,
@@ -43,17 +44,18 @@ contract ReviewManagerTest is Test, ManagerSetup {
         vm.stopPrank();
     }
 
+    // Test creating a response
     function test_createResponse() public {
-        // Erstelle eine Bewertung für eine bestimmte Escrow-ID
+        // Create a review for a specific escrow ID
         vm.startPrank(accounts[2]);
         reviewManager.createReview(0, 5, "Excellent work!");
         vm.stopPrank();
 
-        // Erstelle eine Antwort auf die erstellte Bewertung
+        // Create a response to the created review
         vm.startPrank(accounts[1]);
         reviewManager.createResponse(1, "Thank you!");
 
-        // Überprüfe, ob die Antwort erfolgreich erstellt wurde, indem die Details abgerufen und überprüft werden
+        // Check if the response was successfully created by retrieving and verifying the details
         (, address responder, string memory responseComment) = reviewManager
             .getResponse(1);
 
@@ -64,5 +66,69 @@ contract ReviewManagerTest is Test, ManagerSetup {
             "Response comment should match"
         );
         vm.stopPrank();
+    }
+
+    // Test that review comment must not be empty
+    function test_reviewCommentNotEmpty() public {
+        // Create a review with an empty comment and check if an exception is thrown
+        vm.startPrank(accounts[1]);
+        vm.expectRevert("String must not be empty");
+        reviewManager.createReview(0, 5, "");
+        vm.stopPrank();
+    }
+
+    // Test that only the escrow entity can create a review
+    function test_onlyEscrowEntityCanCreateReview() public {
+        // Attempt to create a review as a non-escrow entity and check if an exception is thrown
+        vm.startPrank(accounts[3]);
+        vm.expectRevert("you are not party of this");
+        reviewManager.createReview(1, 5, "Excellent work!");
+        vm.stopPrank();
+    }
+
+    // Test that only the being-reviewed address can create a response
+    function test_onlyBeingReviewedAddressCanCreateResponse() public {
+        // Create a review and attempt to create a response as a different address than the being-reviewed address
+        vm.startPrank(accounts[2]);
+        reviewManager.createReview(0, 5, "Excellent work!");
+
+        // Attempt to create a response as a different address than the being-reviewed address and check if an exception is thrown
+        vm.expectRevert(
+            "You can only respond to reviews where you are being reviewed"
+        );
+        reviewManager.createResponse(1, "Thank you!");
+        vm.stopPrank();
+    }
+
+    // Test that only one review can be submitted for an escrow
+    function test_reviewOnceForEscrow() public {
+        // Create a review for a specific escrow ID
+        vm.startPrank(accounts[2]);
+        reviewManager.createReview(0, 5, "Excellent work!");
+
+        // Attempt to create a second review for the same escrow ID and check if an exception is thrown
+        vm.expectRevert("You can only review once for this escrowId");
+        reviewManager.createReview(0, 4, "Second review");
+        vm.stopPrank();
+    }
+
+    // Test that response comment must not be empty
+    function test_responseCommentNotEmpty() public {
+        // Create a review for a specific escrow ID
+        vm.prank(accounts[2]);
+        reviewManager.createReview(0, 5, "Excellent work!");
+
+        // Attempt to create a response with an empty comment and check if an exception is thrown
+        vm.startPrank(accounts[1]);
+        vm.expectRevert("String must not be empty");
+        reviewManager.createResponse(1, "");
+        vm.stopPrank();
+    }
+
+    // Test attempting to retrieve a review with an invalid ID
+    function test_invalidReviewId() public {
+        // Attempt to retrieve a review with an invalid ID and check if an exception is thrown
+        vm.expectRevert("Invalid reviewId");
+        reviewManager.getReview(100);
     }
 }

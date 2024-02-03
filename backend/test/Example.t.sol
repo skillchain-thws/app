@@ -7,6 +7,7 @@ import {ManagerSetup} from "./ManagerSetup.t.sol";
 contract ExampleManagerTest is Test, ManagerSetup {
     // SetUp funnction if needed:
     // function setUp() public {}
+    //
     // Unit tests:
     // function test_nameFunction() public {
     /*
@@ -20,6 +21,11 @@ contract ExampleManagerTest is Test, ManagerSetup {
 
         Example:
         assertEq(1, 1, "1 and 1 should be eqaul");
+
+      ---
+
+      Test for reverts with:
+        vm.expectRevert("exact revert message");
 
       ---
 

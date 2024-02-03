@@ -109,13 +109,22 @@ contract ManagerSetup is Test {
         userManager.registerUser("Acc9");
         vm.deal(accounts[9], 100 ether);
 
-        // Create initial demo job and escrow between Acc1 and Acc2
+        // Create initial demo jobs
         // Create a Job
         string[] memory tags = new string[](2);
         tags[0] = "tag1";
         tags[1] = "tag2";
         vm.prank(accounts[1]);
         jobManager.addJob("test job", "test description", 3, tags);
+
+        // Create second Job
+        vm.prank(accounts[3]);
+        jobManager.addJob(
+            "second test job",
+            "second test description",
+            5,
+            tags
+        );
 
         // Send Buy Request
         vm.prank(accounts[2]);

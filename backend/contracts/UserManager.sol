@@ -5,236 +5,244 @@ import "./FreelancerMarketplace.sol";
 import "./CommitteeManager.sol";
 
 contract UserManager {
-  FreelancerMarketplace freelancerMarketplace;
-  CommitteeManager committeeManager;
+    FreelancerMarketplace freelancerMarketplace;
+    CommitteeManager committeeManager;
 
-  mapping(address => User) public users;
-  mapping(uint256 => address) public addresses;
-  uint256 public userCount;
+    mapping(address => User) public users;
+    mapping(uint256 => address) public addresses;
+    uint256 public userCount;
 
-  struct User {
-    address owner;
-    string userName;
-    bool isJudge;
-    uint256[] jobIds;
-    uint256[] escrowIds;
-  }
+    struct User {
+        address owner;
+        string userName;
+        bool isJudge;
+        uint256[] jobIds;
+        uint256[] escrowIds;
+    }
 
-  constructor(address _freelancerMarketplaceAddress) {
-    freelancerMarketplace = FreelancerMarketplace(
-      _freelancerMarketplaceAddress
-    );
-  }
+    constructor(address _freelancerMarketplaceAddress) {
+        freelancerMarketplace = FreelancerMarketplace(
+            _freelancerMarketplaceAddress
+        );
+    }
 
-  //*********************************************************************
-  //*********************************************************************
-  //                        Setter Functions
-  //*********************************************************************
-  //*********************************************************************
+    //*********************************************************************
+    //*********************************************************************
+    //                        Setter Functions
+    //*********************************************************************
+    //*********************************************************************
 
-  function setCommitteeManager(address _address) external {
-    require(
-      freelancerMarketplace.onlyAdmin(),
-      "Only the Admin can add Managers"
-    );
-    committeeManager = CommitteeManager(_address);
-  }
+    function setCommitteeManager(address _address) external {
+        require(
+            freelancerMarketplace.onlyAdmin(),
+            "Only the Admin can add Managers"
+        );
+        committeeManager = CommitteeManager(_address);
+    }
 
-  //*********************************************************************
-  //*********************************************************************
-  //                        Getter Functions
-  //*********************************************************************
-  //*********************************************************************
+    //*********************************************************************
+    //*********************************************************************
+    //                        Getter Functions
+    //*********************************************************************
+    //*********************************************************************
 
-  function getUser(
-    address _address
-  )
-    external
-    view
-    returns (
-      address owner,
-      string memory userName,
-      bool isJudge,
-      uint256[] memory jobIds,
-      uint256[] memory escrowIds
+    function getUser(
+        address _address
     )
-  {
-    User storage user = users[_address];
-    return (
-      user.owner,
-      user.userName,
-      user.isJudge,
-      user.jobIds,
-      user.escrowIds
-    );
-  }
-
-  function getAllUserAddresses() external view returns (address[] memory) {
-    address[] memory allUserAddresses = new address[](userCount);
-
-    for (uint256 i = 0; i < userCount; i++) {
-      allUserAddresses[i] = addresses[i];
+        external
+        view
+        returns (
+            address owner,
+            string memory userName,
+            bool isJudge,
+            uint256[] memory jobIds,
+            uint256[] memory escrowIds
+        )
+    {
+        User storage user = users[_address];
+        return (
+            user.owner,
+            user.userName,
+            user.isJudge,
+            user.jobIds,
+            user.escrowIds
+        );
     }
 
-    return allUserAddresses;
-  }
+    function getAllUserAddresses() external view returns (address[] memory) {
+        address[] memory allUserAddresses = new address[](userCount);
 
-  function getAllUsers() external view returns (User[] memory) {
-    User[] memory allUsers = new User[](userCount);
+        for (uint256 i = 0; i < userCount; i++) {
+            allUserAddresses[i] = addresses[i];
+        }
 
-    for (uint256 i = 0; i < userCount; i++) {
-      address userAddress = addresses[i];
-      User storage user = users[userAddress];
-
-      User memory _user;
-      _user.owner = user.owner;
-      _user.userName = user.userName;
-      _user.isJudge = user.isJudge;
-      _user.jobIds = user.jobIds;
-      _user.escrowIds = user.escrowIds;
-
-      allUsers[i] = _user;
+        return allUserAddresses;
     }
 
-    return allUsers;
-  }
+    function getAllUsers() external view returns (User[] memory) {
+        User[] memory allUsers = new User[](userCount);
 
-  function getAllJobIds(
-    address userAddress
-  ) external view returns (uint256[] memory) {
-    return users[userAddress].jobIds;
-  }
+        for (uint256 i = 0; i < userCount; i++) {
+            address userAddress = addresses[i];
+            User storage user = users[userAddress];
 
-  //*********************************************************************
-  //*********************************************************************
-  //                        User Functions
-  //*********************************************************************
-  //*********************************************************************
+            User memory _user;
+            _user.owner = user.owner;
+            _user.userName = user.userName;
+            _user.isJudge = user.isJudge;
+            _user.jobIds = user.jobIds;
+            _user.escrowIds = user.escrowIds;
 
-  event UserRegistered(address userAddress, string name);
+            allUsers[i] = _user;
+        }
 
-  function registerUser(string memory _name) external nameNotTaken(_name) {
-    require(
-      freelancerMarketplace.nonEmptyString(_name),
-      "String must not be empty"
-    );
-    require(users[msg.sender].owner == address(0), "User already registered");
-
-    User storage newUser = users[msg.sender];
-    newUser.owner = msg.sender;
-    newUser.userName = _name;
-    newUser.isJudge = false;
-
-    // Every registered users becomse a judge, if he does not want to he has to call unsetJudge
-    setJudge(msg.sender);
-
-    addresses[userCount] = msg.sender;
-    userCount++;
-
-    emit UserRegistered(msg.sender, _name);
-  }
-
-  //*********************************************************************
-  //*********************************************************************
-  //                        Job Functions
-  //*********************************************************************
-  //*********************************************************************
-
-  function addJobId(uint256 jobId, address _address) external {
-    users[_address].jobIds.push(jobId);
-  }
-
-  function removeJobId(uint256 jobId, address _address) external {
-    User storage currentUser = users[_address];
-    uint256 indexToRemove;
-
-    for (uint256 i = 0; i < currentUser.jobIds.length; i++) {
-      if (currentUser.jobIds[i] == jobId) {
-        indexToRemove = i;
-        break;
-      }
+        return allUsers;
     }
 
-    require(indexToRemove < currentUser.jobIds.length, "Job ID not found");
-
-    currentUser.jobIds[indexToRemove] = currentUser.jobIds[
-      currentUser.jobIds.length - 1
-    ];
-    currentUser.jobIds.pop();
-  }
-
-  function addEscrowId(uint256 escrowId, address _address) external {
-    users[_address].escrowIds.push(escrowId);
-  }
-
-  function removeEscrowId(uint256 escrowId, address _address) external {
-    User storage currentUser = users[_address];
-    uint256 indexToRemove;
-
-    for (uint256 i = 0; i < currentUser.jobIds.length; i++) {
-      if (currentUser.escrowIds[i] == escrowId) {
-        indexToRemove = i;
-        break;
-      }
+    function getAllJobIds(
+        address userAddress
+    ) external view returns (uint256[] memory) {
+        return users[userAddress].jobIds;
     }
 
-    require(
-      indexToRemove < currentUser.escrowIds.length,
-      "Escrow ID not found"
-    );
+    //*********************************************************************
+    //*********************************************************************
+    //                        User Functions
+    //*********************************************************************
+    //*********************************************************************
 
-    currentUser.jobIds[indexToRemove] = currentUser.jobIds[
-      currentUser.jobIds.length - 1
-    ];
-    currentUser.jobIds.pop();
-  }
+    event UserRegistered(address userAddress, string name);
 
-  //*********************************************************************
-  //*********************************************************************
-  //                        Judge Functions
-  //*********************************************************************
-  //*********************************************************************
+    function registerUser(string memory _name) external nameNotTaken(_name) {
+        require(
+            freelancerMarketplace.nonEmptyString(_name),
+            "String must not be empty"
+        );
+        require(
+            users[msg.sender].owner == address(0),
+            "User already registered"
+        );
 
-  event JudgeSet(address userAddress);
+        User storage newUser = users[msg.sender];
+        newUser.owner = msg.sender;
+        newUser.userName = _name;
+        newUser.isJudge = false;
 
-  function setJudge(address userAddress) public {
-    //require(!users[userAddress].isJudge, "You are already a judge");
-    users[userAddress].isJudge = true;
-    committeeManager.joinCommittee(userAddress);
+        // Every registered users becomse a judge, if he does not want to he has to call unsetJudge
+        setJudge(msg.sender);
 
-    emit JudgeSet(userAddress);
-  }
+        addresses[userCount] = msg.sender;
+        userCount++;
 
-  event JudgeUnset(address userAddress);
-
-  function unsetJudge(address userAddress) external {
-    require(users[userAddress].isJudge, "You have not been a judge");
-    users[userAddress].isJudge = false;
-    // Set status of this committee member to unavailable
-    committeeManager.markMemberAsUnavailable(userAddress);
-
-    emit JudgeUnset(userAddress);
-  }
-
-  //*********************************************************************
-  //*********************************************************************
-  //                              Modifier
-  //*********************************************************************
-  //*********************************************************************
-
-  modifier nameNotTaken(string memory str) {
-    bool taken = false;
-
-    for (uint256 i = 0; i < userCount; i++) {
-      taken = (keccak256(abi.encodePacked(users[addresses[i]].userName)) ==
-        keccak256(abi.encodePacked(str)));
-
-      if (taken) {
-        break;
-      }
+        emit UserRegistered(msg.sender, _name);
     }
 
-    require(!taken, "Name is already taken");
-    _;
-  }
+    //*********************************************************************
+    //*********************************************************************
+    //                        Job Functions
+    //*********************************************************************
+    //*********************************************************************
+
+    function addJobId(uint256 jobId, address _address) external {
+        users[_address].jobIds.push(jobId);
+    }
+
+    function removeJobId(uint256 jobId, address _address) external {
+        User storage currentUser = users[_address];
+        uint256 indexToRemove;
+
+        for (uint256 i = 0; i < currentUser.jobIds.length; i++) {
+            if (currentUser.jobIds[i] == jobId) {
+                indexToRemove = i;
+                break;
+            }
+        }
+
+        require(indexToRemove < currentUser.jobIds.length, "Job ID not found");
+
+        currentUser.jobIds[indexToRemove] = currentUser.jobIds[
+            currentUser.jobIds.length - 1
+        ];
+        currentUser.jobIds.pop();
+    }
+
+    function addEscrowId(uint256 escrowId, address _address) external {
+        users[_address].escrowIds.push(escrowId);
+    }
+
+    function removeEscrowId(uint256 escrowId, address _address) external {
+        User storage currentUser = users[_address];
+        uint256 indexToRemove;
+
+        for (uint256 i = 0; i < currentUser.jobIds.length; i++) {
+            if (currentUser.escrowIds[i] == escrowId) {
+                indexToRemove = i;
+                break;
+            }
+        }
+
+        require(
+            indexToRemove < currentUser.escrowIds.length,
+            "Escrow ID not found"
+        );
+
+        currentUser.jobIds[indexToRemove] = currentUser.jobIds[
+            currentUser.jobIds.length - 1
+        ];
+        currentUser.jobIds.pop();
+    }
+
+    //*********************************************************************
+    //*********************************************************************
+    //                        Judge Functions
+    //*********************************************************************
+    //*********************************************************************
+
+    event JudgeSet(address userAddress);
+
+    function setJudge(address userAddress) public {
+        require(!users[userAddress].isJudge, "You are already a judge");
+        require(
+            users[userAddress].owner == userAddress,
+            "You are not registered and can't be a judge"
+        );
+        users[userAddress].isJudge = true;
+        committeeManager.joinCommittee(userAddress);
+
+        emit JudgeSet(userAddress);
+    }
+
+    event JudgeUnset(address userAddress);
+
+    function unsetJudge(address userAddress) external {
+        require(users[userAddress].isJudge, "You have not been a judge");
+        users[userAddress].isJudge = false;
+        // Set status of this committee member to unavailable
+        committeeManager.markMemberAsUnavailable(userAddress);
+
+        emit JudgeUnset(userAddress);
+    }
+
+    //*********************************************************************
+    //*********************************************************************
+    //                              Modifier
+    //*********************************************************************
+    //*********************************************************************
+
+    modifier nameNotTaken(string memory str) {
+        bool taken = false;
+
+        for (uint256 i = 0; i < userCount; i++) {
+            taken = (keccak256(
+                abi.encodePacked(users[addresses[i]].userName)
+            ) == keccak256(abi.encodePacked(str)));
+
+            if (taken) {
+                break;
+            }
+        }
+
+        require(!taken, "Name is already taken");
+        _;
+    }
 }
