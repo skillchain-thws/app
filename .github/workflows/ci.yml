@@ -33,7 +33,7 @@ jobs:
         run: npx prettier --list-different --plugin=prettier-plugin-solidity 'backend/contracts/**/*.sol'
 
       - name: Lint FE
-        run: npx eslint .
+        run: npx eslint frontend
 
   test:
     strategy:
