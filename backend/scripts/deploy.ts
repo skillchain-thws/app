@@ -1,23 +1,12 @@
-import type { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers'
 import { ethers } from 'hardhat'
 import { exit } from 'node:process'
 import { jobs } from '../includes/mocks'
-
-type Contract = Awaited<ReturnType<typeof ethers.deployContract>>
+import { deployAll } from '../includes/utils'
 
 async function main() {
   const signers = await ethers.getSigners()
-  const admin = signers[signers.length - 1]
 
-  const market = await ethers.deployContract('FreelancerMarketplace', [], { signer: admin })
-  await market.waitForDeployment()
-
-  const chat = await ethers.deployContract('ChatManager', [market.target], { signer: admin })
-  const committee = await ethers.deployContract('CommitteeManager', [market.target], { signer: admin })
-  const escrow = await ethers.deployContract('EscrowManager', [market.target], { signer: admin })
-  const job = await ethers.deployContract('JobManager', [market.target], { signer: admin })
-  const review = await ethers.deployContract('ReviewManager', [market.target], { signer: admin })
-  const user = await ethers.deployContract('UserManager', [market.target], { signer: admin })
+  const { chat, committee, escrow, job, market, review, useAccount, user } = await deployAll()
 
   if (
     market.target !== '0x73511669fd4dE447feD18BB79bAFeAC93aB7F31f'
@@ -30,50 +19,8 @@ async function main() {
   )
     throw new Error ('Wrong deployed addresses! Restart node and try again')
 
-  await Promise.all([
-    chat.waitForDeployment(),
-    committee.waitForDeployment(),
-    escrow.waitForDeployment(),
-    job.waitForDeployment(),
-    review.waitForDeployment(),
-    user.waitForDeployment(),
-  ])
-
-  await Promise.all([
-    chat.setJobManager(job.target),
-    chat.setEscrowManager(escrow.target),
-    chat.setUserManager(user.target),
-
-    committee.setUserManager(user.target),
-    committee.setEscrowManager(escrow.target),
-
-    escrow.setJobManager(job.target),
-    escrow.setUserManager(user.target),
-    escrow.setCommitteeManager(committee.target),
-    escrow.setChatManager(chat.target),
-
-    job.setEscrowManager(escrow.target),
-    job.setUserManager(user.target),
-
-    review.setEscrowManager(escrow.target),
-    review.setJobManager(job.target),
-    review.setUserManager(user.target),
-
-    user.setCommitteeManager(committee.target),
-  ])
-
   const isDev = true
   if (isDev) {
-    const useAccount = async (s: HardhatEthersSigner, username: string) => {
-      const _user = user.connect(s) as Contract
-      const _job = job.connect(s) as Contract
-      const _escrow = escrow.connect(s) as Contract
-
-      await _user.registerUser(username)
-
-      return { user: _user, job: _job, escrow: _escrow }
-    }
-
     await user.registerUser('admin')
     const account0 = await useAccount(signers[0], 'acc0')
     const account1 = await useAccount(signers[1], 'acc1')

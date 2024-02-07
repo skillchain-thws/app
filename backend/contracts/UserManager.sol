@@ -167,28 +167,6 @@ contract UserManager {
     users[_address].escrowIds.push(escrowId);
   }
 
-  function removeEscrowId(uint256 escrowId, address _address) external {
-    User storage currentUser = users[_address];
-    uint256 indexToRemove;
-
-    for (uint256 i = 0; i < currentUser.jobIds.length; i++) {
-      if (currentUser.escrowIds[i] == escrowId) {
-        indexToRemove = i;
-        break;
-      }
-    }
-
-    require(
-      indexToRemove < currentUser.escrowIds.length,
-      "Escrow ID not found"
-    );
-
-    currentUser.jobIds[indexToRemove] = currentUser.jobIds[
-      currentUser.jobIds.length - 1
-    ];
-    currentUser.jobIds.pop();
-  }
-
   //*********************************************************************
   //*********************************************************************
   //                        Judge Functions
@@ -198,7 +176,6 @@ contract UserManager {
   event JudgeSet(address userAddress);
 
   function setJudge(address userAddress) public {
-    //require(!users[userAddress].isJudge, "You are already a judge");
     users[userAddress].isJudge = true;
     committeeManager.joinCommittee(userAddress);
 
@@ -208,7 +185,6 @@ contract UserManager {
   event JudgeUnset(address userAddress);
 
   function unsetJudge(address userAddress) external {
-    require(users[userAddress].isJudge, "You have not been a judge");
     users[userAddress].isJudge = false;
     // Set status of this committee member to unavailable
     committeeManager.markMemberAsUnavailable(userAddress);
