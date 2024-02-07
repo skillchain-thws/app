@@ -74,6 +74,6 @@ export interface ReviewRequestDetail {
 declare global {
   interface Window {
     ethereum: Eip1193Provider &
-    { on(event: string, fn: () => void): void }
+    { on: (event: string, fn: () => void) => void }
   }
 }
