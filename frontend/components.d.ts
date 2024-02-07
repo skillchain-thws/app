@@ -9,6 +9,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     Avatar: typeof import('./src/components/Avatar.vue')['default']
     Badge: typeof import('./src/components/ui/badge/Badge.vue')['default']
+    BaseLogo: typeof import('./src/components/BaseLogo.vue')['default']
     BaseSearch: typeof import('./src/components/BaseSearch.vue')['default']
     BaseUsername: typeof import('./src/components/BaseUsername.vue')['default']
     Button: typeof import('./src/components/ui/button/Button.vue')['default']
