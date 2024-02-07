@@ -134,6 +134,25 @@ contract EscrowManager {
     return escrow.currentRequest;
   }
 
+  function getAllEscrows() public view returns (SimplifiedEscrow[] memory) {
+    SimplifiedEscrow[] memory allEscrows = new SimplifiedEscrow[](escrowCount);
+
+    for (uint256 i = 0; i < escrowCount; i++) {
+      allEscrows[i] = SimplifiedEscrow({
+        escrowId: escrows[i].escrowId,
+        jobId: escrows[i].jobId,
+        buyer: escrows[i].buyer,
+        seller: escrows[i].seller,
+        money: escrows[i].money,
+        price: escrows[i].price,
+        started: escrows[i].started,
+        isDone: escrows[i].isDone
+      });
+    }
+
+    return allEscrows;
+  }
+
   function getEscrow(
     uint256 escrowId
   )
@@ -162,23 +181,6 @@ contract EscrowManager {
       tempEscrow.started,
       tempEscrow.isDone
     );
-  }
-
-  function getSimplifiedEscrow(
-    uint256 escrowId
-  ) public view escrowExists(escrowId) returns (SimplifiedEscrow memory) {
-    Escrow storage tempEscrow = escrows[escrowId];
-    return
-      SimplifiedEscrow(
-        escrowId,
-        tempEscrow.jobId,
-        tempEscrow.buyer,
-        tempEscrow.seller,
-        tempEscrow.money,
-        tempEscrow.price,
-        tempEscrow.started,
-        tempEscrow.isDone
-      );
   }
 
   //*********************************************************************
