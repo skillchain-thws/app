@@ -125,8 +125,10 @@ First, build the skillchain image by opening the terminal in the project's root 
 docker buildx build . -t skillchain:latest
 ```
 
-Run the image and specify port mapping with the `-p` flag, for e.g. port `8080`.
+Run the image.
 
 ```bash
-docker run --rm -it -p 8080:80 skillchain:latest
+docker run --rm -it -p 4173:4173 -p 8545:8545 --name skillchain skillchain:latest
 ```
+
+Open in browser at [http://localhost:4173](http://localhost:4173)

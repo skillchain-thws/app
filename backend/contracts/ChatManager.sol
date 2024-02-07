@@ -110,6 +110,7 @@ contract ChatManager {
   }
 
   // Retrieve all messages in a channel
+  // TODO onlyAuthorized(_escrowId)
   function getAllChannelMessages(
     uint _escrowId
   ) public view returns (Message[] memory) {

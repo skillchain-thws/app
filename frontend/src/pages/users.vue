@@ -53,9 +53,7 @@ async function handleUpdateReviewer(addr: string, v: boolean) {
         <TableCaption>a list of all users</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead class="">
-              reviewer
-            </TableHead>
+            <TableHead>judge</TableHead>
             <TableHead>username</TableHead>
             <TableHead>address</TableHead>
             <TableHead>jobs</TableHead>

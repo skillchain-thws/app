@@ -32,7 +32,7 @@ defineProps<Job>()
 
     <CardFooter class="mt-auto">
       <JobPrice>
-        {{ price }}
+        {{ toETH(price) }}
       </JobPrice>
     </CardFooter>
   </Card>

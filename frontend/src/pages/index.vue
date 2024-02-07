@@ -21,7 +21,7 @@ const data = computed(() => {
   const f = qDebounced.value
     ? my.filter(j => JSON.stringify(j).toLowerCase().includes(q.value.toLowerCase()))
     : my
-  return f.toSorted((a, b) => sortOpt.value === 'lth' ? a.price - b.price : b.price - a.price)
+  return f.toSorted((a, b) => sortOpt.value === 'lth' ? +toETH(a.price) - +toETH(b.price) : +toETH(b.price) - +toETH(a.price))
 })
 
 onMounted(fetch)

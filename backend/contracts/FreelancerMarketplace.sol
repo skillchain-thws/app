@@ -16,6 +16,10 @@ contract FreelancerMarketplace {
   //*********************************************************************
   //*********************************************************************
 
+  constructor() {
+    owner = msg.sender;
+  }
+
   function onlyAdmin() external view returns (bool) {
     require(msg.sender != owner, "You need to be a Admin for this action");
     return true;

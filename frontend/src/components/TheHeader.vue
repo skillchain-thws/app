@@ -10,17 +10,15 @@ const navs
    () => isEthereum && store.isConnected
      ? [
          { to: '/', label: 'jobs' },
-         { to: '/users', label: 'users' },
+         //  { to: '/users', label: 'users' },
          { to: '/chats', label: 'chats' },
          { to: '/requests', label: 'requests' },
-         { to: '/committees', label: 'committees' },
+         { to: '/committees/', label: 'committees' },
        ]
      : [],
  )
 
-onMounted(() => {
-  store.connect()
-})
+onMounted(store.connect)
 </script>
 
 <template>

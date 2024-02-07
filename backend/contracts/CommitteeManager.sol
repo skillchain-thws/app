@@ -190,6 +190,11 @@ contract CommitteeManager {
     // Get Review request for escrowId
     ReviewRequest storage request = reviewRequests[escrowId];
 
+    require(
+      request.requiredCommitteeMembers <= committeeVotes[escrowId].length,
+      "Invalid requiredCommitteeMembers"
+    );
+
     // Initialize temporary empty array for assigned Members with the length of the required ammount of members
     address[] memory assignedMembers = new address[](
       request.requiredCommitteeMembers
@@ -197,6 +202,7 @@ contract CommitteeManager {
 
     // iterate through list of committee votes and add committeeMemberId (the key of his committeeMember mapping)to assigned members
     for (uint i = 0; i < request.requiredCommitteeMembers; i++) {
+      require(i < committeeVotes[escrowId].length, "Index out of bounds");
       assignedMembers[i] = committeeVotes[escrowId][i].voterAddress;
     }
 

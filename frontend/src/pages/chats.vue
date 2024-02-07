@@ -1,18 +1,38 @@
 <script setup lang="ts">
+import { Button } from '@/components/ui/button'
+import { useToast } from '@/components/ui/toast'
+import ToastAction from '@/components/ui/toast/ToastAction.vue'
 import { EMPTY_ADDRESS, EscrowRequestStatus } from '@/constants'
-import { fetchEscrow, fetchJob, fetchMessages, fetchRequest, fetchUser } from '@/lib/fetch'
-import type { Escrow, EscrowRequest, Job, Message } from '@/types'
+import { fetchEscrow, fetchJob, fetchMessages, fetchRequest, fetchRequestDetails, fetchUser } from '@/lib/fetch'
+import type { Escrow, EscrowRequest, Job, Message, ReviewRequestDetail } from '@/types'
 import { compareAddress, shortenAddr } from '@/utils'
 import { CheckCircle2, Forward, HelpCircle, MessageCircleOff, MoreVertical, XCircle } from 'lucide-vue-next'
 
 type CustomEscrow = Escrow & { buyerUsername: string, sellerUsername: string, job: Job }
 
+const router = useRouter()
+const route = useRoute()
+
 const store = useStore()
 const escrowFactory = await store.getEscrowFactory()
 const chatFactory = await store.getChatFactory()
+const committeeFactory = await store.getCommitteeFactory()
+
+const { toast } = useToast()
+
+const q = ref('')
+const qDebounced = refDebounced(q, 500)
 
 const escrowsAsBuyer = shallowRef<CustomEscrow[]>([])
+const showEscrowAsBuyer = computed(() =>
+  qDebounced.value
+    ? escrowsAsBuyer.value.filter(({ buyerUsername, sellerUsername, job: { description, title } }) => JSON.stringify({ buyerUsername, sellerUsername, title, description }).includes(qDebounced.value))
+    : escrowsAsBuyer.value)
 const escrowsAsSeller = shallowRef<CustomEscrow[]>([])
+const showEscrowsAsSeller = computed(() =>
+  qDebounced.value
+    ? escrowsAsSeller.value.filter(({ buyerUsername, sellerUsername, job: { description, title } }) => JSON.stringify({ buyerUsername, sellerUsername, title, description }).includes(qDebounced.value))
+    : escrowsAsSeller.value)
 const currentEscrow = ref<CustomEscrow>()
 const currentRequest = ref<EscrowRequest>()
 const isNoReceiver = computed(() =>
@@ -21,9 +41,7 @@ const isNoReceiver = computed(() =>
   || currentEscrow.value?.seller === EMPTY_ADDRESS)
 const messages = shallowRef<Message[]>([])
 const role = ref<'buyer' | 'seller'>('buyer')
-const s = ref('')
-const router = useRouter()
-const route = useRoute()
+const reviewRequestDetails = shallowRef<ReviewRequestDetail & { username: string }>()
 
 async function fetch() {
   const _escrowsAsBuyer: CustomEscrow[] = []
@@ -87,13 +105,20 @@ async function handleChangeEscrow(e: CustomEscrow) {
   currentEscrow.value = e
   currentRequest.value = await fetchRequest(e.escrowId)
   messages.value = await fetchMessages(e.escrowId)
+
+  const rrd = await fetchRequestDetails(e.escrowId)
+  reviewRequestDetails.value
+  = {
+      ...rrd,
+      username: compareAddress(e.buyer, rrd.requester) ? e.buyerUsername : e.sellerUsername,
+    }
 }
 
 async function handleResponseFromBuyer() {
   if (!currentEscrow.value)
     return
 
-  const res = await escrowFactory.sendRequest(currentEscrow.value.escrowId, { value: currentEscrow.value.price })
+  const res = await escrowFactory.sendRequest(currentEscrow.value.escrowId, { value: BigInt(currentEscrow.value.price) })
   const receipt = await res.wait()
   if (receipt?.status === 1) {
     if (!currentRequest.value)
@@ -128,7 +153,6 @@ async function handleSend() {
   }
 }
 
-const committeeFactory = await store.getCommitteeFactory()
 const isCommitteeDialogOpen = ref(false)
 const newAmount = ref(0)
 const reason = ref('')
@@ -139,7 +163,7 @@ function handleOpenCommitteeDialog() {
     return
 
   isCommitteeDialogOpen.value = true
-  newAmount.value = currentEscrow.value.price
+  newAmount.value = toETH(currentEscrow.value.price)
 }
 
 async function handleOpenCommittee() {
@@ -153,11 +177,39 @@ async function handleOpenCommittee() {
     return
   }
 
-  const response = await committeeFactory.openCommitteeReview(currentEscrow.value.escrowId, newAmount.value, reason.value)
-  const receipt = await response.wait()
-  if (receipt?.status === 1) {
+  const openResponse = await committeeFactory.openCommitteeReview(currentEscrow.value.escrowId, toWEI(newAmount.value), reason.value)
+  const openReceipt = await openResponse.wait()
+  if (openReceipt?.status === 1) {
+    currentRequest.value = await fetchRequest(currentEscrow.value.escrowId)
     isCommitteeDialogOpen.value = false
     reason.value = ''
+    toast({ title: 'step 1/2', description: 'a committee is opening' })
+  }
+
+  const details = await fetchRequestDetails(currentEscrow.value.escrowId)
+  const members = await committeeFactory.getAllAvailableCommitteeMembers()
+  const set = new Set<string>()
+  while (set.size < details.requiredCommitteeMembers) {
+    const i = Math.floor(Math.random() * members.length)
+    set.add(members[i])
+  }
+  const setResponse = await committeeFactory.setCommitteeMembers(currentEscrow.value.escrowId, Array.from(set))
+  const setReceipt = await setResponse.wait()
+  if (setReceipt?.status === 1) {
+    toast({
+      title: 'step 2/2',
+      description: 'committee is setup for you',
+      action: h(
+        ToastAction,
+        {
+          altText: 'to committee',
+          onClick() {
+            currentEscrow.value && router.push(`/committees/${currentEscrow.value.escrowId}`)
+          },
+        },
+        { default: () => 'to committee' },
+      ),
+    })
   }
 }
 </script>
@@ -166,7 +218,7 @@ async function handleOpenCommittee() {
   <div class="py-10">
     <div class="grid grid-cols-3 gap-5">
       <div class="col-span-1" :class="isNoReceiver ? 'border rounded-md' : 'border-none'">
-        <BaseSearch v-if="!isNoReceiver" v-model="s" placeholder="search for chats" />
+        <BaseSearch v-if="!isNoReceiver" v-model="q" placeholder="search for chats" />
 
         <div v-if="!isNoReceiver" class="relative my-6">
           <Separator />
@@ -178,7 +230,7 @@ async function handleOpenCommittee() {
         <ScrollArea class="h-[600px]">
           <ul v-if="escrowsAsBuyer.length" class="space-y-3">
             <li
-              v-for="e in escrowsAsBuyer"
+              v-for="e in showEscrowAsBuyer"
               :key="e.escrowId"
               class="cursor-pointer"
               @click="handleChangeEscrow(e)"
@@ -194,7 +246,7 @@ async function handleOpenCommittee() {
                     </p>
                     <JobPrice>
                       <template #parent>
-                        <span class="font-normal mr-1">{{ e.job.price }}</span>
+                        <span class="font-normal mr-1">{{ toETH(e.job.price) }}</span>
                       </template>
                     </JobPrice>
                   </div>
@@ -215,12 +267,15 @@ async function handleOpenCommittee() {
 
           <ul v-if="escrowsAsSeller.length" class="space-y-3">
             <li
-              v-for="e in escrowsAsSeller"
+              v-for="e in showEscrowsAsSeller"
               :key="e.escrowId"
               class="cursor-pointer"
               @click="handleChangeEscrow(e)"
             >
-              <div class="border rounded-md px-4 py-3 hover:border-primary transition-colors" :class="{ 'border-primary': e.escrowId === currentEscrow?.escrowId }">
+              <div
+                class="border rounded-md px-4 py-3 hover:border-primary transition-colors"
+                :class="{ 'border-primary': e.escrowId === currentEscrow?.escrowId }"
+              >
                 <div class="space-y-1">
                   <div class="flex items-center justify-between w-">
                     <p class="font-medium">
@@ -228,7 +283,7 @@ async function handleOpenCommittee() {
                     </p>
                     <JobPrice>
                       <template #parent>
-                        <span class="font-normal mr-1">{{ e.job.price }}</span>
+                        <span class="font-normal mr-1">{{ toETH(e.job.price) }}</span>
                       </template>
                     </JobPrice>
                   </div>
@@ -269,7 +324,8 @@ async function handleOpenCommittee() {
 
           <div class="ml-auto">
             <DropdownMenu
-              v-if="currentRequest?.status === EscrowRequestStatus.Pending"
+              v-if="currentRequest?.status === EscrowRequestStatus.Pending
+                && !compareAddress(reviewRequestDetails?.requester ?? '', store.address)"
             >
               <DropdownMenuTrigger>
                 <Button variant="outline" size="icon" class="h-8 w-8">
@@ -301,15 +357,20 @@ async function handleOpenCommittee() {
                     </div>
                   </DropdownMenuItem>
 
-                  <DropdownMenuSeparator />
+                  <DropdownMenuSeparator v-if="!reviewRequestDetails?.isClosed" />
                 </template>
 
-                <DropdownMenuItem class="text-orange-500 dark:text-orange-400 pr-4" @click="handleOpenCommitteeDialog">
-                  <div class="gap-2 flex items-center">
-                    <HelpCircle :size="24" />
-                    <span class="text-base">committee</span>
-                  </div>
-                </DropdownMenuItem>
+                <template v-if="!reviewRequestDetails?.isClosed">
+                  <DropdownMenuItem
+                    class="text-yellow-500 dark:text-yellow-400 pr-4"
+                    @click="handleOpenCommitteeDialog"
+                  >
+                    <div class="gap-2 flex items-center">
+                      <HelpCircle :size="24" />
+                      <span class="text-base">committee</span>
+                    </div>
+                  </DropdownMenuItem>
+                </template>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -383,15 +444,26 @@ async function handleOpenCommittee() {
                 escrow has been canceled.
               </p>
             </template>
+
+            <template v-if="currentEscrow && reviewRequestDetails?.requester !== EMPTY_ADDRESS">
+              <p class="text-sm text-center text-muted-foreground">
+                a committee has been requested by <BaseUsername>{{ reviewRequestDetails?.username }}</BaseUsername>
+              </p>
+            </template>
           </div>
         </ScrollArea>
 
         <div class="mt-auto p-3">
           <form class="flex items-center gap-3" @submit.prevent="handleSend">
             <div class="grow">
-              <Input v-model="newMessage" placeholder="type something here..." />
+              <Textarea v-model="newMessage" class="min-h-0" placeholder="type something here..." @keyup.ctrl.enter="handleSend" />
             </div>
-            <Button size="icon" :disabled="isNoReceiver || currentRequest?.status === EscrowRequestStatus.Accepted || currentRequest?.status === EscrowRequestStatus.Declined">
+            <Button
+              size="icon"
+              :disabled="isNoReceiver
+                || currentRequest?.status === EscrowRequestStatus.Accepted
+                || currentRequest?.status === EscrowRequestStatus.Declined"
+            >
               <Forward :size="20" />
             </Button>
           </form>

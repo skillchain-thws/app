@@ -37,7 +37,7 @@ const jobId = ref(-1)
             </ul>
 
             <JobPrice>
-              {{ j.price }}
+              {{ toETH(j.price) }}
             </JobPrice>
           </div>
 

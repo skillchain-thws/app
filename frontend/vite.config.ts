@@ -25,6 +25,7 @@ export default defineConfig({
       dirs: [
         './src/composables',
         './src/stores',
+        './src/lib',
       ],
       vueTemplate: true,
     }),

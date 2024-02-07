@@ -8,6 +8,7 @@ declare global {
   const EffectScope: typeof import('vue')['EffectScope']
   const asyncComputed: typeof import('@vueuse/core')['asyncComputed']
   const autoResetRef: typeof import('@vueuse/core')['autoResetRef']
+  const cn: typeof import('./src/lib/utils')['cn']
   const computed: typeof import('vue')['computed']
   const computedAsync: typeof import('@vueuse/core')['computedAsync']
   const computedEager: typeof import('@vueuse/core')['computedEager']
@@ -34,6 +35,14 @@ declare global {
   const eagerComputed: typeof import('@vueuse/core')['eagerComputed']
   const effectScope: typeof import('vue')['effectScope']
   const extendRef: typeof import('@vueuse/core')['extendRef']
+  const fetchAllJobs: typeof import('./src/lib/fetch')['fetchAllJobs']
+  const fetchEscrow: typeof import('./src/lib/fetch')['fetchEscrow']
+  const fetchEscrows: typeof import('./src/lib/fetch')['fetchEscrows']
+  const fetchJob: typeof import('./src/lib/fetch')['fetchJob']
+  const fetchMessages: typeof import('./src/lib/fetch')['fetchMessages']
+  const fetchRequest: typeof import('./src/lib/fetch')['fetchRequest']
+  const fetchRequestDetails: typeof import('./src/lib/fetch')['fetchRequestDetails']
+  const fetchUser: typeof import('./src/lib/fetch')['fetchUser']
   const getCurrentInstance: typeof import('vue')['getCurrentInstance']
   const getCurrentScope: typeof import('vue')['getCurrentScope']
   const h: typeof import('vue')['h']
@@ -95,11 +104,13 @@ declare global {
   const templateRef: typeof import('@vueuse/core')['templateRef']
   const throttledRef: typeof import('@vueuse/core')['throttledRef']
   const throttledWatch: typeof import('@vueuse/core')['throttledWatch']
+  const toETH: typeof import('./src/lib/utils')['toETH']
   const toRaw: typeof import('vue')['toRaw']
   const toReactive: typeof import('@vueuse/core')['toReactive']
   const toRef: typeof import('vue')['toRef']
   const toRefs: typeof import('vue')['toRefs']
   const toValue: typeof import('vue')['toValue']
+  const toWEI: typeof import('./src/lib/utils')['toWEI']
   const toggleDark: typeof import('./src/composables/dark')['toggleDark']
   const triggerRef: typeof import('vue')['triggerRef']
   const tryOnBeforeMount: typeof import('@vueuse/core')['tryOnBeforeMount']
@@ -308,6 +319,7 @@ declare module 'vue' {
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
     readonly asyncComputed: UnwrapRef<typeof import('@vueuse/core')['asyncComputed']>
     readonly autoResetRef: UnwrapRef<typeof import('@vueuse/core')['autoResetRef']>
+    readonly cn: UnwrapRef<typeof import('./src/lib/utils')['cn']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>
     readonly computedAsync: UnwrapRef<typeof import('@vueuse/core')['computedAsync']>
     readonly computedEager: UnwrapRef<typeof import('@vueuse/core')['computedEager']>
@@ -334,6 +346,14 @@ declare module 'vue' {
     readonly eagerComputed: UnwrapRef<typeof import('@vueuse/core')['eagerComputed']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
     readonly extendRef: UnwrapRef<typeof import('@vueuse/core')['extendRef']>
+    readonly fetchAllJobs: UnwrapRef<typeof import('./src/lib/fetch')['fetchAllJobs']>
+    readonly fetchEscrow: UnwrapRef<typeof import('./src/lib/fetch')['fetchEscrow']>
+    readonly fetchEscrows: UnwrapRef<typeof import('./src/lib/fetch')['fetchEscrows']>
+    readonly fetchJob: UnwrapRef<typeof import('./src/lib/fetch')['fetchJob']>
+    readonly fetchMessages: UnwrapRef<typeof import('./src/lib/fetch')['fetchMessages']>
+    readonly fetchRequest: UnwrapRef<typeof import('./src/lib/fetch')['fetchRequest']>
+    readonly fetchRequestDetails: UnwrapRef<typeof import('./src/lib/fetch')['fetchRequestDetails']>
+    readonly fetchUser: UnwrapRef<typeof import('./src/lib/fetch')['fetchUser']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
@@ -394,11 +414,13 @@ declare module 'vue' {
     readonly templateRef: UnwrapRef<typeof import('@vueuse/core')['templateRef']>
     readonly throttledRef: UnwrapRef<typeof import('@vueuse/core')['throttledRef']>
     readonly throttledWatch: UnwrapRef<typeof import('@vueuse/core')['throttledWatch']>
+    readonly toETH: UnwrapRef<typeof import('./src/lib/utils')['toETH']>
     readonly toRaw: UnwrapRef<typeof import('vue')['toRaw']>
     readonly toReactive: UnwrapRef<typeof import('@vueuse/core')['toReactive']>
     readonly toRef: UnwrapRef<typeof import('vue')['toRef']>
     readonly toRefs: UnwrapRef<typeof import('vue')['toRefs']>
     readonly toValue: UnwrapRef<typeof import('vue')['toValue']>
+    readonly toWEI: UnwrapRef<typeof import('./src/lib/utils')['toWEI']>
     readonly triggerRef: UnwrapRef<typeof import('vue')['triggerRef']>
     readonly tryOnBeforeMount: UnwrapRef<typeof import('@vueuse/core')['tryOnBeforeMount']>
     readonly tryOnBeforeUnmount: UnwrapRef<typeof import('@vueuse/core')['tryOnBeforeUnmount']>
@@ -593,6 +615,7 @@ declare module '@vue/runtime-core' {
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
     readonly asyncComputed: UnwrapRef<typeof import('@vueuse/core')['asyncComputed']>
     readonly autoResetRef: UnwrapRef<typeof import('@vueuse/core')['autoResetRef']>
+    readonly cn: UnwrapRef<typeof import('./src/lib/utils')['cn']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>
     readonly computedAsync: UnwrapRef<typeof import('@vueuse/core')['computedAsync']>
     readonly computedEager: UnwrapRef<typeof import('@vueuse/core')['computedEager']>
@@ -619,6 +642,14 @@ declare module '@vue/runtime-core' {
     readonly eagerComputed: UnwrapRef<typeof import('@vueuse/core')['eagerComputed']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
     readonly extendRef: UnwrapRef<typeof import('@vueuse/core')['extendRef']>
+    readonly fetchAllJobs: UnwrapRef<typeof import('./src/lib/fetch')['fetchAllJobs']>
+    readonly fetchEscrow: UnwrapRef<typeof import('./src/lib/fetch')['fetchEscrow']>
+    readonly fetchEscrows: UnwrapRef<typeof import('./src/lib/fetch')['fetchEscrows']>
+    readonly fetchJob: UnwrapRef<typeof import('./src/lib/fetch')['fetchJob']>
+    readonly fetchMessages: UnwrapRef<typeof import('./src/lib/fetch')['fetchMessages']>
+    readonly fetchRequest: UnwrapRef<typeof import('./src/lib/fetch')['fetchRequest']>
+    readonly fetchRequestDetails: UnwrapRef<typeof import('./src/lib/fetch')['fetchRequestDetails']>
+    readonly fetchUser: UnwrapRef<typeof import('./src/lib/fetch')['fetchUser']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
@@ -679,11 +710,13 @@ declare module '@vue/runtime-core' {
     readonly templateRef: UnwrapRef<typeof import('@vueuse/core')['templateRef']>
     readonly throttledRef: UnwrapRef<typeof import('@vueuse/core')['throttledRef']>
     readonly throttledWatch: UnwrapRef<typeof import('@vueuse/core')['throttledWatch']>
+    readonly toETH: UnwrapRef<typeof import('./src/lib/utils')['toETH']>
     readonly toRaw: UnwrapRef<typeof import('vue')['toRaw']>
     readonly toReactive: UnwrapRef<typeof import('@vueuse/core')['toReactive']>
     readonly toRef: UnwrapRef<typeof import('vue')['toRef']>
     readonly toRefs: UnwrapRef<typeof import('vue')['toRefs']>
     readonly toValue: UnwrapRef<typeof import('vue')['toValue']>
+    readonly toWEI: UnwrapRef<typeof import('./src/lib/utils')['toWEI']>
     readonly triggerRef: UnwrapRef<typeof import('vue')['triggerRef']>
     readonly tryOnBeforeMount: UnwrapRef<typeof import('@vueuse/core')['tryOnBeforeMount']>
     readonly tryOnBeforeUnmount: UnwrapRef<typeof import('@vueuse/core')['tryOnBeforeUnmount']>

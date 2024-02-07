@@ -69,7 +69,7 @@ async function handleDeleteJob() {
       </div>
 
       <JobPrice>
-        {{ job.price }}
+        {{ toETH(job.price) }}
       </JobPrice>
 
       <template v-if="!compareAddress(job.owner, store.address)">
