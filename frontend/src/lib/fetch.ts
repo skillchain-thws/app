@@ -1,5 +1,6 @@
 import { EMPTY_ADDRESS } from '@/constants'
 import type { Escrow, EscrowRequest, Job, Message, ReviewRequestDetail, User } from '@/types'
+import { toETH } from './utils'
 
 export async function fetchEscrow(id: number): Promise<Escrow | undefined> {
   const store = useStore()
@@ -115,7 +116,7 @@ export async function fetchRequestDetails(escrowId: number): Promise<ReviewReque
   const r = await factory.getReviewRequestDetails(escrowId)
   return {
     requester: r[0],
-    newAmount: Number([1]),
+    newAmount: toETH(r[1]),
     reason: r[2],
     requiredCommitteeMembers: Number(r[3]),
     isClosed: r[4],

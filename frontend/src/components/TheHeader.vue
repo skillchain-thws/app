@@ -24,7 +24,7 @@ onMounted(store.connect)
 <template>
   <nav class="flex items-center justify-between border-b">
     <RouterLink to="/">
-      <BaseLogo class="fill-primary text-[12rem]" />
+      <BaseLogo class="fill-primary text-[10rem]" />
     </RouterLink>
 
     <ul class="flex items-center justify-between gap-8 text-lg h-[100px] whitespace-nowrap">

@@ -328,17 +328,15 @@ contract CommitteeManager {
 
     // Call function to determine how many committee members will be reviewing this Review Request
     uint requiredCommitteeMembers = determineRequiredCommitteeMembers(
-      newAmount
+      newAmount / 1e18
     );
 
     // Create temporary Review Request instance in memory and assign the new values
     ReviewRequest memory newRequest = ReviewRequest({
       requester: msg.sender,
-      // TODO newAmount always return 1
       newAmount: newAmount,
       reason: _reason,
-      // TODO determineRequiredCommitteeMembers always return 9
-      requiredCommitteeMembers: 3,
+      requiredCommitteeMembers: requiredCommitteeMembers,
       isClosed: false,
       status: AcceptanceStatus.Pending,
       escrowId: _escrowId

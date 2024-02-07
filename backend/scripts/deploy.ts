@@ -65,13 +65,23 @@ async function main() {
   const isDev = true
   if (isDev) {
     const useAccount = async (s: HardhatEthersSigner, username: string) => {
-      const _user = user.connect(s) as Contract
-      const _job = job.connect(s) as Contract
+      const _chat = chat.connect(s) as Contract
+      const _committee = committee.connect(s) as Contract
       const _escrow = escrow.connect(s) as Contract
+      const _job = job.connect(s) as Contract
+      const _review = review.connect(s) as Contract
+      const _user = user.connect(s) as Contract
 
       await _user.registerUser(username)
 
-      return { user: _user, job: _job, escrow: _escrow }
+      return {
+        chat: _chat,
+        committee: _committee,
+        escrow: _escrow,
+        job: _job,
+        review: _review,
+        user: _user,
+      }
     }
 
     await user.registerUser('admin')
