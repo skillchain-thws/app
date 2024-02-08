@@ -36,7 +36,6 @@ jobs:
         run: npx eslint frontend
 
   test:
-    name: Check BE
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
