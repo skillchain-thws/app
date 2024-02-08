@@ -123,13 +123,12 @@ contract ReviewManager {
     returns (uint timestamp, address responder, string memory responseComment)
   {
     // Check if a response is available for this review
-    require(
-      reviews[_reviewId].responded,
-      "No response available for this review"
-    );
+    if (reviews[_reviewId].responded) {
+      Response storage response = responses[_reviewId];
+      return (response.timestamp, response.responder, response.responseComment);
+    }
 
-    Response storage response = responses[_reviewId];
-    return (response.timestamp, response.responder, response.responseComment);
+    return (0, address(0), "");
   }
 
   // Function to get all reviews for a specific user where the user is being reviewed
@@ -208,7 +207,7 @@ contract ReviewManager {
       }
     }
 
-    revert("Review not found for the given escrowId");
+    return (0, 0, address(0), address(0), "", 0, false, 0);
   }
 
   //*********************************************************************
