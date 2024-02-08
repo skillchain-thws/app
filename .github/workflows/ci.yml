@@ -9,14 +9,19 @@ on:
     branches:
       - main
 
+env:
+  FOUNDRY_PROFILE: ci
+
 jobs:
-  check:
+  lint:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v2
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: pnpm/action-setup@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: lts/*
           cache: pnpm
@@ -28,10 +33,25 @@ jobs:
         run: npx prettier --list-different --plugin=prettier-plugin-solidity 'backend/contracts/**/*.sol'
 
       - name: Lint FE
-        run: npx eslint .
+        run: npx eslint frontend
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Run tests
+        working-directory: ./backend
+        run: |
+          forge test
 
   deploy:
-    needs: check
+    needs: test
 
     permissions:
       contents: write
@@ -39,9 +59,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v2
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: lts/*
           cache: pnpm

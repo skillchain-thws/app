@@ -198,7 +198,11 @@ contract UserManager {
   event JudgeSet(address userAddress);
 
   function setJudge(address userAddress) public {
-    //require(!users[userAddress].isJudge, "You are already a judge");
+    require(!users[userAddress].isJudge, "You are already a judge");
+    require(
+      users[userAddress].owner == userAddress,
+      "You are not registered and can't be a judge"
+    );
     users[userAddress].isJudge = true;
     committeeManager.joinCommittee(userAddress);
 

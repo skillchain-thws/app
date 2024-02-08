@@ -277,7 +277,6 @@ contract EscrowManager {
   //*********************************************************************
 
   // Function to update the Escrow price after committee vote
-  // TODO onlyCommitteeMember(escrowId)
   function updateEscrow(uint escrowId, uint newAmount, bool accepted) external {
     // Ensure that the escrow is not marked as done
     require(!escrows[escrowId].isDone, "Escrow is already completed");
@@ -360,26 +359,6 @@ contract EscrowManager {
       msg.sender == escrows[escrowId].buyer,
       "You are not the buyer in the escrow"
     );
-    _;
-  }
-
-  modifier onlyCommitteeMember(uint escrowId) {
-    bool _isCommitteeMember = false;
-    address[] memory committeeMemberArray = committeeManager
-      .getCommitteeMemberArray(escrowId);
-    for (uint i = 0; i < committeeMemberArray.length; i++) {
-      if (committeeMemberArray[i] == msg.sender) {
-        _isCommitteeMember = true;
-        break;
-      }
-    }
-
-    require(
-      _isCommitteeMember,
-      "you are not a part of the committee for this escrow"
-    );
-
-    // Continue with the execution of the function
     _;
   }
 }

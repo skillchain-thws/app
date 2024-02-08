@@ -131,7 +131,6 @@ contract ChatManager {
   //*********************************************************************
 
   // Open a new communication channel for a given escrow
-  // TODO onlyEscrowEntity(_escrowId)
   function openChannel(uint _escrowId) public {
     // Destruct escrow from getEscrow from EscrowManager to get the addresses of buyer and seller
     (, , address buyer, address seller, , , , ) = escrowManager.getEscrow(
@@ -199,18 +198,6 @@ contract ChatManager {
   //                        Modifier
   //*********************************************************************
   //*********************************************************************
-
-  // Modifier to check if the caller is one of the EscrowParty
-  modifier onlyEscrowEntity(uint _escrowId) {
-    (, , address _buyer, address _seller, , , , ) = escrowManager.getEscrow(
-      _escrowId
-    );
-    require(
-      msg.sender == _buyer || msg.sender == _seller,
-      "you are not party of this"
-    );
-    _;
-  }
 
   modifier onlyAuthorized(uint _escrowId) {
     bool isCommitteeMember = false;
