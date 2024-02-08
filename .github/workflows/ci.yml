@@ -36,10 +36,7 @@ jobs:
         run: npx eslint frontend
 
   test:
-    strategy:
-      fail-fast: true
-
-    name: Foundry project
+    name: Check BE
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -50,16 +47,9 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
 
-      - name: Run Forge build
+      - name: Run tests
         run: |
-          forge --version
-          forge build --sizes
-        id: build
-
-      - name: Run Forge tests
-        run: |
-          forge test -vvv
-        id: test
+          forge test
 
   deploy:
     needs: test
