@@ -87,7 +87,7 @@ async function main() {
     await user.registerUser('admin')
     const account0 = await useAccount(signers[0], 'acc0')
     const account1 = await useAccount(signers[1], 'acc1')
-    for (let i = 2; i <= 18; i++)
+    for (let i = 2; i <= 15; i++)
       await useAccount(signers[i], `acc${i}`)
 
     for (const { title, description, price, tags } of jobs.slice(0, 5))

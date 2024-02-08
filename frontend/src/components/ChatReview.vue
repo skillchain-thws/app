@@ -63,8 +63,10 @@ async function handleResponseToReview() {
 
   const request = await reviewFactory.createResponse(review.value.id, response.value)
   const receipt = await request.wait()
-  if (receipt?.status === 1)
+  if (receipt?.status === 1) {
     await findReviewAndResponse()
+    isResponseOpen.value = false
+  }
 }
 
 function handleChooseRating(v: number) {
@@ -76,35 +78,31 @@ const reviewingUsername = ref(EMPTY_ADDRESS)
 const beingReviewedUsername = ref(EMPTY_ADDRESS)
 
 async function findReviewAndResponse() {
-  try {
-    const _review = await reviewFactory.getReviewByEscrowId(props.escrowId)
-    if (_review[2] === EMPTY_ADDRESS || _review[3] === EMPTY_ADDRESS)
-      return
+  const _review = await reviewFactory.getReviewByEscrowId(props.escrowId)
+  if (_review[2] === EMPTY_ADDRESS || _review[3] === EMPTY_ADDRESS)
+    return
 
-    review.value = {
-      timestamp: Number(_review[0]),
-      rating: Number(_review[1]),
-      reviewingAddress: _review[2],
-      beingReviewedAddress: _review[3],
-      reviewComment: _review[4],
-      relevantEscrowId: Number(_review[5]),
-      responded: _review[6],
-      id: Number(_review[7]),
-    }
-
-    reviewingUsername.value = (await fetchUser(review.value.reviewingAddress)).userName
-    beingReviewedUsername.value = (await fetchUser(review.value.beingReviewedAddress)).userName
-
-    const _response = await reviewFactory.getResponse(review.value.id)
-    if (_response[1] === EMPTY_ADDRESS)
-      return
-    reviewResponse.value = {
-      timestamp: Number(_response[0]),
-      responder: _response[1],
-      responseComment: _response[2],
-    }
+  review.value = {
+    timestamp: Number(_review[0]),
+    rating: Number(_review[1]),
+    reviewingAddress: _review[2],
+    beingReviewedAddress: _review[3],
+    reviewComment: _review[4],
+    relevantEscrowId: Number(_review[5]),
+    responded: _review[6],
+    id: Number(_review[7]),
   }
-  catch (e) {
+
+  reviewingUsername.value = (await fetchUser(review.value.reviewingAddress)).userName
+  beingReviewedUsername.value = (await fetchUser(review.value.beingReviewedAddress)).userName
+
+  const _response = await reviewFactory.getResponse(review.value.id)
+  if (_response[1] === EMPTY_ADDRESS)
+    return
+  reviewResponse.value = {
+    timestamp: Number(_response[0]),
+    responder: _response[1],
+    responseComment: _response[2],
   }
 }
 
