@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Link, Moon, Sun } from 'lucide-vue-next'
+import { Moon, Sun } from 'lucide-vue-next'
 import type { RouteNamedMap } from 'vue-router/auto/routes'
 
 const isDark = useDark()
@@ -23,9 +23,8 @@ onMounted(store.connect)
 
 <template>
   <nav class="flex items-center justify-between border-b">
-    <RouterLink to="/" class="flex items-center gap-2">
-      <Link :size="23" class="text-primary" />
-      <span class="text-2xl tracking-wide">skillchain</span>
+    <RouterLink to="/">
+      <BaseLogo class="fill-primary text-[10rem]" />
     </RouterLink>
 
     <ul class="flex items-center justify-between gap-8 text-lg h-[100px] whitespace-nowrap">
