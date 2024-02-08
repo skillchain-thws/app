@@ -43,14 +43,13 @@ jobs:
         with:
           submodules: recursive
 
-      - run: cd backend
-
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
 
       - name: Run tests
+        working-directory: ./backend
         run: |
-          forge test -vvv
+          forge test
 
   deploy:
     needs: test
